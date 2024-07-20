@@ -1,0 +1,110 @@
+package com.siewe_rostand.tvcam.auth;
+
+import com.siewe_rostand.tvcam.Roles.RoleType;
+import com.siewe_rostand.tvcam.Roles.Roles;
+import com.siewe_rostand.tvcam.Roles.RolesRepository;
+import com.siewe_rostand.tvcam.Users.Users;
+import com.siewe_rostand.tvcam.Users.UsersRepository;
+import com.siewe_rostand.tvcam.security.JwtService;
+import com.siewe_rostand.tvcam.shared.Exceptions.EntityAlreadyExistException;
+import com.siewe_rostand.tvcam.shared.ObjectsValidator;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * @author rostand
+ * @project tv-cam
+ */
+
+@Service
+@RequiredArgsConstructor
+public class AuthenticationService {
+
+    private final UsersRepository usersRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
+    private final AuthenticationManager authenticationManager;
+    private final RolesRepository roleRepository;
+    private final ObjectsValidator<RegisterRequest> validator;
+
+    private static final Map<String, Object> EMPTY_CLAIMS = Collections.unmodifiableMap(new HashMap<>());
+
+    @Transactional
+    public AuthenticationResponse register(RegisterRequest request) {
+        validator.validate(request);
+        if (usersRepository.findByTelephone(request.getTelephone()) != null) {
+            throw new EntityAlreadyExistException("A user with the telephone number " + request.getTelephone() + " already exist");
+        }
+        Users user = Users.builder()
+                .firstname(request.getFirstname())
+                .lastname(request.getLastname())
+                .telephone(request.getTelephone())
+                .password(
+                        passwordEncoder.encode(request.getPassword())
+                )
+                .active(true)
+                .build();
+        // set roles
+        Roles userRole = roleRepository.getByName(RoleType.ROLE_USER.name())
+                .orElse(
+                        Roles.builder()
+                                .name(RoleType.ROLE_USER.name())
+                                .build()
+                );
+        if (userRole.getRoleId() == null) {
+            userRole = roleRepository.save(userRole);
+        }
+        var defaultUserRole = Set.of(userRole);
+        user.setRoles(defaultUserRole);
+
+        var savedUser = usersRepository.save(user);
+
+        Map<String, Object> claims = buildClaims(user);
+        var jwtToken = jwtService.generateToken(savedUser, claims);
+
+        return AuthenticationResponse.builder()
+                .token(jwtToken)
+                .fullname(user.getFirstname() + " " + user.getLastname())
+                .userId(savedUser.getUserId())
+                .telephone(user.getTelephone())
+                .build();
+    }
+
+    public AuthenticationResponse authenticate(AuthenticationRequest request) {
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getTelephone(),
+                        request.getPassword()
+                )
+        );
+        var user = usersRepository.getByTelephone(request.getTelephone())
+                .orElseThrow();
+
+        Map<String, Object> claims = buildClaims(user);
+        var jwtToken = jwtService.generateToken(user, claims);
+
+        return AuthenticationResponse.builder()
+                .token(jwtToken)
+                .fullname(user.getFirstname() + " " + user.getLastname())
+                .userId(user.getUserId())
+                .telephone(user.getTelephone())
+                .build();
+    }
+    private Map<String, Object> buildClaims(Users user) {
+        Map<String, Object> claims = new HashMap<>(EMPTY_CLAIMS);
+        claims.put("firstname", user.getFirstname());
+        claims.put("lastname", user.getLastname());
+        claims.put("active", user.getActive());
+        claims.put("role", user.getRoles());
+        return claims;
+    }
+}
