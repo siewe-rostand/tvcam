@@ -14,12 +14,12 @@ import java.util.Map;
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class HttpResponse {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm:ss")
-    private LocalDateTime timestamp;
+    protected LocalDateTime timestamp;
     protected int statusCode;
     protected HttpStatus status;
+    protected String reason;
     protected String message;
-    protected String developerMessage;
     protected String path;
-    protected String requestMethod;
+    protected String developerMessage;
     protected Map<?, ?> data;
 }

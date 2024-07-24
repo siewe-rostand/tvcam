@@ -1,5 +1,6 @@
 package com.siewe_rostand.tvcam.Users;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.siewe_rostand.tvcam.Roles.Roles;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
@@ -9,11 +10,13 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.rmi.server.UID;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Entity
@@ -31,10 +34,13 @@ public class Users implements UserDetails {
     @SequenceGenerator(name = "mySequence", sequenceName = "MY_SEQ", allocationSize = 1)
     private Long userId;
 
+    private UUID uid;
+
     private String firstname;
 
     private String lastname;
 
+    @JsonIgnore
     private String password;
 
     @Min(9)
@@ -58,6 +64,7 @@ public class Users implements UserDetails {
             @JoinColumn(name = "role_id", referencedColumnName = "id")})
     private Set<Roles> roles;
 
+    @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles

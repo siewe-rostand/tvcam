@@ -68,16 +68,29 @@ public class UserServiceImpl implements UserService {
             return usersRepository.save(users);
         }
     }
-
     @Override
     public PaginatedResponse findAll(Integer page, Integer size, String sortBy, String direction, String name) {
-        Pageable pageable = PageRequest.of(page, size, Sort.Direction.fromString(direction), sortBy);
-        Page<Users> users = usersRepository.findAll(name, pageable);
+        Pageable pageable = createPageable(page, size, sortBy, direction);
+        Page<Users> users;
+        if (!name.equals("")) {
+            users = usersRepository.findAll(name, pageable);
+        } else {
+            users = usersRepository.findAll(pageable);
+        }
+        return buildResponse(users,pageable);
+    }
+
+    private Pageable createPageable(Integer page, Integer size, String sortBy, String direction) {
+        return PageRequest.of(page, size, Sort.Direction.fromString(direction), sortBy);
+    }
+
+    private PaginatedResponse buildResponse(Page<Users> users, Pageable pageable) {
         Page<UserResponse> responses = users.map(mapper::toResponse);
         return PaginatedResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.OK).statusCode(HttpStatus.OK.value())
-                .message("Users gotten successfully").data(responses.getContent())
+                .message("Users gotten successfully")
+                .data(responses.getContent())
                 .lastPage(responses.isLast()).firstPage(responses.isFirst())
                 .totalPages(responses.getTotalPages()).totalElements(responses.getNumberOfElements())
                 .empty(responses.isEmpty()).sorted(responses.getSort().isSorted())
