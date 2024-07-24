@@ -7,18 +7,24 @@ import com.siewe_rostand.tvcam.Users.Users;
 import com.siewe_rostand.tvcam.Users.UsersRepository;
 import com.siewe_rostand.tvcam.security.JwtService;
 import com.siewe_rostand.tvcam.shared.Exceptions.EntityAlreadyExistException;
+import com.siewe_rostand.tvcam.shared.HttpResponse;
 import com.siewe_rostand.tvcam.shared.ObjectsValidator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
+import static java.util.Map.of;
+import static org.springframework.http.HttpStatus.*;
 
 /**
  * @author rostand
@@ -79,24 +85,25 @@ public class AuthenticationService {
                 .build();
     }
 
-    public AuthenticationResponse authenticate(AuthenticationRequest request) {
+    public HttpResponse authenticate(AuthenticationRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getTelephone(),
                         request.getPassword()
                 )
         );
-        var user = usersRepository.getByTelephone(request.getTelephone())
+        Users user = usersRepository.getByTelephone(request.getTelephone())
                 .orElseThrow();
 
         Map<String, Object> claims = buildClaims(user);
-        var jwtToken = jwtService.generateToken(user, claims);
+        String jwtToken = jwtService.generateToken(user, claims);
 
-        return AuthenticationResponse.builder()
-                .token(jwtToken)
-                .fullname(user.getFirstname() + " " + user.getLastname())
-                .userId(user.getUserId())
-                .telephone(user.getTelephone())
+        return HttpResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .message("login successfully")
+                .status(OK)
+                .statusCode(OK.value())
+                .data(of("user", user, "access_token",jwtToken))
                 .build();
     }
     private Map<String, Object> buildClaims(Users user) {

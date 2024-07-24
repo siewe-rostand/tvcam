@@ -29,7 +29,6 @@ public class SecurityFilterChainConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        System.out.println("SecurityFilterChainConfig.securityFilterChain");
         return http
                 .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)

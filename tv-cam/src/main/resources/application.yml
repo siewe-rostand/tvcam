@@ -26,9 +26,3 @@ spring:
 security:
   jwt:
     security-key: 7638792F423F4428472B4B6250655368566D597133743677397A244326462948404D635166546A576E5A7234753778214125442A472D4B6150645267556B5870
-logging:
-  level:
-    org:
-      springframework:
-        security: TRACE
-        web: TRACE

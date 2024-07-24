@@ -1,8 +1,7 @@
 package com.siewe_rostand.tvcam.security;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import com.siewe_rostand.tvcam.exceptions.JwtAuthenticationException;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,18 +32,34 @@ public class JwtService {
         return extractClaim(token, Claims::getSubject);
     }
 
-    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-        final Claims claims = extractAllClaims(token);
-        return claimsResolver.apply(claims);
+    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) throws JwtAuthenticationException {
+        try{
+            final Claims claims = extractAllClaims(token);
+            return claimsResolver.apply(claims);
+        } catch (JwtException | IllegalArgumentException e) {
+            throw new JwtAuthenticationException("Error parsing JWT token: " + e.getMessage());
+        }
     }
 
-    private Claims extractAllClaims(String token) {
-        return Jwts
-                .parserBuilder()
-                .setSigningKey(getSignInKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+    private Claims extractAllClaims(String token)   throws JwtAuthenticationException {
+        try {
+            return Jwts
+                    .parserBuilder()
+                    .setSigningKey(getSignInKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        }catch (SecurityException ex) {
+            throw new JwtAuthenticationException("Invalid JWT signature\n" + ex.getMessage());
+        } catch (MalformedJwtException ex) {
+            throw new JwtAuthenticationException("Invalid JWT token\n" + ex.getMessage());
+        } catch (ExpiredJwtException ex) {
+            throw new JwtAuthenticationException("Expired JWT token\n" + ex.getMessage());
+        } catch (UnsupportedJwtException ex) {
+            throw new JwtAuthenticationException("Unsupported JWT token\n" + ex.getMessage());
+        } catch (IllegalArgumentException ex) {
+            throw new JwtAuthenticationException("JWT claims string is empty\n" + ex.getMessage());
+        }
     }
 
     private Key getSignInKey() {

@@ -31,5 +31,7 @@ public interface UsersRepository extends JpaRepository<Users, Long> {
             + "where u.lastname like ?1 or u.firstname like ?1 or ?1 is null")
     Page<Users> findAll(String name, Pageable pageable);
 
+    Page<Users> findAll(Pageable pageable);
+
     List<Users> findAllByActive(boolean active);
 }

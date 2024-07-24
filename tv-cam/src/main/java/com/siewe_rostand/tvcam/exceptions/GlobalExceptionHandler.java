@@ -3,7 +3,9 @@ package com.siewe_rostand.tvcam.exceptions;
 import com.siewe_rostand.tvcam.shared.Exceptions.EntityAlreadyExistException;
 import com.siewe_rostand.tvcam.shared.Exceptions.EntityNotFoundException;
 import com.siewe_rostand.tvcam.shared.Exceptions.OperationNotPermittedException;
+import com.siewe_rostand.tvcam.shared.HttpResponse;
 import com.siewe_rostand.tvcam.shared.model.ExceptionResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
@@ -12,10 +14,14 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.nio.file.AccessDeniedException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.HashSet;
 import java.util.Set;
 
-import static com.siewe_rostand.tvcam.shared.model.BusinessErrorCodes.*;
+import static com.siewe_rostand.tvcam.shared.model.BusinessErrorCodes.ACCOUNT_DISABLED;
+import static com.siewe_rostand.tvcam.shared.model.BusinessErrorCodes.ACCOUNT_LOCKED;
+import static java.time.LocalDateTime.now;
 import static org.springframework.http.HttpStatus.*;
 
 /**
@@ -24,6 +30,7 @@ import static org.springframework.http.HttpStatus.*;
  */
 
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(LockedException.class)
@@ -49,16 +56,30 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<ExceptionResponse> handleException() {
+    public ResponseEntity<HttpResponse> handleException(BadCredentialsException exception) {
         return ResponseEntity
-                .status(UNAUTHORIZED)
+                .status(BAD_REQUEST)
                 .body(
-                        ExceptionResponse.builder()
-                                .statusCode(BAD_CREDENTIALS.getCode())
-                                .status(BAD_CREDENTIALS.getDescription())
-                                .error("Login and / or Password is incorrect")
+                        HttpResponse.builder()
+                                .timestamp(now())
+                                .statusCode(BAD_REQUEST.value())
+                                .status(BAD_REQUEST)
+                                .reason("phone number and / or Password is incorrect")
+                                .developerMessage(exception.getMessage())
                                 .build()
                 );
+    }
+
+    @ExceptionHandler(SQLIntegrityConstraintViolationException.class)
+    public ResponseEntity<HttpResponse> sQLIntegrityConstraintViolationException(SQLIntegrityConstraintViolationException exception) {
+        return new ResponseEntity<>(
+                HttpResponse.builder()
+                        .timestamp(now())
+                        .reason(exception.getMessage().contains("Duplicate entry") ? "Information already exists" : exception.getMessage())
+                        .developerMessage(exception.getMessage())
+                        .status(BAD_REQUEST)
+                        .statusCode(BAD_REQUEST.value())
+                        .build(), BAD_REQUEST);
     }
 
     @ExceptionHandler(EntityAlreadyExistException.class)
@@ -128,5 +149,34 @@ public class GlobalExceptionHandler {
                                 .build()
                 );
     }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<HttpResponse> accessDeniedException(AccessDeniedException exception) {
+        log.error(exception.getMessage());
+        return new ResponseEntity<>(
+                HttpResponse.builder()
+                        .timestamp(now())
+                        .reason("Access denied. You don't have access")
+                        .developerMessage(exception.getMessage())
+                        .status(FORBIDDEN)
+                        .statusCode(FORBIDDEN.value())
+                        .build(), FORBIDDEN);
+    }
+
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<HttpResponse> processRuntimeException(AccessDeniedException exception) {
+        log.error(exception.getMessage());
+        return new ResponseEntity<>(
+                HttpResponse.builder()
+                        .timestamp(now())
+                        .reason("An internal server error occurred.")
+                        .developerMessage(exception.getMessage())
+                        .status(INTERNAL_SERVER_ERROR)
+                        .statusCode(INTERNAL_SERVER_ERROR.value())
+                        .build(), INTERNAL_SERVER_ERROR);
+    }
+
+
 
 }
