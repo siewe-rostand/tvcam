@@ -19,6 +19,7 @@ public class UsersDto {
 
     private String telephone;
 
+
     private String address;
 
     private Boolean activated;
@@ -31,11 +32,10 @@ public class UsersDto {
         if (users != null){
             usersDto.setId(users.getUserId());
             usersDto.setFirstname(users.getFirstname());
-            usersDto.setLastname(users.getAddress());
+            usersDto.setLastname(users.getLastname());
             usersDto.setTelephone(users.getTelephone());
             usersDto.setAddress(users.getAddress());
             usersDto.setActivated(users.getActive());
-
             /*
               make sure the role table in the database contain some roles
              */

@@ -9,9 +9,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,7 +21,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 /**
@@ -50,7 +48,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                return;
            }
 
-           final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
            final String jwt;
            final String userEmail;
 
@@ -81,11 +78,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     private String getJwtFromRequest(HttpServletRequest request)  throws JwtAuthenticationException {
-        String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+        String authHeader = request.getHeader(AUTHORIZATION);
         if (StringUtils.hasText(authHeader) && authHeader.startsWith("Bearer ")) {
             return authHeader.substring(7);
         }
-        throw new JwtAuthenticationException("No JWT token found in request headers");
+        throw new JwtAuthenticationException("No Bearer in Authorization", "No JWT token found in request headers");
     }
 
     private void handleAuthenticationException(HttpServletResponse response, JwtAuthenticationException e)

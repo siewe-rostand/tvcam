@@ -5,13 +5,13 @@ import com.siewe_rostand.tvcam.Roles.Roles;
 import com.siewe_rostand.tvcam.Roles.RolesRepository;
 import com.siewe_rostand.tvcam.Users.Users;
 import com.siewe_rostand.tvcam.Users.UsersRepository;
+import com.siewe_rostand.tvcam.exceptions.EmptyPasswordException;
 import com.siewe_rostand.tvcam.security.JwtService;
 import com.siewe_rostand.tvcam.shared.Exceptions.EntityAlreadyExistException;
 import com.siewe_rostand.tvcam.shared.HttpResponse;
-import com.siewe_rostand.tvcam.shared.ObjectsValidator;
+import com.siewe_rostand.tvcam.validator.ObjectsValidator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static java.util.Map.of;
-import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.HttpStatus.OK;
 
 /**
  * @author rostand
@@ -75,7 +75,7 @@ public class AuthenticationService {
         var savedUser = usersRepository.save(user);
 
         Map<String, Object> claims = buildClaims(user);
-        var jwtToken = jwtService.generateToken(savedUser, claims);
+        var jwtToken = jwtService.generateToken(claims, savedUser);
 
         return AuthenticationResponse.builder()
                 .token(jwtToken)
@@ -86,6 +86,9 @@ public class AuthenticationService {
     }
 
     public HttpResponse authenticate(AuthenticationRequest request) {
+        if (request.getPassword() == null || request.getPassword().isEmpty()) {
+            throw new EmptyPasswordException("Encoded password cannot be empty");
+        }
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getTelephone(),
@@ -96,7 +99,7 @@ public class AuthenticationService {
                 .orElseThrow();
 
         Map<String, Object> claims = buildClaims(user);
-        String jwtToken = jwtService.generateToken(user, claims);
+        String jwtToken = jwtService.generateToken(claims, user);
 
         return HttpResponse.builder()
                 .timestamp(LocalDateTime.now())

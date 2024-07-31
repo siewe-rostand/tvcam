@@ -22,4 +22,5 @@ public class HttpResponse {
     protected String path;
     protected String developerMessage;
     protected Map<?, ?> data;
+    private String errorSource;
 }
