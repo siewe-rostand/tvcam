@@ -2,10 +2,11 @@ package com.siewe_rostand.tvcam.Users;
 
 import com.siewe_rostand.tvcam.Roles.Roles;
 import com.siewe_rostand.tvcam.Roles.RolesRepository;
+import com.siewe_rostand.tvcam.exceptions.ApiException;
 import com.siewe_rostand.tvcam.shared.Exceptions.EntityAlreadyExistException;
 import com.siewe_rostand.tvcam.shared.Exceptions.EntityNotFoundException;
-import com.siewe_rostand.tvcam.shared.ObjectsValidator;
 import com.siewe_rostand.tvcam.shared.PaginatedResponse;
+import com.siewe_rostand.tvcam.validator.ObjectsValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -15,12 +16,20 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentContextPath;
 
 @Service
 @Slf4j
@@ -43,7 +52,7 @@ public class UserServiceImpl implements UserService {
         if (usersDto.getActivated() == null) {
             usersDto.setActivated(true);
         }
-        return Users.builder().userId(usersDto.getId()).firstname(usersDto.getFirstname()).address(usersDto.getLastname())
+        return Users.builder().userId(usersDto.getId()).firstname(usersDto.getFirstname()).lastname(usersDto.getLastname())
                 .telephone(usersDto.getTelephone()).address(usersDto.getAddress()).active(usersDto.getActivated()).roles(roles)
                 .build();
     }
@@ -64,8 +73,20 @@ public class UserServiceImpl implements UserService {
         if (usersRepository.findByUserId(usersDto.getId()) == null) {
             throw new EntityNotFoundException(Users.class, "id", usersDto.getId().toString());
         } else {
-            Users users = toMap(usersDto);
-            return usersRepository.save(users);
+            Users existingUser = usersRepository.findByUserId(usersDto.getId());
+            existingUser.setActive(usersDto.getActivated());
+            existingUser.setLastname(usersDto.getLastname());
+            existingUser.setFirstname(usersDto.getFirstname());
+            existingUser.setAddress(usersDto.getAddress());
+            existingUser.setTelephone(usersDto.getTelephone());
+
+            HashSet<Roles> roles = new HashSet<>();
+            if (usersDto.getRoles() != null) {
+                for (String role : usersDto.getRoles())
+                    roles.add(rolesRepository.findByName(role));
+            }
+            existingUser.setRoles(roles);
+            return usersRepository.save(existingUser);
         }
     }
     @Override
@@ -162,5 +183,29 @@ public class UserServiceImpl implements UserService {
 
     public Users findByTelephone(String telephone) {
         return usersRepository.findByTelephone(telephone);
+    }
+
+    private String setUserImageUrl(String email) {
+        return fromCurrentContextPath().path("/user/image/" + email + ".png").toUriString();
+    }
+
+    private void saveImage(String email, MultipartFile image) {
+        Path fileStorageLocation = Paths.get(System.getProperty("user.home") + "/Downloads/images/").toAbsolutePath().normalize();
+        if (!Files.exists(fileStorageLocation)) {
+            try {
+                Files.createDirectories(fileStorageLocation);
+            } catch (Exception exception) {
+                log.error(exception.getMessage());
+                throw new ApiException("Unable to create directories to save image");
+            }
+            log.info("Created directories: {}", fileStorageLocation);
+        }
+        try {
+            Files.copy(image.getInputStream(), fileStorageLocation.resolve(email + ".png"), REPLACE_EXISTING);
+        } catch (IOException exception) {
+            log.error(exception.getMessage());
+            throw new ApiException(exception.getMessage());
+        }
+        log.info("File saved in: {} folder", fileStorageLocation);
     }
 }

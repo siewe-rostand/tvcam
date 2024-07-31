@@ -26,6 +26,7 @@ public class UserMapper {
                 .telephone(user.getTelephone())
                 .active(user.getActive())
                 .address(user.getAddress())
+                .created_at(user.getCreatedAt())
                 .build();
     }
 }

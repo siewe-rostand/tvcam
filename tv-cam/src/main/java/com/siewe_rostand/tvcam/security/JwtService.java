@@ -4,7 +4,9 @@ import com.siewe_rostand.tvcam.exceptions.JwtAuthenticationException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -22,10 +24,13 @@ import java.util.function.Function;
 public class JwtService {
 
 
-    private final String secretKey;
+    private final String secretKey; 
 
-    public JwtService(@Value("${security.jwt.security-key}") String secretKey){
+    private final long jwtExpiration;
+
+    public JwtService(@Value("${security.jwt.security-key}") String secretKey, @Value("${security.jwt.expiration}") Long jwtExpiration){
         this.secretKey = secretKey;
+        this.jwtExpiration = jwtExpiration;
     }
 
     public String extractUsername(String token) {
@@ -37,7 +42,7 @@ public class JwtService {
             final Claims claims = extractAllClaims(token);
             return claimsResolver.apply(claims);
         } catch (JwtException | IllegalArgumentException e) {
-            throw new JwtAuthenticationException("Error parsing JWT token: " + e.getMessage());
+            throw new JwtAuthenticationException(e.getMessage(),"Error parsing JWT token");
         }
     }
 
@@ -50,15 +55,15 @@ public class JwtService {
                     .parseClaimsJws(token)
                     .getBody();
         }catch (SecurityException ex) {
-            throw new JwtAuthenticationException("Invalid JWT signature\n" + ex.getMessage());
+            throw new JwtAuthenticationException(ex.getMessage(),"Invalid JWT signature");
         } catch (MalformedJwtException ex) {
-            throw new JwtAuthenticationException("Invalid JWT token\n" + ex.getMessage());
+            throw new JwtAuthenticationException(ex.getMessage(),"Invalid JWT token");
         } catch (ExpiredJwtException ex) {
-            throw new JwtAuthenticationException("Expired JWT token\n" + ex.getMessage());
+            throw new JwtAuthenticationException(ex.getMessage(),"Expired JWT token");
         } catch (UnsupportedJwtException ex) {
-            throw new JwtAuthenticationException("Unsupported JWT token\n" + ex.getMessage());
+            throw new JwtAuthenticationException(ex.getMessage(), "Unsupported JWT token");
         } catch (IllegalArgumentException ex) {
-            throw new JwtAuthenticationException("JWT claims string is empty\n" + ex.getMessage());
+            throw new JwtAuthenticationException(ex.getMessage(),"JWT claims string is empty");
         }
     }
 
@@ -81,19 +86,34 @@ public class JwtService {
         return extractClaim(token, Claims::getExpiration);
     }
 
-    public String generateToken(UserDetails user) {
-        return generateToken(user, new HashMap<>());
+    public String generateToken(UserDetails userDetails) {
+        return generateToken(new HashMap<>(), userDetails);
     }
 
-    public String generateToken(UserDetails user, Map<String, Object> claims) {
+    public String generateToken(
+            Map<String, Object> extraClaims,
+            UserDetails userDetails
+    ) {
+        return buildToken(extraClaims, userDetails, jwtExpiration);
+    }
+
+    private String buildToken(
+            Map<String, Object> extraClaims,
+            UserDetails userDetails,
+            long expiration
+    ) {
+        var authorities = userDetails.getAuthorities()
+                .stream().
+                        map(GrantedAuthority::getAuthority)
+                .toList();
         return Jwts
                 .builder()
-                .setClaims(claims)
-                .setSubject(user.getUsername())
+                .setClaims(extraClaims)
+                .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24))
-                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
-                .compact()
-                ;
+                .setExpiration(new Date(System.currentTimeMillis() + expiration))
+                .claim("authorities", authorities)
+                .signWith(getSignInKey())
+                .compact();
     }
 }

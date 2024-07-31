@@ -34,6 +34,7 @@ public class Users implements UserDetails {
     @SequenceGenerator(name = "mySequence", sequenceName = "MY_SEQ", allocationSize = 1)
     private Long userId;
 
+
     private UUID uid;
 
     private String firstname;
@@ -47,6 +48,8 @@ public class Users implements UserDetails {
     private String telephone;
 
     private String address;
+
+    private String imageUrl;
 
 
     private Boolean active;
@@ -80,6 +83,7 @@ public class Users implements UserDetails {
         String formattedDate = formatter.format(now);
         if(createdAt == null) createdAt = formattedDate;
         if (this.updatedAt == null) updatedAt = formattedDate;
+        uid = UUID.randomUUID();
     }
 
     @PreUpdate

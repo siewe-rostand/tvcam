@@ -18,13 +18,13 @@ public interface UsersRepository extends JpaRepository<Users, Long> {
 
     Boolean existsByTelephone(String telephone);
 
-    @Query("select u from Users u JOIN u.roles r WHERE r.name LIKE ?1")
+    @Query("select u from Users u JOIN u.roles r WHERE r.name = ?1")
     List<Users> findAllByRole(String role);
 
-    @Query("SELECT u FROM Users  u JOIN u.roles r WHERE r.name LIKE ?1 AND u.active IS NOT NULL OR u.active  = true")
+    @Query("SELECT u FROM Users  u JOIN u.roles r WHERE r.name = ?1 AND u.active IS NOT NULL OR u.active  = true")
     Page<Users> findByRole(String role, Pageable pageable);
 
-    @Query("SELECT u FROM Users u WHERE u.firstname LIKE ?1 OR u.lastname LIKE ?1 ORDER BY u.createdAt")
+    @Query("SELECT u FROM Users u WHERE u.firstname = ?1 OR u.lastname = ?1 OR u.telephone = ?1 ORDER BY u.createdAt")
     List<Users> findAllByKeyword(String keyword);
 
     @Query("select u from Users u "

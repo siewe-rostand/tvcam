@@ -6,12 +6,15 @@ import com.siewe_rostand.tvcam.shared.Exceptions.OperationNotPermittedException;
 import com.siewe_rostand.tvcam.shared.HttpResponse;
 import com.siewe_rostand.tvcam.shared.model.ExceptionResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.nio.file.AccessDeniedException;
@@ -33,6 +36,32 @@ import static org.springframework.http.HttpStatus.*;
 @Slf4j
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(ObjectValidationException.class)
+    public  ResponseEntity<HttpResponse> handle(ObjectValidationException exception) {
+          exception.printStackTrace();
+        return ResponseEntity
+                .status(BAD_REQUEST)
+                .body(
+                        HttpResponse.builder()
+                                .timestamp(now())
+                                .statusCode(BAD_REQUEST.value())
+                                .status(BAD_REQUEST)
+                                .reason("You have some validation errors")
+                                .developerMessage(exception.getViolations().toString())
+                                .errorSource(exception.getViolationSource())
+                                .build()
+                );
+    }
+
+    @ExceptionHandler(EmptyPasswordException.class)
+    public ResponseEntity<ExceptionResponse> handleException(EmptyPasswordException exp) {
+        return ResponseEntity.status(BAD_REQUEST)
+                .body(ExceptionResponse.builder()
+                        .statusCode(BAD_REQUEST.value())
+                        .status(BAD_REQUEST.getReasonPhrase())
+                        .error(exp.getMessage()).build()
+                );
+    }
     @ExceptionHandler(LockedException.class)
     public ResponseEntity<ExceptionResponse> handleException(LockedException exp) {
         return ResponseEntity.status(UNAUTHORIZED)
@@ -57,6 +86,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<HttpResponse> handleException(BadCredentialsException exception) {
+        exception.printStackTrace();
         return ResponseEntity
                 .status(BAD_REQUEST)
                 .body(
@@ -138,16 +168,29 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ExceptionResponse> handleException(Exception exp) {
+    public ResponseEntity<HttpResponse> handleException(Exception exp) {
         exp.printStackTrace();
-        return ResponseEntity
-                .status(INTERNAL_SERVER_ERROR)
-                .body(
-                        ExceptionResponse.builder()
-                                .status("Internal error, please contact the admin")
-                                .error(exp.getMessage())
-                                .build()
-                );
+        return  new ResponseEntity<>(
+                HttpResponse.builder()
+                        .timestamp(now())
+                        .reason("Internal error, please contact the admin")
+                        .developerMessage(exp.getMessage())
+                        .status(INTERNAL_SERVER_ERROR)
+                        .statusCode(INTERNAL_SERVER_ERROR.value())
+                        .build(), INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
+    public ResponseEntity<HttpResponse> handleMethodNotAllowed(HttpRequestMethodNotSupportedException ex) {
+        return new ResponseEntity<>(
+                HttpResponse.builder()
+                        .timestamp(now())
+                        .reason("The requested method is not allowed for this endpoint")
+                        .developerMessage(ex.getMessage())
+                        .status(METHOD_NOT_ALLOWED)
+                        .statusCode(METHOD_NOT_ALLOWED.value())
+                        .build(), METHOD_NOT_ALLOWED);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
@@ -165,8 +208,8 @@ public class GlobalExceptionHandler {
 
 
     @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<HttpResponse> processRuntimeException(AccessDeniedException exception) {
-        log.error(exception.getMessage());
+    public ResponseEntity<HttpResponse> processRuntimeException(RuntimeException exception) {
+        exception.printStackTrace();
         return new ResponseEntity<>(
                 HttpResponse.builder()
                         .timestamp(now())

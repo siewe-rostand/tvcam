@@ -28,9 +28,9 @@ public class UsersController {
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<HttpResponse> saveUser(@RequestBody UsersDto usersDto) {
+    public ResponseEntity<HttpResponse> saveUser(@RequestBody UserRequest usersDto) {
         ObjectMapper objectMapper = new ObjectMapper();
-        UsersDto dto = new UsersDto().CreateDTO(userService.saveUser(usersDto));
+        UserResponse dto = userService.create(usersDto);
         Map<String, Object> data = objectMapper
                 .convertValue(dto, new TypeReference<>() {
                 });
@@ -40,7 +40,7 @@ public class UsersController {
                         .status(HttpStatus.CREATED).statusCode(HttpStatus.CREATED.value()).build());
     }
 
-    @PutMapping("/edit")
+    @PatchMapping("/edit")
     public ResponseEntity<HttpResponse> updateUser(@RequestBody UsersDto usersDto) {
         ObjectMapper objectMapper = new ObjectMapper();
         UsersDto dto = new UsersDto().CreateDTO(userService.updateUser(usersDto));
@@ -48,8 +48,8 @@ public class UsersController {
         });
         return ResponseEntity.ok().body(
                 HttpResponse.builder().timestamp(LocalDateTime.now())
-                        .message("User updated successfully").data(data)
-                        .status(HttpStatus.CREATED).statusCode(HttpStatus.CREATED.value()).build());
+                        .message("User data updated successfully").data(data)
+                        .status(HttpStatus.OK).statusCode(HttpStatus.OK.value()).build());
     }
 
     @GetMapping
