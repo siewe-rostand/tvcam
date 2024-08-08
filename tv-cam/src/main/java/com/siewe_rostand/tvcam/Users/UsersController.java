@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/users")
+@RequestMapping("/users")
 @RequiredArgsConstructor
 public class UsersController {
     private  final Logger logger = LoggerFactory.getLogger(UsersController.class);
@@ -40,7 +40,7 @@ public class UsersController {
                         .status(HttpStatus.CREATED).statusCode(HttpStatus.CREATED.value()).build());
     }
 
-    @PatchMapping("/edit")
+    @PutMapping("/edit")
     public ResponseEntity<HttpResponse> updateUser(@RequestBody UsersDto usersDto) {
         ObjectMapper objectMapper = new ObjectMapper();
         UsersDto dto = new UsersDto().CreateDTO(userService.updateUser(usersDto));

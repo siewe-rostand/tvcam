@@ -45,6 +45,7 @@ public class Users implements UserDetails {
     private String password;
 
     @Min(9)
+    @Column(unique = true)
     private String telephone;
 
     private String address;

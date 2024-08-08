@@ -13,8 +13,4 @@ public class JwtAuthenticationException extends AuthenticationException {
         super(msg);
         this.reason = reason;
     }
-//
-//    public JwtAuthenticationException(String msg) {
-//        super(msg);
-//    }
 }

@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
-@EntityListeners(AuditingEntityListener.class)
+@EnableJpaAuditing(auditorAwareRef = "auditorAware")
 @SpringBootApplication
 @Slf4j
 public class TvCamApplication {

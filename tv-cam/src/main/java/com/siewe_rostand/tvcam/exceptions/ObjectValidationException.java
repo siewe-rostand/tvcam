@@ -17,4 +17,6 @@ public class ObjectValidationException extends RuntimeException {
     private final Set<String> violations;
     @Getter
     private final String violationSource;
+    @Getter
+    private final String reason;
 }

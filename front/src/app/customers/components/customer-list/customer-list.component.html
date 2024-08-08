@@ -1,0 +1,284 @@
+<app-navbar></app-navbar>
+
+<p-toast key="toastKey"/>
+
+
+
+<div class="card">
+  <p-toast />
+  <p-toolbar styleClass="mb-4 gap-2">
+    <ng-template pTemplate="left">
+      <p-button
+        severity="success"
+        label="New"
+        icon="pi pi-plus"
+        class="mr-2"
+        (onClick)="openNew()"
+      />
+      <p-button
+        severity="danger"
+        label="Delete"
+        icon="pi pi-trash"
+        class="mr-2"
+        (onClick)="deleteSelectedCustomers()"
+        [disabled]="!selectedCustomers || !selectedCustomers.length"></p-button>
+      <p-button
+        severity="info"
+        label="Facture"
+        icon="pi pi-receipt"
+        (onClick)="showGenerateBill()"
+        [disabled]="!selectedCustomers || !selectedCustomers.length"></p-button>
+    </ng-template>
+
+    <ng-template pTemplate="right">
+      <p-button severity="help" label="Export" icon="pi pi-upload" />
+    </ng-template>
+  </p-toolbar>
+
+  <!-- user list table -->
+  <p-table
+    #dt
+    [value]="customers"
+    [rows]="10"
+    [rowsPerPageOptions]="[10, 25, 50]"
+    [paginator]="true"
+    [globalFilterFields]="['name', 'address', 'telephone']"
+    [tableStyle]="{ 'min-width': '75rem' }"
+    [(selection)]="selectedCustomers"
+    (selectionChange)="onSelectionChange($event)"
+    [rowHover]="true"
+    dataKey="id"
+
+  >
+    <ng-template pTemplate="caption">
+      <div class="flex align-items-center justify-content-between">
+        <h5 class="m-1 text-xl text-primary">liste des clients</h5>
+        <span class="p-input-icon-left">
+          <i class="pi pi-search"></i>
+          <input pInputText type="text" placeholder="Search..." />
+        </span>
+      </div>
+    </ng-template>
+    <ng-template pTemplate="header">
+      <tr>
+        <th style="width: 4rem">
+          <p-tableHeaderCheckbox />
+        </th>
+        <th pSortableColumn="name" style="min-width: 15rem">
+          Nom <p-sortIcon field="name" />
+        </th>
+        <th pSortableColumn="telephone">
+          Telephone <p-sortIcon field="telephone" />
+        </th>
+        <th pSortableColumn="address" style="min-width: 15rem">
+          Adresse <p-sortIcon field="address" />
+        </th>
+        <th pSortableColumn="active" style="min-width: 10rem">
+          Impayé <p-sortIcon field="active" />
+        </th>
+        <th pSortableColumn="active" style="min-width: 10rem">
+          Suspendu <p-sortIcon field="active" />
+        </th>
+        <th></th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-customer>
+      <tr>
+        <td>
+          <p-tableCheckbox [value]="customer" />
+        </td>
+        <td>
+          {{ customer.name }}
+        </td>
+        <td>
+          {{ customer.telephone }}
+        </td>
+        <td>
+          {{ customer.address }}
+        </td>
+        <td>
+          <i
+            class="pi"
+            [ngClass]="{
+              'text-green-500 pi-check-circle': customer.hasDebt,
+              'text-red-500 pi-times-circle': !customer.hasDebt
+            }"
+          ></i>
+        </td>
+        <td>
+          <i
+            class="pi"
+            [ngClass]="{
+              'text-green-500 pi-check-circle': customer.isSuspended,
+              'text-red-500 pi-times-circle': !customer.isSuspended
+            }"
+          ></i>
+        </td>
+        <td>
+          <p-button
+            icon="pi pi-pencil"
+            class="mr-2"
+            [rounded]="true"
+            [outlined]="true"
+            severity="success"
+            (onClick)="openEdit(customer)"
+          />
+          <p-button
+            icon="pi pi-trash"
+            severity="danger"
+            [rounded]="true"
+            [outlined]="true"
+            (onClick)="deleteCustomer(customer)"
+          />
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+
+  <!-- update user dialog  -->
+  <p-dialog
+    [(visible)]="updateCustomerDialog"
+    [style]="{ width: '450px' }"
+    header="Detail de L'utilisateur"
+    [modal]="true"
+    styleClass="p-fluid"
+  >
+    <ng-template pTemplate="content">
+      <div class="field">
+        <label for="name">Nom</label>
+        <input
+          type="text"
+          pInputText
+          id="name"
+          [(ngModel)]="customer.name"
+          required
+          autofocus
+        />
+        <small class="p-error" *ngIf="submitted && !customer.name">
+          Le nom doit être indiqué.
+        </small>
+      </div>
+
+      <div class="field">
+        <label for="telephone">Numéro de téléphone</label>
+        <input
+          type="text"
+          pInputText
+          id="telephone"
+          [(ngModel)]="customer.telephone"
+          required
+          autofocus
+        />
+        <small class="p-error" *ngIf="submitted && !customer.telephone">
+          Veuillez saisir le numéro de téléphone.
+        </small>
+      </div>
+
+      <div class="field">
+        <label for="address">Adresse</label>
+        <input
+          type="text"
+          pInputText
+          id="address"
+          [(ngModel)]="customer.address"
+          required
+          autofocus
+        />
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+      <p-button
+        label="Cancel"
+        icon="pi pi-times"
+        [text]="true"
+        (onClick)="hideUpdateDialog()"
+      />
+      <p-button
+        label="Save"
+        icon="pi pi-check"
+        [text]="true"
+        (onClick)="editCustomer()"
+      />
+    </ng-template>
+  </p-dialog>
+
+  <!-- create new customer dialog -->
+  <p-dialog
+    [(visible)]="saveCustomerDialog"
+    [style]="{ width: '450px' }"
+    header="créer un nouveau utilisateur"
+    [modal]="true"
+    styleClass="p-fluid"
+  >
+    <ng-template pTemplate="content">
+      <div class="field">
+        <label for="name">Nom</label>
+        <input
+          type="text"
+          pInputText
+          id="name"
+          [(ngModel)]="customer.name"
+          required
+          autofocus
+        />
+        <small class="p-error" *ngIf="submitted && !customer.name">
+          Le nom doit être indiqué.
+        </small>
+      </div>
+
+      <div class="field">
+        <label for="telephone">Numéro de téléphone</label>
+        <input
+          type="text"
+          pInputText
+          id="telephone"
+          [(ngModel)]="customer.telephone"
+          required
+          autofocus
+        />
+        <small class="p-error" *ngIf="submitted && !customer.telephone">
+          Veuillez saisir le numéro de téléphone.
+        </small>
+      </div>
+
+      <div class="field">
+        <label for="address">Adresse</label>
+        <input
+          type="text"
+          pInputText
+          id="address"
+          [(ngModel)]="customer.address"
+          required
+          autofocus
+        />
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+      <p-button
+        label="Cancel"
+        icon="pi pi-times"
+        [text]="true"
+        (onClick)="hideSaveDialog()"
+      />
+      <p-button
+        label="Save"
+        icon="pi pi-check"
+        [text]="true"
+        (onClick)="saveCustomer()"
+      />
+    </ng-template>
+  </p-dialog>
+
+<!--  <p-confirmDialog [style]="{ width: '450px' }" />-->
+  <p-confirmDialog>
+    <ng-template pTemplate="message" let-message>
+      <div class="flex flex-column align-items-center w-full gap-3 border-bottom-1 surface-border">
+        <i class="pi pi-exclamation-circle text-6xl text-primary-500"></i>
+        <p>{{ message.message }}</p>
+      </div>
+    </ng-template>
+  </p-confirmDialog>
+</div>

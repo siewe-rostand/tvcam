@@ -1,10 +1,31 @@
 package com.siewe_rostand.tvcam.Bills;
 
+import com.siewe_rostand.tvcam.Customers.CustomerService;
 import com.siewe_rostand.tvcam.Customers.Customers;
+import com.siewe_rostand.tvcam.Customers.CustomersDTO;
 import com.siewe_rostand.tvcam.Customers.CustomersRepository;
-import com.siewe_rostand.tvcam.exceptions.ResourceNotFoundException;
+import com.siewe_rostand.tvcam.Payment.PaymentStatus;
+import com.siewe_rostand.tvcam.exceptions.ApiException;
 import com.siewe_rostand.tvcam.shared.PaginatedResponse;
+import com.siewe_rostand.tvcam.validator.ObjectsValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 /**
  * @author rostand
@@ -13,21 +34,29 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class BillServicesImpl implements BillServices {
+    private static final Logger log = LoggerFactory.getLogger(BillServicesImpl.class);
     private final BillRepository billRepository;
 
+    private final ObjectsValidator<BillRequest> validator;
+    private final BillMapper billMapper;
     private final CustomersRepository customersRepository;
 
-    public BillServicesImpl(BillRepository billRepository, CustomersRepository customersRepository) {
+    public BillServicesImpl(BillRepository billRepository, CustomerService customerService,
+                            ObjectsValidator<BillRequest> validator, BillMapper billMapper, CustomersRepository customersRepository) {
         this.billRepository = billRepository;
+        this.validator = validator;
+        this.billMapper = billMapper;
         this.customersRepository = customersRepository;
     }
 
+    @Transactional
     @Override
-    public Bills save(BillSDto billSDto) throws ResourceNotFoundException{
-        Customers customers = customersRepository.findById(billSDto.getCustomerId())
-                .orElseThrow(()-> new ResourceNotFoundException("customer with id "+billSDto.getCustomerId()+ " not found"));
-        Bills bills = new Bills().toMap(billSDto,customers);
-        return billRepository.save(bills);
+    public BillResponse save(BillRequest request) {
+        validator.validate(request);
+//        customerService.checkIfCustomerExistsOrThrow(request.getCustomerId());
+        Bills bills = billMapper.toBills(request);
+        Bills savedBills = billRepository.save(bills);
+        return billMapper.toResponse(savedBills);
     }
 
     @Override
@@ -37,7 +66,33 @@ public class BillServicesImpl implements BillServices {
 
     @Override
     public PaginatedResponse findAll(Integer page, Integer size, String sortBy, String direction, String name) {
-        return null;
+        Pageable pageable = createPageable(page, size, sortBy, direction);
+        Page<Bills> bills ;
+        if(!name.isEmpty()) {
+            bills = billRepository.findAll(name,pageable);
+        }else {
+            bills = billRepository.findAll(pageable);
+        }
+        return buildResponse(bills,pageable);
+    }
+
+    private Pageable createPageable(Integer page, Integer size, String sortBy, String direction) {
+        return PageRequest.of(page, size, Sort.Direction.fromString(direction), sortBy);
+    }
+
+    private PaginatedResponse buildResponse(Page<Bills> bills, Pageable pageable) {
+        Page<BillResponse> responses = bills.map(billMapper::toResponse);
+        return PaginatedResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.OK).statusCode(HttpStatus.OK.value())
+                .data(responses.getContent())
+                .message("All bills gotten successfully")
+                .lastPage(responses.isLast()).firstPage(responses.isFirst())
+                .totalPages(responses.getTotalPages()).totalElements(responses.getNumberOfElements())
+                .empty(responses.isEmpty()).sorted(pageable.getSort().isSorted())
+                .numberOfElements(responses.getNumberOfElements())
+                .page(pageable.getPageNumber()).paged(pageable.isPaged())
+                .build();
     }
 
     @Override
@@ -48,5 +103,110 @@ public class BillServicesImpl implements BillServices {
     @Override
     public void delete(Long id) {
 
+    }
+
+    @Transactional
+    @Override
+    public BillResponse generateBills(BillRequest request) {
+        LocalDate today = LocalDate.now();
+        BillResponse response = new BillResponse();
+        List<Customers> customers = customersRepository.findAll();
+        for (Customers c : customers) {
+            try {
+                if (shouldGenerateBill(c, today))
+                    response = generateBillForCustomer(c, today, request);
+            } catch (Exception e) {
+                e.printStackTrace();
+                log.error("Error generating bill for customer {}{}", c.getCustomerId(), e.getMessage());
+            }
+        }
+
+        return response;
+    }
+
+    @Transactional
+    @Override
+    public List<BillResponse> generateBillsForSelectedCustomers(List<Long> customerIds) {
+        log.debug("bill request: {}", customerIds);
+        List<BillResponse> generatedBills = new ArrayList<>();
+        LocalDate today = LocalDate.now();
+
+        List<Customers> customers = customersRepository.findAllById(customerIds);
+
+        for (Customers c : customers) {
+            try {
+                if (shouldGenerateBill(c, today)) {
+                    BillResponse response = generateBillForCustomer(c, today, new BillRequest());
+                    generatedBills.add(response);
+                }
+            } catch (Exception e) {
+                log.trace("Error generating bill for customer {}", e.getMessage());
+                throw new ApiException("Error generating bill for customer" + c.getCustomerId() + " " + e);
+                // Optionally, you could throw a custom exception here to be handled by the controller
+            }
+        }
+        return generatedBills;
+    }
+
+    @Transactional
+    public BillResponse generateBillForCustomer(Customers customer, LocalDate billingDate, BillRequest request) {
+        validator.validate(request);
+
+        BigDecimal netToPay = calculateBillAmount(customer);
+        BigDecimal debt = getUnpaidAmount(customer);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.FRANCE);
+        LocalDate dueDate = billingDate.plusDays(10);
+        String deadLine = formatter.format(dueDate);
+
+        Bills newBill = Bills.builder()
+                .customers(customer)
+                .amount(BigDecimal.valueOf(2000))
+                .deadline((request.getDeadline() == null || request.getDeadline().isEmpty()) ? deadLine : request.getDeadline())
+                .paymentStatus(PaymentStatus.UNPAID)
+                .debt(debt)
+                .observation(request.getObservation())
+                .month((request.getMonth() == null || request.getMonth().isEmpty()) ? billingDate.getMonth().name() : request.getMonth())
+                .year((request.getYear() == null || request.getYear().isEmpty()) ? String.valueOf(billingDate.getYear()) : request.getYear())
+                .depositDate(request.getDepositDate())
+                .penalties(request.getPenalties())
+                .currentPeriodBill(true)
+                .netToPay(netToPay)
+                .build();
+
+        Bills savedBill = billRepository.save(newBill);
+        customer.setLastBillGenerationDate(billingDate);
+        customersRepository.save(customer);
+        return billMapper.toResponse(savedBill);
+    }
+
+    private boolean shouldGenerateBill(Customers customer, LocalDate today) {
+
+        if (customer.getLastBillGenerationDate() == null) {
+            return true;
+        }
+
+        long monthsSinceLastBill = ChronoUnit.MONTHS.between(customer.getLastBillGenerationDate(), today);
+
+        return switch (customer.getPaymentFrequency()) {
+            case MONTHLY -> monthsSinceLastBill >= 1;
+            case QUARTERLY -> monthsSinceLastBill >= 3;
+            case SEMI_ANNUALLY -> monthsSinceLastBill >= 6;
+            case ANNUALLY -> monthsSinceLastBill >= 12;
+        };
+    }
+
+    @Transactional(readOnly = true)
+    public BigDecimal calculateBillAmount(Customers customer) {
+        BigDecimal baseAmount = new BigDecimal("2000.00"); // Example base amount
+        BigDecimal unpaidAmount = getUnpaidAmount(customer);
+        return baseAmount.add(unpaidAmount);
+    }
+
+    @Transactional(readOnly = true)
+    public BigDecimal getUnpaidAmount(Customers customer) {
+        List<Bills> unpaidBills = billRepository.findAllByCustomersAndPaymentStatus(customer, PaymentStatus.UNPAID);
+        return unpaidBills.stream()
+                .map(Bills::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

@@ -5,9 +5,11 @@ import com.siewe_rostand.tvcam.shared.Exceptions.EntityNotFoundException;
 import com.siewe_rostand.tvcam.shared.Exceptions.OperationNotPermittedException;
 import com.siewe_rostand.tvcam.shared.HttpResponse;
 import com.siewe_rostand.tvcam.shared.model.ExceptionResponse;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.nio.file.AccessDeniedException;
 import java.sql.SQLIntegrityConstraintViolationException;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -38,7 +41,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ObjectValidationException.class)
     public  ResponseEntity<HttpResponse> handle(ObjectValidationException exception) {
-          exception.printStackTrace();
+          log.trace(exception.getMessage());
         return ResponseEntity
                 .status(BAD_REQUEST)
                 .body(
@@ -46,9 +49,25 @@ public class GlobalExceptionHandler {
                                 .timestamp(now())
                                 .statusCode(BAD_REQUEST.value())
                                 .status(BAD_REQUEST)
-                                .reason("You have some validation errors")
+                                .reason(exception.getReason())
                                 .developerMessage(exception.getViolations().toString())
                                 .errorSource(exception.getViolationSource())
+                                .build()
+                );
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public  ResponseEntity<HttpResponse> handle(ConstraintViolationException exception) {
+          log.trace(exception.getMessage());
+        return ResponseEntity
+                .status(BAD_REQUEST)
+                .body(
+                        HttpResponse.builder()
+                                .timestamp(now())
+                                .statusCode(BAD_REQUEST.value())
+                                .status(BAD_REQUEST)
+                                .reason("Validation error")
+                                .developerMessage(exception.getMessage())
                                 .build()
                 );
     }
@@ -62,6 +81,7 @@ public class GlobalExceptionHandler {
                         .error(exp.getMessage()).build()
                 );
     }
+
     @ExceptionHandler(LockedException.class)
     public ResponseEntity<ExceptionResponse> handleException(LockedException exp) {
         return ResponseEntity.status(UNAUTHORIZED)
@@ -86,7 +106,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<HttpResponse> handleException(BadCredentialsException exception) {
-        exception.printStackTrace();
+        log.trace(exception.getMessage());
         return ResponseEntity
                 .status(BAD_REQUEST)
                 .body(
@@ -102,6 +122,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(SQLIntegrityConstraintViolationException.class)
     public ResponseEntity<HttpResponse> sQLIntegrityConstraintViolationException(SQLIntegrityConstraintViolationException exception) {
+        log.trace(exception.getMessage());
         return new ResponseEntity<>(
                 HttpResponse.builder()
                         .timestamp(now())
@@ -113,16 +134,16 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(EntityAlreadyExistException.class)
-    public ResponseEntity<ExceptionResponse> handleException(EntityAlreadyExistException exp) {
-        return ResponseEntity
-                .status(CONFLICT)
-                .body(
-                        ExceptionResponse.builder()
-                                .status(CONFLICT.getReasonPhrase())
-                                .statusCode(CONFLICT.value())
-                                .error(exp.getMessage())
-                                .build()
-                );
+    public ResponseEntity<HttpResponse> handleException(EntityAlreadyExistException exp) {
+        log.trace(exp.getMessage());
+        return new ResponseEntity<>(
+                HttpResponse.builder()
+                        .timestamp(now())
+                        .reason("You Have some Duplicate Entry")
+                        .developerMessage(exp.getMessage())
+                        .status(CONFLICT)
+                        .statusCode(CONFLICT.value())
+                        .build(), CONFLICT);
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
@@ -169,7 +190,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<HttpResponse> handleException(Exception exp) {
-        exp.printStackTrace();
+        log.trace(exp.getMessage());
         return  new ResponseEntity<>(
                 HttpResponse.builder()
                         .timestamp(now())
@@ -210,6 +231,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<HttpResponse> processRuntimeException(RuntimeException exception) {
         exception.printStackTrace();
+        log.trace(Arrays.toString(exception.getStackTrace()));
         return new ResponseEntity<>(
                 HttpResponse.builder()
                         .timestamp(now())
@@ -218,6 +240,21 @@ public class GlobalExceptionHandler {
                         .status(INTERNAL_SERVER_ERROR)
                         .statusCode(INTERNAL_SERVER_ERROR.value())
                         .build(), INTERNAL_SERVER_ERROR);
+    }
+
+
+    @ExceptionHandler(ApiException.class)
+    public ResponseEntity<HttpResponse> processRuntimeException(ApiException exception) {
+        exception.printStackTrace();
+        log.trace(Arrays.toString(exception.getStackTrace()));
+        return new ResponseEntity<>(
+                HttpResponse.builder()
+                        .timestamp(now())
+                        .reason(exception.getMessage().contains("Duplicate entry") ? "Information already exists" : exception.reason)
+                        .developerMessage(exception.fillInStackTrace().toString())
+                        .status(BAD_REQUEST)
+                        .statusCode(BAD_REQUEST.value())
+                        .build(), BAD_REQUEST);
     }
 
 

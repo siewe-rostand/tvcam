@@ -3,9 +3,16 @@ package com.siewe_rostand.tvcam.Payment;
 import com.siewe_rostand.tvcam.Bills.Bills;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.Hibernate;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDate;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import java.util.Objects;
 
 @Entity
@@ -15,6 +22,8 @@ import java.util.Objects;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
+@SuperBuilder
+@EntityListeners(AuditingEntityListener.class)
 public class Payments {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,18 +31,31 @@ public class Payments {
     @Column(name = "id")
     private Long paymentId;
 
-    private Integer amount;
+    private BigDecimal amount;
 
-    private Integer debt;
+    private String paymentRef;
 
     private String observation;
 
-    private String paymentMethod;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private PaymentMethod paymentMethod;
 
-    @Column(name = "net_to_pay")
-    private Integer netToPay;
+    @Column(nullable = false)
+    private String paymentDate;
 
-    private LocalDate paymentDate;
+    @Column(name = "updated_at")
+    private String updatedAt;
+
+    @Column(name = "createdAt")
+    private String createdAt;
+
+    @CreatedBy
+    @Column(name = "created_by", nullable = false)
+    private Long createdBy;
+
+    @LastModifiedBy
+    private Long modifiedBy;
 
     @ManyToOne
     @JoinColumn(name = "bill_id", referencedColumnName = "id")
@@ -50,5 +72,25 @@ public class Payments {
     @Override
     public int hashCode() {
         return getClass().hashCode();
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", Locale.FRANCE);
+        createdAt = formatter.format(now);
+        if (paymentMethod != null) {
+            paymentMethod = PaymentMethod.CASH;
+        }
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        if (paymentMethod != null) {
+            paymentMethod = PaymentMethod.CASH;
+        }
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", Locale.FRANCE);
+        updatedAt = formatter.format(now);
     }
 }
