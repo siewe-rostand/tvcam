@@ -23,15 +23,13 @@ public class ObjectsValidator<T> {
 
     public void validate(T objectToValidate) {
         Set<ConstraintViolation<T>> violations =  validator.validate(objectToValidate);
-        System.out.println("++++++++++++++++++++++++++++++++++++++++++");
         if (!violations.isEmpty()) {
-            System.out.println("ObjectsValidator.validate========================================");
             Set<String> errorMsg = violations
                     .stream()
                     .map(ConstraintViolation::getMessage)
                     .collect(Collectors.toSet());
-            System.out.println("objectToValidate ++++++++++++++= " + errorMsg);
-            throw new ObjectValidationException(errorMsg, objectToValidate.getClass().getSimpleName());
+            throw new ObjectValidationException(errorMsg, objectToValidate.getClass().getSimpleName(),
+                    "Validation error on " + objectToValidate.getClass().getSimpleName());
         }
     }
 }

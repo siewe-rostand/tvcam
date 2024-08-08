@@ -89,11 +89,12 @@ public class UserServiceImpl implements UserService {
             return usersRepository.save(existingUser);
         }
     }
+
     @Override
     public PaginatedResponse findAll(Integer page, Integer size, String sortBy, String direction, String name) {
         Pageable pageable = createPageable(page, size, sortBy, direction);
         Page<Users> users;
-        if (!name.equals("")) {
+        if (!name.isEmpty()) {
             users = usersRepository.findAll(name, pageable);
         } else {
             users = usersRepository.findAll(pageable);
@@ -135,7 +136,7 @@ public class UserServiceImpl implements UserService {
     public UserResponse findById(Long id) {
         return usersRepository.findById(id)
                 .map(mapper::toResponse)
-                .orElseThrow(() -> new jakarta.persistence.EntityNotFoundException("No user found with the ID:: " + id));
+                .orElseThrow(() -> new EntityNotFoundException(Users.class, "id", id.toString()));
     }
 
     @Override

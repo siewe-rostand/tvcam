@@ -1,0 +1,86 @@
+<app-navbar></app-navbar>
+
+
+<!-- payment list table -->
+<p-table
+  #dt
+  [value]="payments"
+  [rows]="10"
+  [rowsPerPageOptions]="[10, 25, 50]"
+  [paginator]="true"
+  [globalFilterFields]="['name', 'address', 'telephone']"
+  [tableStyle]="{ 'min-width': '75rem' }"
+  [(selection)]="selectedPayments"
+  (selectionChange)="onSelectionChange($event)"
+  [rowHover]="true"
+  dataKey="id"
+
+>
+  <ng-template pTemplate="caption">
+    <div class="flex align-items-center justify-content-between">
+      <h5 class="m-1 text-xl text-primary">liste des clients</h5>
+      <span class="p-input-icon-left">
+          <i class="pi pi-search"></i>
+          <input pInputText type="text" placeholder="Search..." />
+        </span>
+    </div>
+  </ng-template>
+  <ng-template pTemplate="header">
+    <tr>
+      <th style="width: 4rem">
+        <p-tableHeaderCheckbox />
+      </th>
+      <th pSortableColumn="name" style="min-width: 15rem">
+        Nom <p-sortIcon field="name" />
+      </th>
+      <th pSortableColumn="telephone">
+        Telephone <p-sortIcon field="telephone" />
+      </th>
+      <th pSortableColumn="address" style="min-width: 15rem">
+        Adresse <p-sortIcon field="address" />
+      </th>
+      <th pSortableColumn="active" style="min-width: 10rem">
+        Impayé <p-sortIcon field="active" />
+      </th>
+      <th pSortableColumn="active" style="min-width: 10rem">
+        Suspendu <p-sortIcon field="active" />
+      </th>
+      <th></th>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="body" let-customer>
+    <tr>
+      <td>
+        <p-tableCheckbox [value]="customer" />
+      </td>
+      <td>
+        {{ customer.name }}
+      </td>
+      <td>
+        {{ customer.telephone }}
+      </td>
+      <td>
+        {{ customer.address }}
+      </td>
+      <td>
+        <i
+          class="pi"
+          [ngClass]="{
+              'text-green-500 pi-check-circle': customer.hasDebt,
+              'text-red-500 pi-times-circle': !customer.hasDebt
+            }"
+        ></i>
+      </td>
+      <td>
+        <i
+          class="pi"
+          [ngClass]="{
+              'text-green-500 pi-check-circle': customer.isSuspended,
+              'text-red-500 pi-times-circle': !customer.isSuspended
+            }"
+        ></i>
+      </td>
+    </tr>
+  </ng-template>
+</p-table>

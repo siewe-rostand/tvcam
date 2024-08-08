@@ -56,7 +56,7 @@
 //        Mockito.when(customerService.save(Mockito.any(CustomersDto.class))).thenReturn(new Customers().toMap(customersDto));
 //
 //        // when - action or behaviour we are to test
-//        ResultActions resultActions = mockMvc.perform(post("/api/v1/customers")
+//        ResultActions resultActions = mockMvc.perform(post("/customers")
 //        .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(customersDto)));
 //
 //        assertEquals(MethodArgumentNotValidException.class,resultActions.andReturn().getResolvedException().getClass());
