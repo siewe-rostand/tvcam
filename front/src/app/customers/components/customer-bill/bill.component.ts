@@ -33,11 +33,11 @@ import {DividerModule} from "primeng/divider";
     NavbarComponent, CommonModule, TagModule,
     DialogModule, PaginatorModule, ToolbarModule, SplitterModule, DividerModule,
   ],
-  templateUrl: './customer-bill.component.html',
-  styleUrl: './customer-bill.component.css',
+  templateUrl: './bill.component.html',
+  styleUrl: './bill.component.css',
   providers: [MessageService, ConfirmationService],
 })
-export class CustomerBillComponent implements OnInit {
+export class BillComponent implements OnInit {
   bills!: BillModel[];
   bill!: BillModel;
   payment!: PaymentModel;

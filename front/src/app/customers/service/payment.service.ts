@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import {HttpClient} from "@angular/common/http";
+import {HttpClient, HttpParams} from "@angular/common/http";
 import {catchError, Observable} from "rxjs";
 import {PaymentModel} from "../model/payment.model";
 
@@ -12,6 +12,12 @@ export class PaymentService {
 
   makePayment(payment: PaymentModel): Observable<any> {
     return this.http.post(`payments`, payment)
+      .pipe(catchError(this.handleError));
+  }
+
+  getMonthlyPayment(month: string): Observable<any> {
+    const params = new HttpParams().set("month",month)
+    return this.http.get('payments/all',{params:params})
       .pipe(catchError(this.handleError));
   }
 

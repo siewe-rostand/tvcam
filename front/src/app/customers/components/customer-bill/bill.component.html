@@ -16,10 +16,6 @@
         (onClick)="showMakePayment()"
         [disabled]="!selectedBills || !selectedBills.length"></p-button>
     </ng-template>
-
-    <ng-template pTemplate="right">
-      <p-button severity="help" (onClick)="printBills()" [disabled]="!selectedBills || !selectedBills.length" label="Export" icon="pi pi-upload"/>
-    </ng-template>
   </p-toolbar>
 
   <p-table

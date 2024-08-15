@@ -9,7 +9,6 @@ import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
@@ -18,6 +17,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.nio.file.AccessDeniedException;
 import java.sql.SQLIntegrityConstraintViolationException;
@@ -255,6 +255,20 @@ public class GlobalExceptionHandler {
                         .status(BAD_REQUEST)
                         .statusCode(BAD_REQUEST.value())
                         .build(), BAD_REQUEST);
+    }
+
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<HttpResponse> processRuntimeException(ResourceNotFoundException exception) {
+        log.trace(Arrays.toString(exception.getStackTrace()));
+        return new ResponseEntity<>(
+                HttpResponse.builder()
+                        .timestamp(now())
+                        .reason("This resource has not been found")
+                        .developerMessage(exception.getMessage())
+                        .status(NOT_FOUND)
+                        .statusCode(NOT_FOUND.value())
+                        .build(), NOT_FOUND);
     }
 
 

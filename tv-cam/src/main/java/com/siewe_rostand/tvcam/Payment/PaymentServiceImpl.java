@@ -5,6 +5,7 @@ import com.siewe_rostand.tvcam.Bills.Bills;
 import com.siewe_rostand.tvcam.Customers.Customers;
 import com.siewe_rostand.tvcam.Customers.CustomersRepository;
 import com.siewe_rostand.tvcam.exceptions.ApiException;
+import com.siewe_rostand.tvcam.exceptions.ResourceNotFoundException;
 import com.siewe_rostand.tvcam.shared.Exceptions.EntityNotFoundException;
 import com.siewe_rostand.tvcam.shared.PaginatedResponse;
 import com.siewe_rostand.tvcam.validator.ObjectsValidator;
@@ -17,7 +18,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -51,13 +51,17 @@ public class PaymentServiceImpl implements PaymentService {
         if (currentBills.getPaymentStatus() == PaymentStatus.PAID) {
             throw new ApiException("Trying to pay a bill which have already been paid", "Current bill has already been paid");
         }
+        BigDecimal remainingAmount = currentBills.getNetToPay().subtract(currentBills.getPaidAmount());
+
+        if (paymentRequest.getAmount().compareTo(remainingAmount) > 0) {
+            throw new ApiException("Payment amount is more than what is remaining to be paid");
+        }
         if(paymentRequest.customerPaymentFrequency != null){
             customers.setPaymentFrequency(PaymentFrequency.valueOf(paymentRequest.getCustomerPaymentFrequency()));
             customersRepository.save(customers);
         }
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.FRANCE);
-        LocalDate now = LocalDate.now();
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", Locale.FRANCE);
 
         Payments payments = new Payments();
         payments.setBills(currentBills);
@@ -65,17 +69,15 @@ public class PaymentServiceImpl implements PaymentService {
 
         payments.setPaymentRef(paymentReferenceGenerator.generatePaymentReference());
         payments.setAmount(paymentRequest.getAmount());
-        payments.setPaymentMethod(PaymentMethod.valueOf(paymentRequest.getPaymentMethod()));
+        payments.setPaymentMethod(paymentRequest.getPaymentMethod() == null ? PaymentMethod.CASH : PaymentMethod.valueOf(paymentRequest.getPaymentMethod()));
         payments.setObservation(paymentRequest.getObservation());
         paymentRepository.save(payments);
 
+        currentBills.setPaidAmount(currentBills.getPaidAmount().add(paymentRequest.getAmount()));
         if (payments.getAmount().compareTo(currentBills.getNetToPay()) >= 0) {
             currentBills.setPaymentStatus(PaymentStatus.PAID);
-            currentBills.setNetToPay(BigDecimal.valueOf(0));
         } else {
-            BigDecimal rest = currentBills.getNetToPay().subtract(payments.getAmount());
             currentBills.setPaymentStatus(PaymentStatus.PARTIALLY_PAID);
-            currentBills.setNetToPay(rest);
         }
 
         billRepository.save(currentBills);
@@ -83,13 +85,16 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public PaginatedResponse findAll(Integer page, Integer size, String sortBy, String direction, String name) {
+    public PaginatedResponse findAll(Integer page, Integer size, String sortBy, String direction, String name) throws ResourceNotFoundException {
         Pageable pageable = createPageable(page, size, sortBy, direction);
         Page<Payments> payments;
         if (!name.isEmpty()) {
             payments = paymentRepository.findAll(name, pageable);
         } else {
             payments = paymentRepository.findAll(pageable);
+        }
+        if (payments.isEmpty()) {
+            throw new ResourceNotFoundException("Payments not found. The payment table maybe empty");
         }
         return buildResponse(payments, pageable);
     }
@@ -100,6 +105,19 @@ public class PaymentServiceImpl implements PaymentService {
         List<PaymentResponse> paymentResponses = new ArrayList<>();
         for (Payments payment : payments) {
             paymentResponses.add(paymentMapper.toResponse(payment));
+        }
+        return paymentResponses;
+    }
+
+    @Override
+    public List<PaymentResponse> findByBills_Month(String month) throws ResourceNotFoundException {
+        List<Payments> payments = paymentRepository.findByBills_Month(month);
+        List<PaymentResponse> paymentResponses = new ArrayList<>();
+        for (Payments payment : payments) {
+            paymentResponses.add(paymentMapper.toResponse(payment));
+        }
+        if (payments.isEmpty()) {
+            throw new ResourceNotFoundException("Payments not found for this month of " + month);
         }
         return paymentResponses;
     }

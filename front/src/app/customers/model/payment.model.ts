@@ -9,4 +9,6 @@ export interface PaymentModel {
   paymentStatus?: string;
   paymentReference?: string;
   paymentAmount?: number;
+  customerName?: string;
+  month?: string;
 }

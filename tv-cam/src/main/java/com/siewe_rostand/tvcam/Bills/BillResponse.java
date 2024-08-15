@@ -16,7 +16,8 @@ import java.math.BigDecimal;
 @Builder
 public class BillResponse {
     private Long id;
-    private BigDecimal amount;
+    private BigDecimal paidAmount;
+    private BigDecimal monthlyPayment;
     private String year;
     private String month;
     private String depositDate;

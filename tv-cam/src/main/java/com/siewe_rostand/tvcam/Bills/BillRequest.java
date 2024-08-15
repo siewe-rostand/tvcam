@@ -27,7 +27,9 @@ public class BillRequest {
 
     private String observation;
 
-    private BigDecimal amount;
+    private BigDecimal paidAmount;
+
+    private BigDecimal monthlyPayment;
 
     private Integer penalties;
 

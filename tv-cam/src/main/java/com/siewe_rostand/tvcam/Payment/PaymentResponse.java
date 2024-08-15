@@ -21,4 +21,9 @@ public class PaymentResponse {
     private BigDecimal paymentAmount;
     private String paymentStatus;
     private String paymentReference;
+    private String customerName;
+    private Long customerId;
+    private String month;
+    private BigDecimal totalPaid;
+    private BigDecimal remainingBalance;
 }

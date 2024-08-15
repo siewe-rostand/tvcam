@@ -26,6 +26,11 @@ public class PaymentMapper {
                 .paymentDate(payments.getPaymentDate())
                 .paymentStatus(payments.getBills().getPaymentStatus().name())
                 .paymentReference(payments.getPaymentRef())
+                .customerName(payments.bills.getCustomers().getName())
+                .customerId(payments.bills.getCustomers().getCustomerId())
+                .month(payments.bills.getMonth())
+                .remainingBalance(payments.bills.getNetToPay().subtract(payments.bills.getPaidAmount()))
+                .totalPaid(payments.bills.getPaidAmount())
                 .build();
     }
 }

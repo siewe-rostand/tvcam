@@ -2,6 +2,7 @@ package com.siewe_rostand.tvcam.Payment;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.siewe_rostand.tvcam.exceptions.ResourceNotFoundException;
 import com.siewe_rostand.tvcam.shared.HttpResponse;
 import com.siewe_rostand.tvcam.shared.PaginatedResponse;
 import lombok.RequiredArgsConstructor;
@@ -47,7 +48,7 @@ public class PaymentController {
                                                              @RequestParam(name = "size", defaultValue = "999999") Integer size,
                                                              @RequestParam(name = "sortBy", defaultValue = "createdAt") String sortBy,
                                                              @RequestParam(name = "direction", defaultValue = "desc") String direction,
-                                                             @RequestParam(name = "name", defaultValue = "") String name) {
+                                                             @RequestParam(name = "name", defaultValue = "") String name) throws ResourceNotFoundException {
         PaginatedResponse response = paymentService.findAll(page, size, sortBy, direction, name);
         return ResponseEntity.ok(response);
     }
@@ -58,6 +59,15 @@ public class PaymentController {
         if (response.isEmpty()) return ResponseEntity.notFound().build();
         return ResponseEntity.ok().body(
                 HttpResponse.builder().timestamp(now()).message("Customer's payment gotten successfully")
+                        .statusCode(OK.value()).status(OK).content(response).build()
+        );
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<HttpResponse> findByBillsMonth(@RequestParam("month") String month) throws ResourceNotFoundException {
+        List<PaymentResponse> response = paymentService.findByBills_Month(month);
+        return ResponseEntity.ok().body(
+                HttpResponse.builder().timestamp(now()).message("Payment for the month of " + month + " gotten successfully")
                         .statusCode(OK.value()).status(OK).content(response).build()
         );
     }

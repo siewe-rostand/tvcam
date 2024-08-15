@@ -2,10 +2,10 @@ package com.siewe_rostand.tvcam.Bills;
 
 import com.siewe_rostand.tvcam.Customers.CustomerService;
 import com.siewe_rostand.tvcam.Customers.Customers;
-import com.siewe_rostand.tvcam.Customers.CustomersDTO;
 import com.siewe_rostand.tvcam.Customers.CustomersRepository;
 import com.siewe_rostand.tvcam.Payment.PaymentStatus;
 import com.siewe_rostand.tvcam.exceptions.ApiException;
+import com.siewe_rostand.tvcam.exceptions.ResourceNotFoundException;
 import com.siewe_rostand.tvcam.shared.PaginatedResponse;
 import com.siewe_rostand.tvcam.validator.ObjectsValidator;
 import org.slf4j.Logger;
@@ -65,15 +65,18 @@ public class BillServicesImpl implements BillServices {
     }
 
     @Override
-    public PaginatedResponse findAll(Integer page, Integer size, String sortBy, String direction, String name) {
+    public PaginatedResponse findAll(Integer page, Integer size, String sortBy, String direction, String name) throws ResourceNotFoundException {
         Pageable pageable = createPageable(page, size, sortBy, direction);
-        Page<Bills> bills ;
-        if(!name.isEmpty()) {
-            bills = billRepository.findAll(name,pageable);
-        }else {
+        Page<Bills> bills;
+        if (!name.isEmpty()) {
+            bills = billRepository.findAll(name, pageable);
+        } else {
             bills = billRepository.findAll(pageable);
         }
-        return buildResponse(bills,pageable);
+        if (bills.isEmpty()){
+            throw new ResourceNotFoundException("Bills not found. The database table seems to be empty");
+        }
+        return buildResponse(bills, pageable);
     }
 
     private Pageable createPageable(Integer page, Integer size, String sortBy, String direction) {
@@ -108,7 +111,7 @@ public class BillServicesImpl implements BillServices {
     @Transactional
     @Override
     public BillResponse generateBills(BillRequest request) {
-        LocalDate today = LocalDate.now();
+        LocalDateTime today = LocalDateTime.now();
         BillResponse response = new BillResponse();
         List<Customers> customers = customersRepository.findAll();
         for (Customers c : customers) {
@@ -116,7 +119,6 @@ public class BillServicesImpl implements BillServices {
                 if (shouldGenerateBill(c, today))
                     response = generateBillForCustomer(c, today, request);
             } catch (Exception e) {
-                e.printStackTrace();
                 log.error("Error generating bill for customer {}{}", c.getCustomerId(), e.getMessage());
             }
         }
@@ -126,10 +128,10 @@ public class BillServicesImpl implements BillServices {
 
     @Transactional
     @Override
-    public List<BillResponse> generateBillsForSelectedCustomers(List<Long> customerIds) {
+    public void generateBillsForSelectedCustomers(List<Long> customerIds) {
         log.debug("bill request: {}", customerIds);
         List<BillResponse> generatedBills = new ArrayList<>();
-        LocalDate today = LocalDate.now();
+        LocalDateTime today = LocalDateTime.now();
 
         List<Customers> customers = customersRepository.findAllById(customerIds);
 
@@ -145,31 +147,31 @@ public class BillServicesImpl implements BillServices {
                 // Optionally, you could throw a custom exception here to be handled by the controller
             }
         }
-        return generatedBills;
     }
 
     @Transactional
-    public BillResponse generateBillForCustomer(Customers customer, LocalDate billingDate, BillRequest request) {
+    public BillResponse     generateBillForCustomer(Customers customer, LocalDateTime billingDate, BillRequest request) {
         validator.validate(request);
 
         BigDecimal netToPay = calculateBillAmount(customer);
         BigDecimal debt = getUnpaidAmount(customer);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.FRANCE);
-        LocalDate dueDate = billingDate.plusDays(10);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", Locale.FRANCE);
+        LocalDateTime dueDate = billingDate.plusDays(10);
         String deadLine = formatter.format(dueDate);
 
         Bills newBill = Bills.builder()
                 .customers(customer)
-                .amount(BigDecimal.valueOf(2000))
+                .monthlyPayment(request.getMonthlyPayment() == null ? BigDecimal.valueOf(2000) : request.getMonthlyPayment())
                 .deadline((request.getDeadline() == null || request.getDeadline().isEmpty()) ? deadLine : request.getDeadline())
                 .paymentStatus(PaymentStatus.UNPAID)
                 .debt(debt)
                 .observation(request.getObservation())
-                .month((request.getMonth() == null || request.getMonth().isEmpty()) ? billingDate.getMonth().name() : request.getMonth())
+                .month((request.getMonth() == null || request.getMonth().isEmpty()) ? billingDate.getMonth().name().toLowerCase() : request.getMonth())
                 .year((request.getYear() == null || request.getYear().isEmpty()) ? String.valueOf(billingDate.getYear()) : request.getYear())
                 .depositDate(request.getDepositDate())
                 .penalties(request.getPenalties())
                 .currentPeriodBill(true)
+                .paidAmount(request.getPaidAmount() == null ? BigDecimal.ZERO : request.getPaidAmount())
                 .netToPay(netToPay)
                 .build();
 
@@ -179,7 +181,7 @@ public class BillServicesImpl implements BillServices {
         return billMapper.toResponse(savedBill);
     }
 
-    private boolean shouldGenerateBill(Customers customer, LocalDate today) {
+    private boolean shouldGenerateBill(Customers customer, LocalDateTime today) {
 
         if (customer.getLastBillGenerationDate() == null) {
             return true;
@@ -206,7 +208,7 @@ public class BillServicesImpl implements BillServices {
     public BigDecimal getUnpaidAmount(Customers customer) {
         List<Bills> unpaidBills = billRepository.findAllByCustomersAndPaymentStatus(customer, PaymentStatus.UNPAID);
         return unpaidBills.stream()
-                .map(Bills::getAmount)
+                .map(Bills::getPaidAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

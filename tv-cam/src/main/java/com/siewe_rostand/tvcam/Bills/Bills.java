@@ -37,13 +37,15 @@ public class Bills extends BaseEntity {
     @Column(name = "deposit_date")
     private String depositDate;
     private String deadline;
-    @NotNull(message = "bill amount must not be null")
-    private BigDecimal amount;
-
     private BigDecimal debt;
     private Integer penalties;
+
+    @NotNull(message = "bill amount must not be null")
+    private BigDecimal paidAmount;
     @Column(name = "net_to_pay")
     private BigDecimal netToPay;
+    private BigDecimal monthlyPayment;
+
     private String observation;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

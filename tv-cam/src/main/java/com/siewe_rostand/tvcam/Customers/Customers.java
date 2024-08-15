@@ -1,21 +1,15 @@
 package com.siewe_rostand.tvcam.Customers;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.siewe_rostand.tvcam.Payment.PaymentFrequency;
 import com.siewe_rostand.tvcam.shared.model.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.ColumnDefault;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Locale;
-import java.util.UUID;
 
 @Entity
 @Table(name = "customers")
@@ -24,6 +18,7 @@ import java.util.UUID;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class Customers extends BaseEntity {
 
     @Id
@@ -62,7 +57,8 @@ public class Customers extends BaseEntity {
     @ColumnDefault("'MONTHLY'")
     private PaymentFrequency paymentFrequency;;
 
-    private LocalDate lastBillGenerationDate;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime lastBillGenerationDate;
 
 
     public Customers toMap(CustomersDTO customersDto) {

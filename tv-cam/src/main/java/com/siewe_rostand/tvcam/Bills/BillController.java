@@ -3,6 +3,7 @@ package com.siewe_rostand.tvcam.Bills;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.siewe_rostand.tvcam.exceptions.ApiException;
+import com.siewe_rostand.tvcam.exceptions.ResourceNotFoundException;
 import com.siewe_rostand.tvcam.shared.HttpResponse;
 import com.siewe_rostand.tvcam.shared.PaginatedResponse;
 import org.slf4j.Logger;
@@ -70,7 +71,7 @@ public class BillController {
                                                          @RequestParam(name = "size", defaultValue = "999999") Integer size,
                                                          @RequestParam(name = "sortBy", defaultValue = "createdAt") String sortBy,
                                                          @RequestParam(name = "direction", defaultValue = "desc") String direction,
-                                                         @RequestParam(name = "name", defaultValue = "") String name) {
+                                                         @RequestParam(name = "name", defaultValue = "") String name) throws ResourceNotFoundException {
         PaginatedResponse response = billServices.findAll(page, size, sortBy, direction, name);
         return ResponseEntity.status(OK).body(response);
     }

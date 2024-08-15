@@ -7,12 +7,12 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 /**
  * @author rostand
@@ -29,13 +29,12 @@ import java.time.LocalDateTime;
 public class BaseEntity {
 
 
-    @CreatedDate
     @Column(nullable = false, updatable = false, name = "created_at")
-    private LocalDateTime createdAt;
+    private String createdAt;
 
-    @LastModifiedDate
+
     @Column(insertable = false, name = "updated_at")
-    private LocalDateTime updatedAt;
+    private String updatedAt;
 
     @CreatedBy
     @Column(nullable = false, updatable = false)
@@ -43,5 +42,21 @@ public class BaseEntity {
 
     @LastModifiedBy
     @Column(insertable = false)
-    private Long lastModifiedBy;
+    private Long modifiedBy;
+
+    @PrePersist
+    protected void PrePersist() {
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", Locale.FRANCE);
+        String formattedDate = formatter.format(now);
+        if (createdAt == null) createdAt = formattedDate;
+        if (this.updatedAt == null) updatedAt = formattedDate;
+    }
+
+    @PreUpdate
+    protected void PreUpdate() {
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", Locale.FRANCE);
+        updatedAt = formatter.format(now);
+    }
 }

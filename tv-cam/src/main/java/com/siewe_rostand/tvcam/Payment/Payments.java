@@ -44,14 +44,12 @@ public class Payments {
     @Column(nullable = false)
     private String paymentDate;
 
-    @Column(name = "updated_at")
     private String updatedAt;
 
-    @Column(name = "createdAt")
     private String createdAt;
 
     @CreatedBy
-    @Column(name = "created_by", nullable = false)
+    @Column(nullable = false)
     private Long createdBy;
 
     @LastModifiedBy
