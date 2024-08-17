@@ -1,0 +1,206 @@
+<p-table
+  #dt
+  [value]="bills"
+  [rows]="10"
+  [rowsPerPageOptions]="[10, 25, 50]"
+  [paginator]="true"
+  [globalFilterFields]="['name', 'address', 'telephone']"
+  [tableStyle]="{ 'min-width': '75rem' }"
+  [(selection)]="selectedBills"
+  (selectionChange)="onSelectionChange($event)"
+  [rowHover]="true"
+  dataKey="id"
+
+>
+  <ng-template pTemplate="caption">
+    <div class="flex align-items-center justify-content-between">
+      <h5 class="m-1 text-xl text-primary">liste des clients</h5>
+      <span class="p-input-icon-left">
+          <i class="pi pi-search"></i>
+          <input pInputText type="text" placeholder="Search..."/>
+        </span>
+    </div>
+  </ng-template>
+  <ng-template pTemplate="header">
+    <tr>
+      <th style="width: 4rem">
+        <p-tableHeaderCheckbox/>
+      </th>
+      <th pSortableColumn="name">
+        Client
+        <p-sortIcon field="Client"/>
+      </th>
+      <th pSortableColumn="telephone">
+        Mois
+        <p-sortIcon field="Mois"/>
+      </th>
+      <th pSortableColumn="address">
+        Année
+        <p-sortIcon field="Annee"/>
+      </th>
+      <th pSortableColumn="active">
+        Total à payer
+        <p-sortIcon field="netToPay"/>
+      </th>
+      <th pSortableColumn="active">
+        Montant payé
+        <p-sortIcon field="Montant"/>
+      </th>
+      <th pSortableColumn="active">
+        Reste à payer
+        <p-sortIcon field="Montant"/>
+      </th>
+      <th pSortableColumn="active">
+        Impayé
+        <p-sortIcon field="impayé"/>
+      </th>
+      <th pSortableColumn="active">
+        Date dépôt
+        <p-sortIcon field="depositDate"/>
+      </th>
+      <th pSortableColumn="active">
+        Date Limite
+        <p-sortIcon field="limitDate"/>
+      </th>
+      <th pSortableColumn="active">
+        Statut
+        <p-sortIcon field="status"/>
+      </th>
+      <th></th>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="body" let-bill>
+    <tr>
+      <td>
+        <p-tableCheckbox [value]="bill"/>
+      </td>
+      <td>
+        {{ bill.customerName }}
+      </td>
+      <td>
+        {{ bill.month }}
+      </td>
+      <td>
+        {{ bill.year }}
+      </td>
+      <td>
+        {{ bill.netToPay }}
+      </td>
+      <td>
+        {{ bill.paidAmount }}
+      </td>
+      <td>
+        {{ bill.debt }}
+      </td>
+      <td>
+        {{ bill.remainingBalance }}
+      </td>
+      <td>
+        {{ bill.depositDate }}
+      </td>
+      <td>
+        {{ bill.deadLine }}
+      </td>
+      <td>
+        <app-payment-status [status]="bill.status"></app-payment-status>
+      </td>
+      <td>
+        <p-button
+          icon="pi pi-dollar"
+          class="mr-2"
+          [rounded]="true"
+          [outlined]="true"
+          severity="success"
+          (onClick)="openEdit(bill)"
+        />
+        <p-button
+          icon="pi pi-trash"
+          severity="danger"
+          [rounded]="true"
+          [outlined]="true"
+          (onClick)="deleteBill(bill)"
+        />
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<p-dialog
+  [(visible)]="makePaymentDialog"
+  [style]="{ width: '450px' }"
+  header="Effectuer un nouveau paiement"
+  [modal]="true"
+  styleClass="p-fluid"
+>
+  <ng-template pTemplate="content">
+
+    <div class="flex align-items-center justify-content-between mb-3">
+      <div>Facture De:</div>
+      <div class="font-bold md:font-light">{{ bill.customerName }}</div>
+      <div class="font-bold md:font-light mr-2">{{ bill.month }} - {{ bill.year }}</div>
+    </div>
+
+    <div class="flex align-items-center justify-content-between mb-2">
+      <div>Montant:</div>
+      <div class="font-bold md:font-light mr-2">{{ bill.amount }}</div>
+    </div>
+
+    <div class="flex align-items-center justify-content-between mb-2">
+      <div>Arriérés:</div>
+      <div class="font-bold md:font-light mr-2">{{ bill.debt }}</div>
+    </div>
+
+    <div class="flex align-items-center justify-content-between mb-2">
+      <div>montant net à payer:</div>
+      <div class="font-bold mr-2">{{ bill.netToPay }}</div>
+    </div>
+    <p-divider />
+    <div class="field mt-4">
+      <label for="amount">Entrer le Montant</label>
+      <input
+        type="text"
+        pInputText
+        id="amount"
+        [(ngModel)]="amount"
+        required
+        autofocus
+      />
+      <small class="p-error" *ngIf="submitted && amount <= 0">
+        Veuillez entrer le montant.
+      </small>
+    </div>
+    <div class="field mt-4">
+      <label for="observation">Ajouter un commentaire</label>
+      <input
+        type="text"
+        pInputText
+        id="observation"
+        [(ngModel)]="commentaire"
+        autofocus
+      />
+    </div>
+    <p-dropdown
+      [options]="paymentMethod"
+      [(ngModel)]="selectedPaymentMethod"
+      [checkmark]="true"
+      optionLabel="name"
+      [showClear]="true"
+      placeholder="Choisir method de paiement" />
+  </ng-template>
+
+  <ng-template pTemplate="footer">
+    <p-button
+      label="Cancel"
+      icon="pi pi-times"
+      [text]="true"
+      (onClick)="hideUpdateBill()"
+    />
+    <p-button
+      label="Save"
+      icon="pi pi-check"
+      [text]="true"
+      (onClick)="makePayment()"
+    />
+  </ng-template>
+</p-dialog>

@@ -42,6 +42,9 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public PaymentResponse save(PaymentRequest paymentRequest) {
         validator.validate(paymentRequest);
+        if (paymentRequest.amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new ApiException("Bill amount is invalid and must be greater than "+paymentRequest.amount, "must provide the payment amount");
+        }
         Customers customers = customersRepository.findById(paymentRequest.customerId)
                 .orElseThrow(() -> new EntityNotFoundException(Customers.class, "customerId" + paymentRequest.customerId.toString()));
 
@@ -101,7 +104,8 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public List<PaymentResponse> findPaymentByCustomerId(Long customerId) {
-        List<Payments> payments = paymentRepository.findByBills_CustomersCustomerId(customerId);
+        Customers customers = customersRepository.findById(customerId).orElseThrow(()-> new EntityNotFoundException(Customers.class, "customerId" + customerId));
+        List<Payments> payments = paymentRepository.findByBills_CustomersCustomerId(customers.getCustomerId());
         List<PaymentResponse> paymentResponses = new ArrayList<>();
         for (Payments payment : payments) {
             paymentResponses.add(paymentMapper.toResponse(payment));

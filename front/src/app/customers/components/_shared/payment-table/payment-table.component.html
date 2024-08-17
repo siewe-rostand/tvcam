@@ -1,0 +1,90 @@
+<p-table
+  #dt
+  [value]="payments"
+  [rows]="10"
+  [rowsPerPageOptions]="[10, 25, 50]"
+  [paginator]="true"
+  [globalFilterFields]="['name', 'address', 'telephone']"
+  [tableStyle]="{ 'min-width': '75rem' }"
+  [(selection)]="selectedPayments"
+  (selectionChange)="onSelectionChange($event)"
+  [rowHover]="true"
+  dataKey="id"
+>
+  <ng-template pTemplate="caption">
+    <div class="flex align-items-center justify-content-between">
+      <h5 class="m-1 text-xl text-primary">liste des Paiements</h5>
+      <span class="p-input-icon-left">
+          <i class="pi pi-search"></i>
+          <input pInputText type="text" placeholder="Search..."/>
+        </span>
+    </div>
+  </ng-template>
+  <ng-template pTemplate="header">
+    <tr>
+      <th style="width: 4rem">
+        <p-tableHeaderCheckbox/>
+      </th>
+      <th pSortableColumn="ref" style="min-width: 15rem">
+        Reference
+        <p-sortIcon field="ref"/>
+      </th>
+      <th pSortableColumn="customer">
+        Client
+        <p-sortIcon field="customer"/>
+      </th>
+      <th pSortableColumn="month" style="min-width: 15rem">
+        Mois
+        <p-sortIcon field="month"/>
+      </th>
+      <th pSortableColumn="amount" style="min-width: 15rem">
+        Montant
+        <p-sortIcon field="amount"/>
+      </th>
+      <th pSortableColumn="status" style="min-width: 10rem">
+        Statut
+        <p-sortIcon field="status"/>
+      </th>
+      <th pSortableColumn="date" style="min-width: 10rem">
+        Date
+        <p-sortIcon field="date"/>
+      </th>
+      <th></th>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="body" let-payment let-i="rowIndex">
+    <tr >
+      <td>
+        <p-tableCheckbox [value]="payment"/>
+      </td>
+      <td>
+        {{ payment.paymentReference }}
+      </td>
+      <td>
+        {{ payment.customerName }}
+      </td>
+      <td>
+        {{ payment.month }}
+      </td>
+      <td>
+        {{ payment.paymentAmount }}
+      </td>
+      <td>
+        <app-payment-status [status]="payment.paymentStatus"></app-payment-status>
+      </td>
+      <td>
+        {{ payment.paymentDate }}
+      </td>
+      <td>
+        <p-button
+          icon="pi pi-eye"
+          class="mr-2"
+          [rounded]="true"
+          [outlined]="true"
+          severity="info"
+        />
+      </td>
+    </tr>
+  </ng-template>
+</p-table>

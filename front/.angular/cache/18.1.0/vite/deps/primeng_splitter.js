@@ -2,10 +2,6 @@ import {
   DomHandler
 } from "./chunk-QU7AFVGG.js";
 import {
-  PrimeTemplate,
-  SharedModule
-} from "./chunk-DMTEHVKZ.js";
-import {
   CommonModule,
   DOCUMENT,
   NgClass,
@@ -15,6 +11,10 @@ import {
   NgTemplateOutlet,
   isPlatformBrowser
 } from "./chunk-EHV74PGP.js";
+import {
+  PrimeTemplate,
+  SharedModule
+} from "./chunk-DMTEHVKZ.js";
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,

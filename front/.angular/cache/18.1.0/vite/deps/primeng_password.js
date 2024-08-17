@@ -15,7 +15,7 @@ import {
 import {
   InputText,
   InputTextModule
-} from "./chunk-OVFOIIZE.js";
+} from "./chunk-IQM3345P.js";
 import {
   NG_VALUE_ACCESSOR
 } from "./chunk-27A76D6T.js";
@@ -26,15 +26,6 @@ import {
   trigger
 } from "./chunk-3BBYDTQR.js";
 import {
-  OverlayService,
-  PrimeNGConfig,
-  PrimeTemplate,
-  SharedModule,
-  TranslationKeys,
-  UniqueComponentId,
-  zindexutils
-} from "./chunk-DMTEHVKZ.js";
-import {
   CommonModule,
   DOCUMENT,
   NgClass,
@@ -43,6 +34,15 @@ import {
   NgTemplateOutlet,
   isPlatformBrowser
 } from "./chunk-EHV74PGP.js";
+import {
+  OverlayService,
+  PrimeNGConfig,
+  PrimeTemplate,
+  SharedModule,
+  TranslationKeys,
+  UniqueComponentId,
+  zindexutils
+} from "./chunk-DMTEHVKZ.js";
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,

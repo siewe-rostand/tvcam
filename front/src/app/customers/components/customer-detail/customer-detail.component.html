@@ -1,0 +1,45 @@
+<p-card>
+  <ng-template pTemplate="header">
+    <h2 class="bg-primary font-bold border-round m-2 flex align-items-center justify-content-center"
+        style="min-height: 100px">Detail de {{ customer?.name }}</h2>
+  </ng-template>
+  <p-tabView styleClass="equal-width-tabs">
+    <p-tabPanel>
+      <ng-template pTemplate="header">
+        <div class="flex align-items-center gap-2">
+          <span class="font-bold white-space-nowrap m-0">
+            Profile
+          </span>
+        </div>
+      </ng-template>
+      <div>
+        <!--        <h2>Customer Details</h2>-->
+        <p>Name:<span class="font-bold text-xl w-10 ml-2">{{ customer?.name }}</span></p>
+        <p>Telephone:<span class="font-bold text-xl w-10 ml-2">{{ customer?.telephone }}</span></p>
+        <p>Address: <span class="font-bold text-xl w-10 ml-2">{{ customer?.address }}</span></p>
+        <p>Impaye: <span class="font-bold text-xl w-10 ml-2">{{ customer?.hasDebt == false ? 'NON' : 'OUI' }}</span></p>
+      </div>
+    </p-tabPanel>
+    <p-tabPanel header="Header II">
+      <ng-template pTemplate="header">
+        <div class="flex align-items-center gap-2">
+          <span class="font-bold white-space-nowrap m-0">
+                       Factures
+                    </span>
+        </div>
+      </ng-template>
+      <app-bill-table [bills]="bills"></app-bill-table>
+    </p-tabPanel>
+    <p-tabPanel header="Header III">
+      <ng-template pTemplate="header">
+        <div class="flex align-items-center gap-2">
+          <span class="font-bold white-space-nowrap m-0">
+            Paiement
+          </span>
+        </div>
+      </ng-template>
+      <app-payment-table [payments]="payments"></app-payment-table>
+    </p-tabPanel>
+  </p-tabView>
+
+</p-card>

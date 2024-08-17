@@ -6,6 +6,8 @@ import com.siewe_rostand.tvcam.Customers.CustomersRepository;
 import com.siewe_rostand.tvcam.Payment.PaymentStatus;
 import com.siewe_rostand.tvcam.exceptions.ApiException;
 import com.siewe_rostand.tvcam.exceptions.ResourceNotFoundException;
+import com.siewe_rostand.tvcam.shared.Exceptions.EntityNotFoundException;
+import com.siewe_rostand.tvcam.shared.HttpResponse;
 import com.siewe_rostand.tvcam.shared.PaginatedResponse;
 import com.siewe_rostand.tvcam.validator.ObjectsValidator;
 import org.slf4j.Logger;
@@ -14,18 +16,18 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+
+import static org.springframework.http.HttpStatus.OK;
 
 /**
  * @author rostand
@@ -79,6 +81,25 @@ public class BillServicesImpl implements BillServices {
         return buildResponse(bills, pageable);
     }
 
+    @Override
+    public HttpResponse findCustomerBills(Long customerId) throws ResourceNotFoundException {
+        Customers customer = customersRepository.findById(customerId).orElseThrow(()
+                -> new EntityNotFoundException(Customers.class, "customer with id " + customerId + " not found"));
+
+        List<Bills> bills = billRepository.findAllByCustomers(customer);
+        if (bills.isEmpty()) {
+            throw new ResourceNotFoundException("Bills not found. Customer have no bills available in the system");
+        }
+        List<BillResponse> billResponses = new ArrayList<>();
+        for (Bills bill : bills) {
+            BillResponse billResponse = billMapper.toResponse(bill);
+            billResponses.add(billResponse);
+        }
+
+        return HttpResponse.builder().content(billResponses).status(OK).message("Bills for customer " + customer.getName() + " gotten successfully").statusCode(OK.value()).build();
+    }
+
+
     private Pageable createPageable(Integer page, Integer size, String sortBy, String direction) {
         return PageRequest.of(page, size, Sort.Direction.fromString(direction), sortBy);
     }
@@ -87,7 +108,7 @@ public class BillServicesImpl implements BillServices {
         Page<BillResponse> responses = bills.map(billMapper::toResponse);
         return PaginatedResponse.builder()
                 .timestamp(LocalDateTime.now())
-                .status(HttpStatus.OK).statusCode(HttpStatus.OK.value())
+                .status(OK).statusCode(OK.value())
                 .data(responses.getContent())
                 .message("All bills gotten successfully")
                 .lastPage(responses.isLast()).firstPage(responses.isFirst())
@@ -128,7 +149,7 @@ public class BillServicesImpl implements BillServices {
 
     @Transactional
     @Override
-    public void generateBillsForSelectedCustomers(List<Long> customerIds) {
+    public List<BillResponse> generateBillsForSelectedCustomers(List<Long> customerIds) {
         log.debug("bill request: {}", customerIds);
         List<BillResponse> generatedBills = new ArrayList<>();
         LocalDateTime today = LocalDateTime.now();
@@ -147,6 +168,7 @@ public class BillServicesImpl implements BillServices {
                 // Optionally, you could throw a custom exception here to be handled by the controller
             }
         }
+        return generatedBills;
     }
 
     @Transactional

@@ -1,5 +1,6 @@
 package com.siewe_rostand.tvcam.Bills;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.siewe_rostand.tvcam.Customers.Customers;
 import com.siewe_rostand.tvcam.Payment.PaymentFrequency;
 import com.siewe_rostand.tvcam.Payment.PaymentStatus;
@@ -23,7 +24,8 @@ import java.util.List;
 @Setter
 @SuperBuilder
 public class Bills extends BaseEntity {
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "bills")
+    @JsonIgnore
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "bills",fetch = FetchType.EAGER)
     List<Payments> payments;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -1,5 +1,6 @@
 package com.siewe_rostand.tvcam.Bills;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -14,6 +15,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@JsonInclude(JsonInclude.Include.NON_DEFAULT)
 public class BillResponse {
     private Long id;
     private BigDecimal paidAmount;
@@ -29,4 +31,5 @@ public class BillResponse {
     private String customerName;
     private Long customerId;
     private String status;
+    private BigDecimal remainingBalance;
 }

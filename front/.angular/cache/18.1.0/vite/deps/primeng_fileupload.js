@@ -7,13 +7,13 @@ import {
   TimesCircleIcon
 } from "./chunk-BR7JRNUT.js";
 import {
-  CheckIcon
-} from "./chunk-PUNFKMKI.js";
-import {
   Button,
   ButtonDirective,
   ButtonModule
-} from "./chunk-ZUPJIRSF.js";
+} from "./chunk-NUKO3U64.js";
+import {
+  CheckIcon
+} from "./chunk-PUNFKMKI.js";
 import {
   TimesIcon
 } from "./chunk-QWOBHWSI.js";
@@ -21,11 +21,11 @@ import "./chunk-H7JSWHSS.js";
 import {
   BaseIcon
 } from "./chunk-AAZTR5OM.js";
+import "./chunk-SLGUVPUN.js";
 import {
   Ripple,
   RippleModule
-} from "./chunk-E44AIM5L.js";
-import "./chunk-SLGUVPUN.js";
+} from "./chunk-C7ZNJOEP.js";
 import {
   DomHandler
 } from "./chunk-QU7AFVGG.js";
@@ -35,14 +35,6 @@ import {
   transition,
   trigger
 } from "./chunk-3BBYDTQR.js";
-import {
-  MessageService,
-  PrimeNGConfig,
-  PrimeTemplate,
-  SharedModule,
-  TranslationKeys,
-  UniqueComponentId
-} from "./chunk-DMTEHVKZ.js";
 import {
   DomSanitizer
 } from "./chunk-3Q4XOZU4.js";
@@ -60,6 +52,14 @@ import {
   NgTemplateOutlet,
   isPlatformBrowser
 } from "./chunk-EHV74PGP.js";
+import {
+  MessageService,
+  PrimeNGConfig,
+  PrimeTemplate,
+  SharedModule,
+  TranslationKeys,
+  UniqueComponentId
+} from "./chunk-DMTEHVKZ.js";
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,

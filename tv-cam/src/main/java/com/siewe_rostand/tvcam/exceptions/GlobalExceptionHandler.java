@@ -5,6 +5,7 @@ import com.siewe_rostand.tvcam.shared.Exceptions.EntityNotFoundException;
 import com.siewe_rostand.tvcam.shared.Exceptions.OperationNotPermittedException;
 import com.siewe_rostand.tvcam.shared.HttpResponse;
 import com.siewe_rostand.tvcam.shared.model.ExceptionResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -17,7 +18,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.nio.file.AccessDeniedException;
 import java.sql.SQLIntegrityConstraintViolationException;
@@ -188,13 +189,27 @@ public class GlobalExceptionHandler {
                 );
     }
 
+//    @ExceptionHandler(Exception.class)
+//    public ResponseEntity<HttpResponse> handleException(Exception exp) {
+//        log.trace(exp.getMessage());
+//        return  new ResponseEntity<>(
+//                HttpResponse.builder()
+//                        .timestamp(now())
+//                        .reason("Internal error, please contact the admin")
+//                        .developerMessage(exp.getMessage())
+//                        .status(INTERNAL_SERVER_ERROR)
+//                        .statusCode(INTERNAL_SERVER_ERROR.value())
+//                        .build(), INTERNAL_SERVER_ERROR);
+//    }
+
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<HttpResponse> handleException(Exception exp) {
+    public ResponseEntity<HttpResponse> handleException(Exception exp, HttpServletRequest request) {
         log.trace(exp.getMessage());
+        String requestedUrl = request.getRequestURL().toString();
         return  new ResponseEntity<>(
                 HttpResponse.builder()
                         .timestamp(now())
-                        .reason("Internal error, please contact the admin")
+                        .reason("Exception occurred for URL: " + requestedUrl)
                         .developerMessage(exp.getMessage())
                         .status(INTERNAL_SERVER_ERROR)
                         .statusCode(INTERNAL_SERVER_ERROR.value())
@@ -266,6 +281,19 @@ public class GlobalExceptionHandler {
                         .timestamp(now())
                         .reason("This resource has not been found")
                         .developerMessage(exception.getMessage())
+                        .status(NOT_FOUND)
+                        .statusCode(NOT_FOUND.value())
+                        .build(), NOT_FOUND);
+    }
+
+    @ExceptionHandler(NoHandlerFoundException.class)
+    public ResponseEntity<HttpResponse> handleNoHandlerFoundException(NoHandlerFoundException ex) {
+        String requestedUrl = ex.getRequestURL();
+        return new ResponseEntity<>(
+                HttpResponse.builder()
+                        .timestamp(now())
+                        .reason("This endpoint" + requestedUrl + " has not been found or is incorrect: Please kindly verify your endpoint")
+                        .developerMessage(ex.getMessage())
                         .status(NOT_FOUND)
                         .statusCode(NOT_FOUND.value())
                         .build(), NOT_FOUND);

@@ -15,8 +15,9 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
-import static java.time.LocalDateTime.*;
-import static org.springframework.http.HttpStatus.*;
+import static java.time.LocalDateTime.now;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.OK;
 
 
 /**
@@ -56,9 +57,10 @@ public class BillController {
     public ResponseEntity<HttpResponse> generateBillsForSelectedCustomers(@RequestBody List<Long> customerIds) {
         logger.debug("BillController:::generateBillsForSelectedCustomers {}", customerIds);
         try {
-            billServices.generateBillsForSelectedCustomers(customerIds);
+            var response = billServices.generateBillsForSelectedCustomers(customerIds);
             return ResponseEntity.status(CREATED).body(
                     HttpResponse.builder().timestamp(now()).message("selected users bills created successfully")
+                            .content(response)
                             .status(CREATED).statusCode(CREATED.value()).build()
             );
         } catch (Exception e) {
@@ -73,6 +75,14 @@ public class BillController {
                                                          @RequestParam(name = "direction", defaultValue = "desc") String direction,
                                                          @RequestParam(name = "name", defaultValue = "") String name) throws ResourceNotFoundException {
         PaginatedResponse response = billServices.findAll(page, size, sortBy, direction, name);
+        return ResponseEntity.status(OK).body(response);
+    }
+
+    @GetMapping("/customer/{customerId}")
+    public ResponseEntity<HttpResponse> getBillsByCustomerId(@PathVariable(name = "customerId") Long customerId) throws ResourceNotFoundException {
+        logger.debug("BillController::getBillsByCustomerId {}", customerId);
+        HttpResponse response = billServices.findCustomerBills(customerId);
+
         return ResponseEntity.status(OK).body(response);
     }
 

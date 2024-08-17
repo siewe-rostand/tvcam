@@ -14,6 +14,10 @@ export class CustomerService {
     return this.http.get<any>('customers');
   }
 
+  getCustomerById(customerId: number): Observable<any> {
+    return this.http.get<any>(`customers/${customerId}`);
+  }
+
   createCustomer(customer: CustomerModel): Observable<any> {
     return this.http.post<any>('customers/save', customer);
   }

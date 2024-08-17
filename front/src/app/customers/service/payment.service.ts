@@ -22,7 +22,7 @@ export class PaymentService {
   }
 
   getPaymentsForCustomer(customerId: number): Observable<any> {
-    return this.http.get(`payments/customer/${customerId}`)
+    return this.http.get(`payments/${customerId}`)
       .pipe(catchError(this.handleError));
   }
 

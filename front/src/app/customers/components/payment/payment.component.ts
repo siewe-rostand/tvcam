@@ -8,6 +8,9 @@ import {CommonModule} from "@angular/common";
 import {PaymentService} from "../../service/payment.service";
 import {TagModule} from "primeng/tag";
 import {ToolbarModule} from "primeng/toolbar";
+import {StatusService} from "../../../_shared/status.service";
+import {PaymentStatusComponent} from "../_shared/payment-table/payment-status/payment-status.component";
+import {PaymentTableComponent} from "../_shared/payment-table/payment-table.component";
 
 @Component({
   selector: 'app-bill-payment',
@@ -19,7 +22,9 @@ import {ToolbarModule} from "primeng/toolbar";
     TableModule,
     CommonModule,
     TagModule,
-    ToolbarModule
+    ToolbarModule,
+    PaymentStatusComponent,
+    PaymentTableComponent
   ],
   templateUrl: './payment.component.html',
   styleUrl: './payment.component.css'
@@ -32,7 +37,7 @@ export class PaymentComponent implements OnInit {
   currentMonth = this.currentDate.getMonth() + 1;
 
 
-  constructor(private paymentService: PaymentService,) {
+  constructor(private paymentService: PaymentService, protected statusService: StatusService) {
   }
 
   ngOnInit(): void {
@@ -54,33 +59,6 @@ export class PaymentComponent implements OnInit {
         console.log(error)
       }
     })
-  }
-
-  getStatusSeverity(status: string) {
-    switch (status) {
-      case 'UNPAID':
-        return 'danger';
-      case 'PAID':
-        return 'success';
-      case 'PARTIALLY_PAID':
-        return 'warning';
-      default:
-        return 'danger'
-    }
-  }
-
-
-  getStatus(status: string) {
-    switch (status) {
-      case 'UNPAID':
-        return 'non payé';
-      case 'PAID':
-        return 'payé';
-      case 'PARTIALLY_PAID':
-        return 'partiellement payé';
-      default:
-        return 'non payé';
-    }
   }
 
 }

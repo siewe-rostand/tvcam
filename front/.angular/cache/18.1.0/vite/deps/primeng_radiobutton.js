@@ -8,14 +8,14 @@ import {
   NgControl
 } from "./chunk-27A76D6T.js";
 import {
-  PrimeNGConfig
-} from "./chunk-DMTEHVKZ.js";
-import {
   CommonModule,
   NgClass,
   NgIf,
   NgStyle
 } from "./chunk-EHV74PGP.js";
+import {
+  PrimeNGConfig
+} from "./chunk-DMTEHVKZ.js";
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,

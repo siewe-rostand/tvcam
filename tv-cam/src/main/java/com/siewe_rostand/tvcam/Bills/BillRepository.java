@@ -23,4 +23,6 @@ public interface BillRepository extends JpaRepository<Bills, Long> {
     void resetCurrentPeriodFlag();
 
     Optional<Bills> findByCustomersAndCurrentPeriodBill(Customers customers, boolean currentPeriodBill);
+
+    List<Bills> findAllByCustomers(Customers customers);
 }

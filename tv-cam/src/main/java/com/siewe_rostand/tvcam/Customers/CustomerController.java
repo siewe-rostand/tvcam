@@ -79,9 +79,12 @@ public class CustomerController {
         if (customerService.findById(id) == null) {
             throw new EntityNotFoundException(Users.class, "id", id.toString());
         } else {
+            ObjectMapper objectMapper = new ObjectMapper();
             CustomersDTO customersDto = customerService.findById(id);
+            Map<String, Object> data = objectMapper.convertValue(customersDto, new TypeReference<>() {
+            });
             return ResponseEntity.ok().body(
-                    HttpResponse.builder().data(Map.of("customer", customersDto)).status(HttpStatus.OK).statusCode(HttpStatus.OK.value()).
+                    HttpResponse.builder().data(data).status(HttpStatus.OK).statusCode(HttpStatus.OK.value()).
                             message("Customer with id " + id + " gotten successfully!!!").timestamp(LocalDateTime.now())
                             .build());
         }

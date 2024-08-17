@@ -1,6 +1,7 @@
 package com.siewe_rostand.tvcam.Bills;
 
 
+import com.siewe_rostand.tvcam.Customers.CustomersDTO;
 import org.springframework.stereotype.Component;
 
 /**
@@ -41,6 +42,7 @@ public class BillMapper {
                 .customerName(bills.getCustomers().getName())
                 .customerId(bills.getCustomers().getCustomerId())
                 .status(bills.getPaymentStatus().name())
+                .remainingBalance(bills.getNetToPay().subtract(bills.getPaidAmount()))
                 .build();
     }
 }

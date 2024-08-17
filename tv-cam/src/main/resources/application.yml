@@ -24,9 +24,12 @@ spring:
     open-in-view: false
     database-platform: org.hibernate.dialect.MySQLDialect
 
+  mvc:
+    throw-exception-if-no-handler-found: true
+    static-path-pattern: /**
   jackson:
     time-zone: Africa/Lagos
-    date-format: yyyy-MM-dd HH:mm:ss
+    date-format: dd-MM-yyyy HH:mm:ss
 
 security:
   jwt:

@@ -15,6 +15,7 @@ import {CommonModule} from '@angular/common';
 import {CustomerModel} from '../../model/customer.model';
 import {ConfirmDialogModule} from 'primeng/confirmdialog';
 import {BillService} from "../../service/bill.service";
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-customer-list',
@@ -52,7 +53,8 @@ export class CustomerListComponent implements OnInit {
   constructor(
     private customerService: CustomerService, private billService: BillService,
     private messageService: MessageService,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private router: Router
   ) {
   }
 
@@ -154,6 +156,9 @@ export class CustomerListComponent implements OnInit {
     });
   }
 
+  moveToDetail(customerId: number) {
+    this.router.navigate(['/customers', customerId,'detail']);
+  }
   openEdit(customer: CustomerModel) {
     this.customer = {...customer};
     this.updateCustomerDialog = true;

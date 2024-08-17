@@ -3,11 +3,11 @@ import {
   NgModel
 } from "./chunk-27A76D6T.js";
 import {
-  PrimeNGConfig
-} from "./chunk-DMTEHVKZ.js";
-import {
   CommonModule
 } from "./chunk-EHV74PGP.js";
+import {
+  PrimeNGConfig
+} from "./chunk-DMTEHVKZ.js";
 import {
   ChangeDetectorRef,
   Directive,

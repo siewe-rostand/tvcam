@@ -2,30 +2,22 @@ import {
   AngleRightIcon
 } from "./chunk-UUQ264OD.js";
 import {
-  Tooltip,
-  TooltipModule
-} from "./chunk-R3B54S7I.js";
-import {
   AngleDownIcon
 } from "./chunk-HWIUARGD.js";
+import {
+  Tooltip,
+  TooltipModule
+} from "./chunk-XQLRTSM5.js";
 import {
   BaseIcon
 } from "./chunk-AAZTR5OM.js";
 import {
   Ripple,
   RippleModule
-} from "./chunk-E44AIM5L.js";
+} from "./chunk-C7ZNJOEP.js";
 import {
   DomHandler
 } from "./chunk-QU7AFVGG.js";
-import {
-  ObjectUtils,
-  PrimeNGConfig,
-  PrimeTemplate,
-  SharedModule,
-  UniqueComponentId,
-  zindexutils
-} from "./chunk-DMTEHVKZ.js";
 import {
   RouterLink,
   RouterLinkActive,
@@ -43,6 +35,14 @@ import {
   NgTemplateOutlet,
   isPlatformBrowser
 } from "./chunk-EHV74PGP.js";
+import {
+  ObjectUtils,
+  PrimeNGConfig,
+  PrimeTemplate,
+  SharedModule,
+  UniqueComponentId,
+  zindexutils
+} from "./chunk-DMTEHVKZ.js";
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,

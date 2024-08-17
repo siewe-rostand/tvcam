@@ -12,4 +12,6 @@ export interface BillModel {
   customerName?: string;
   customerId?: number;
   status?: string;
+  remainingBalance?: number;
+  paidAmount?: number;
 }

@@ -125,6 +125,14 @@
             (onClick)="openEdit(customer)"
           />
           <p-button
+            icon="pi pi-eye"
+            class="mr-2"
+            [rounded]="true"
+            [outlined]="true"
+            severity="info"
+            (onClick)="moveToDetail(customer.id)"
+          />
+          <p-button
             icon="pi pi-trash"
             severity="danger"
             [rounded]="true"

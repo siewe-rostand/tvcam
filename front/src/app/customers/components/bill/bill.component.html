@@ -1,0 +1,65 @@
+<app-navbar></app-navbar>
+<div class="card">
+  <p-toolbar styleClass="mb-4 gap-3">
+    <ng-template pTemplate="left">
+      <p-button
+        severity="danger"
+        label="Supprimer"
+        icon="pi pi-trash"
+        class="mr-2"
+        (onClick)="deleteBills()"
+        [disabled]="!selectedBills || !selectedBills.length"></p-button>
+      <p-button
+        severity="info"
+        label="Paiement"
+        icon="pi pi-receipt"
+        (onClick)="showMakePayment()"
+        [disabled]="!selectedBills || !selectedBills.length"></p-button>
+    </ng-template>
+  </p-toolbar>
+
+  <app-bill-table [bills]="bills" (selectedBillsChange)="handleSelectedBillsChange($event)"></app-bill-table>
+
+
+
+  <!-- make a new bill payment dialog  -->
+  <p-dialog
+    [(visible)]="savePaymentDialog"
+    [style]="{ width: '450px' }"
+    header="Effectuer un nouveau paiement"
+    [modal]="true"
+    styleClass="p-fluid"
+  >
+    <ng-template pTemplate="content">
+
+      <div class="field">
+        <label for="paymentAmount">Entrer le montant</label>
+        <input
+          type="text"
+          pInputText
+          id="paymentAmount"
+          [(ngModel)]="payment.paymentDate"
+          autofocus
+        />
+        <small class="p-error" *ngIf="submitted && !payment.paymentAmount">
+          Veuillez Entrer le montant.
+        </small>
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+      <p-button
+        label="Cancel"
+        icon="pi pi-times"
+        [text]="true"
+        (onClick)="hidePaymentDialog()"
+      />
+      <p-button
+        label="Save"
+        icon="pi pi-check"
+        [text]="true"
+        (onClick)="makePayment()"
+      />
+    </ng-template>
+  </p-dialog>
+</div>

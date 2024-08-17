@@ -1,0 +1,10 @@
+::ng-deep .equal-width-tabs .p-tabview-nav {
+  display: flex;
+}
+::ng-deep .equal-width-tabs .p-tabview-nav li {
+  flex: 1;
+}
+::ng-deep .equal-width-tabs .p-tabview-nav li a {
+  width: 100%;
+  text-align: center;
+}

@@ -58,7 +58,7 @@ public class PaymentController {
         List<PaymentResponse> response = paymentService.findPaymentByCustomerId(customerId);
         if (response.isEmpty()) return ResponseEntity.notFound().build();
         return ResponseEntity.ok().body(
-                HttpResponse.builder().timestamp(now()).message("Customer's payment gotten successfully")
+                HttpResponse.builder().timestamp(now()).message("Customer's payment gotten successfully").content(response)
                         .statusCode(OK.value()).status(OK).content(response).build()
         );
     }
