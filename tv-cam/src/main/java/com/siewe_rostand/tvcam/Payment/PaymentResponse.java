@@ -26,4 +26,6 @@ public class PaymentResponse {
     private String month;
     private BigDecimal totalPaid;
     private BigDecimal remainingBalance;
+    private String user;
+    private String customerPaymentFrequency;
 }

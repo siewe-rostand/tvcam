@@ -24,7 +24,17 @@ export class AuthService {
     );
   }
 
-  signin(request: RegisterRequest): Observable<any> {
+  changePassword(telephone: string, password: string): Observable<any> {
+    return this.http.post<any>(
+      'auth/password/change',
+      {
+        newPassword: password,
+        telephone: telephone,
+      }
+    );
+  }
+
+  signup(request: RegisterRequest): Observable<any> {
     return this.http.post<AuthResponseModel>(
       'auth/register',
       request

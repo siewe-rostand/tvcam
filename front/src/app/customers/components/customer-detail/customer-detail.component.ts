@@ -12,7 +12,7 @@ import {BillModel} from "../../model/bill.model";
 import {BillService} from "../../service/bill.service";
 import {MessageService} from "primeng/api";
 import {PaymentModel} from "../../model/payment.model";
-import {StatusService} from "../../../_shared/status.service";
+import {StatusService} from "../../../_shared/services/status.service";
 import {PaymentService} from "../../service/payment.service";
 import {PaymentTableComponent} from "../_shared/payment-table/payment-table.component";
 import {BillTableComponent} from "../_shared/bill-table/bill-table.component";

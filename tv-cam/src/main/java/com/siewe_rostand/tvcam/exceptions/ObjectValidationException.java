@@ -10,13 +10,11 @@ import java.util.Set;
  * @project tv-cam
  */
 
+@Getter
 @RequiredArgsConstructor
 public class ObjectValidationException extends RuntimeException {
 
-    @Getter
     private final Set<String> violations;
-    @Getter
     private final String violationSource;
-    @Getter
     private final String reason;
 }

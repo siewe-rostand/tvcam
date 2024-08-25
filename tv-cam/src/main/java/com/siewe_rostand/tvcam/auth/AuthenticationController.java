@@ -55,4 +55,10 @@ public class AuthenticationController {
     ) {
         return ResponseEntity.ok(service.authenticate(request));
     }
+
+    @PostMapping("/password/change")
+    public ResponseEntity<HttpResponse> forgotPassword(@RequestBody ForgetPasswordForm forgetPasswordForm) {
+        return ResponseEntity.ok(service.forgottenPassword(forgetPasswordForm));
+    }
+
 }

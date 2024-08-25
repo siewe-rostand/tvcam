@@ -117,4 +117,8 @@ public class Users implements UserDetails {
     public boolean isEnabled() {
         return active;
     }
+
+    public String getFullName() {
+        return firstname + " " + lastname;
+    }
 }

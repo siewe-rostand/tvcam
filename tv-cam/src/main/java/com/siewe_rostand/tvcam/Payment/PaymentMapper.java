@@ -31,6 +31,8 @@ public class PaymentMapper {
                 .month(payments.bills.getMonth())
                 .remainingBalance(payments.bills.getNetToPay().subtract(payments.bills.getPaidAmount()))
                 .totalPaid(payments.bills.getPaidAmount())
+                .customerPaymentFrequency(payments.bills.getCustomers().getPaymentFrequency().name())
+//                .user(payments.users.getFullName()) //TODO: set the user who created the payment
                 .build();
     }
 }

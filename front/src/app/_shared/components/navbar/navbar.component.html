@@ -82,18 +82,16 @@
     </ng-template>
     <ng-template pTemplate="item" let-item let-root="root">
       <a [routerLink]="item.routerLink"
-         routerLinkActive="active"
+         [routerLinkActive]="['active']"
          [routerLinkActiveOptions]="{exact: true}"
-         [ngClass]="{'p-menuitem-link': true}" >
+         [ngClass]="{'p-menuitem-link': true}" ariaCurrentWhenActive="page" >
         <span [class]="item.icon"></span>
         <span class="ml-2">{{ item.label }}</span>
-        <i
-          *ngIf="item.items"
+        <i *ngIf="item.items"
           [ngClass]="[
             'pi',
             root ? 'pi-angle-down ml-2' : 'pi-angle-right ml-auto'
-          ]"
-        ></i>
+          ]"></i>
       </a>
     </ng-template>
     <ng-template pTemplate="end">

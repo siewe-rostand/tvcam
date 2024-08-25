@@ -11,8 +11,7 @@ export class PaymentService {
   constructor(private http: HttpClient) { }
 
   makePayment(payment: PaymentModel): Observable<any> {
-    return this.http.post(`payments`, payment)
-      .pipe(catchError(this.handleError));
+    return this.http.post(`payments`, payment);
   }
 
   getMonthlyPayment(month: string): Observable<any> {

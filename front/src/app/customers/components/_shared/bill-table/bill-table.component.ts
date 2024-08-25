@@ -1,7 +1,7 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {Button} from "primeng/button";
 import {InputTextModule} from "primeng/inputtext";
-import {MessageService, PrimeTemplate} from "primeng/api";
+import {ConfirmationService, MessageService} from "primeng/api";
 import {TableModule} from "primeng/table";
 import {TagModule} from "primeng/tag";
 import {BillModel} from "../../../model/bill.model";
@@ -13,6 +13,9 @@ import {FormsModule} from "@angular/forms";
 import {NgIf} from "@angular/common";
 import {PaymentModel} from "../../../model/payment.model";
 import {PaymentService} from "../../../service/payment.service";
+import {ToastModule} from "primeng/toast";
+import {ConfirmDialogModule} from "primeng/confirmdialog";
+import {BillService} from "../../../service/bill.service";
 
 @Component({
   selector: 'app-bill-table',
@@ -20,7 +23,6 @@ import {PaymentService} from "../../../service/payment.service";
   imports: [
     Button,
     InputTextModule,
-    PrimeTemplate,
     TableModule,
     TagModule,
     PaymentStatusComponent,
@@ -28,10 +30,13 @@ import {PaymentService} from "../../../service/payment.service";
     DividerModule,
     DropdownModule,
     FormsModule,
-    NgIf
+    NgIf,
+    ToastModule,
+    ConfirmDialogModule
   ],
   templateUrl: './bill-table.component.html',
-  styleUrl: './bill-table.component.css'
+  styleUrl: './bill-table.component.css',
+  providers: [MessageService, ConfirmationService],
 })
 export class BillTableComponent {
   @Input() bills: BillModel[] = [];
@@ -50,7 +55,8 @@ export class BillTableComponent {
   payment: PaymentModel= {};
 
 
-  constructor(private paymentService: PaymentService, private messageService: MessageService) {
+  constructor(private paymentService: PaymentService, private billService: BillService,
+              private messageService: MessageService, private confirmationService: ConfirmationService,) {
   }
   onSelectionChange(event: BillModel) {
     this.selectedBillsChange.emit(this.selectedBills);
@@ -64,7 +70,27 @@ export class BillTableComponent {
 
 
   deleteBill(bill: BillModel) {
+    this.confirmationService.confirm({
+      message: `Êtes-vous sûr de vouloir supprimer la facture de <b>${bill.customerName?.toUpperCase()}</b>
+      d'un montant <b>${bill.paidAmount?.toString().toUpperCase()}</b> et tous les paiements liee a cette facture?`,
+      header: 'Confirmation',
+      icon: 'pi pi-exclamation-triangle',
+      dismissableMask: false,
+      accept: () => {
+        this.billService.deleteBill(bill.id!).subscribe({
+          next: (res) => {
+            console.log(res)
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Successful',
+              detail: 'Facture supprimée avec succès',
+              life: 3000,
+            });
+          }
+        })
 
+      },
+    });
   }
   hideUpdateBill() {
     this.makePaymentDialog = false;
@@ -80,7 +106,6 @@ export class BillTableComponent {
       observation: this.commentaire,
       paymentMethod: this.selectedPaymentMethod == undefined ? "CASH" : this.selectedPaymentMethod['value'],
     };
-    console.log(this.payment)
     this.paymentService.makePayment(this.payment).subscribe({
       next: data => {
         this.submitted = false;
@@ -92,16 +117,6 @@ export class BillTableComponent {
           life: 4000,
         });
       },
-      error: err => {
-        this.submitted = false;
-        console.log(err);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Une erreur s\'est produite lors de la suppression',
-          life: 3000,
-        });
-      }
     })
   }
 }

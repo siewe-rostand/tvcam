@@ -8,7 +8,6 @@ import {CommonModule} from "@angular/common";
 import {PaymentService} from "../../service/payment.service";
 import {TagModule} from "primeng/tag";
 import {ToolbarModule} from "primeng/toolbar";
-import {StatusService} from "../../../_shared/status.service";
 import {PaymentStatusComponent} from "../_shared/payment-table/payment-status/payment-status.component";
 import {PaymentTableComponent} from "../_shared/payment-table/payment-table.component";
 
@@ -37,7 +36,7 @@ export class PaymentComponent implements OnInit {
   currentMonth = this.currentDate.getMonth() + 1;
 
 
-  constructor(private paymentService: PaymentService, protected statusService: StatusService) {
+  constructor(private paymentService: PaymentService) {
   }
 
   ngOnInit(): void {
@@ -45,8 +44,9 @@ export class PaymentComponent implements OnInit {
     this.getAllPayments();
   }
 
-  onSelectionChange(event: any) {
-    this.selectedPayments = event;
+  handleSelectedPaymentChange(newSelection: any[]): void {
+    this.selectedPayments = newSelection;
+    console.log('Selected payments updated:', this.selectedPayments);
   }
 
   getAllPayments() {

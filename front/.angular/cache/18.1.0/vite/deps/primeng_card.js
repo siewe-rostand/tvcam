@@ -1,17 +1,17 @@
 import {
-  CommonModule,
-  NgClass,
-  NgIf,
-  NgStyle,
-  NgTemplateOutlet
-} from "./chunk-EHV74PGP.js";
-import {
   Footer,
   Header,
   ObjectUtils,
   PrimeTemplate,
   SharedModule
 } from "./chunk-DMTEHVKZ.js";
+import {
+  CommonModule,
+  NgClass,
+  NgIf,
+  NgStyle,
+  NgTemplateOutlet
+} from "./chunk-EHV74PGP.js";
 import {
   ChangeDetectionStrategy,
   Component,

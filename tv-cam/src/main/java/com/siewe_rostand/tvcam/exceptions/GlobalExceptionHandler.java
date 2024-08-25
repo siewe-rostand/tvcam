@@ -1,11 +1,10 @@
 package com.siewe_rostand.tvcam.exceptions;
 
 import com.siewe_rostand.tvcam.shared.Exceptions.EntityAlreadyExistException;
-import com.siewe_rostand.tvcam.shared.Exceptions.EntityNotFoundException;
 import com.siewe_rostand.tvcam.shared.Exceptions.OperationNotPermittedException;
 import com.siewe_rostand.tvcam.shared.HttpResponse;
 import com.siewe_rostand.tvcam.shared.model.ExceptionResponse;
-import jakarta.servlet.http.HttpServletRequest;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -148,13 +147,17 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<ExceptionResponse> handleException(EntityNotFoundException exp) {
+    public ResponseEntity<HttpResponse> handleException(EntityNotFoundException exp) {
+        log.trace(exp.getMessage());
         return ResponseEntity
                 .status(NOT_FOUND)
                 .body(
-                        ExceptionResponse.builder()
+                        HttpResponse.builder()
+                                .timestamp(now())
+                                .reason("This resource has not been found")
+                                .developerMessage(exp.getMessage())
+                                .status(NOT_FOUND)
                                 .statusCode(NOT_FOUND.value())
-                                .error(exp.getMessage())
                                 .build()
                 );
     }
@@ -189,32 +192,19 @@ public class GlobalExceptionHandler {
                 );
     }
 
-//    @ExceptionHandler(Exception.class)
-//    public ResponseEntity<HttpResponse> handleException(Exception exp) {
-//        log.trace(exp.getMessage());
-//        return  new ResponseEntity<>(
-//                HttpResponse.builder()
-//                        .timestamp(now())
-//                        .reason("Internal error, please contact the admin")
-//                        .developerMessage(exp.getMessage())
-//                        .status(INTERNAL_SERVER_ERROR)
-//                        .statusCode(INTERNAL_SERVER_ERROR.value())
-//                        .build(), INTERNAL_SERVER_ERROR);
-//    }
-
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<HttpResponse> handleException(Exception exp, HttpServletRequest request) {
+    public ResponseEntity<HttpResponse> handleException(Exception exp) {
         log.trace(exp.getMessage());
-        String requestedUrl = request.getRequestURL().toString();
         return  new ResponseEntity<>(
                 HttpResponse.builder()
                         .timestamp(now())
-                        .reason("Exception occurred for URL: " + requestedUrl)
+                        .reason("Internal error, please contact the admin")
                         .developerMessage(exp.getMessage())
                         .status(INTERNAL_SERVER_ERROR)
                         .statusCode(INTERNAL_SERVER_ERROR.value())
                         .build(), INTERNAL_SERVER_ERROR);
     }
+
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
@@ -260,13 +250,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ApiException.class)
     public ResponseEntity<HttpResponse> processRuntimeException(ApiException exception) {
-        exception.printStackTrace();
-        log.trace(Arrays.toString(exception.getStackTrace()));
         return new ResponseEntity<>(
                 HttpResponse.builder()
                         .timestamp(now())
                         .reason(exception.getMessage().contains("Duplicate entry") ? "Information already exists" : exception.reason)
-                        .developerMessage(exception.fillInStackTrace().toString())
+                        .developerMessage(exception.getMessage())
                         .status(BAD_REQUEST)
                         .statusCode(BAD_REQUEST.value())
                         .build(), BAD_REQUEST);

@@ -7,4 +7,5 @@
   </ng-template>
 </p-toolbar>
 <!-- payment list table -->
-<app-payment-table [payments]="payments"></app-payment-table>
+<app-payment-table [payments]="payments"
+                   (selectedPaymentsChange)="handleSelectedPaymentChange($event)"></app-payment-table>

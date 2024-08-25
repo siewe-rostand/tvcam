@@ -1,15 +1,13 @@
 package com.siewe_rostand.tvcam.Bills;
 
-import com.siewe_rostand.tvcam.Customers.CustomerService;
 import com.siewe_rostand.tvcam.Customers.Customers;
 import com.siewe_rostand.tvcam.Customers.CustomersRepository;
 import com.siewe_rostand.tvcam.Payment.PaymentStatus;
 import com.siewe_rostand.tvcam.exceptions.ApiException;
-import com.siewe_rostand.tvcam.exceptions.ResourceNotFoundException;
-import com.siewe_rostand.tvcam.shared.Exceptions.EntityNotFoundException;
 import com.siewe_rostand.tvcam.shared.HttpResponse;
 import com.siewe_rostand.tvcam.shared.PaginatedResponse;
 import com.siewe_rostand.tvcam.validator.ObjectsValidator;
+import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -43,7 +41,7 @@ public class BillServicesImpl implements BillServices {
     private final BillMapper billMapper;
     private final CustomersRepository customersRepository;
 
-    public BillServicesImpl(BillRepository billRepository, CustomerService customerService,
+    public BillServicesImpl(BillRepository billRepository,
                             ObjectsValidator<BillRequest> validator, BillMapper billMapper, CustomersRepository customersRepository) {
         this.billRepository = billRepository;
         this.validator = validator;
@@ -67,7 +65,7 @@ public class BillServicesImpl implements BillServices {
     }
 
     @Override
-    public PaginatedResponse findAll(Integer page, Integer size, String sortBy, String direction, String name) throws ResourceNotFoundException {
+    public PaginatedResponse findAll(Integer page, Integer size, String sortBy, String direction, String name) {
         Pageable pageable = createPageable(page, size, sortBy, direction);
         Page<Bills> bills;
         if (!name.isEmpty()) {
@@ -75,21 +73,15 @@ public class BillServicesImpl implements BillServices {
         } else {
             bills = billRepository.findAll(pageable);
         }
-        if (bills.isEmpty()){
-            throw new ResourceNotFoundException("Bills not found. The database table seems to be empty");
-        }
         return buildResponse(bills, pageable);
     }
 
     @Override
-    public HttpResponse findCustomerBills(Long customerId) throws ResourceNotFoundException {
+    public HttpResponse findCustomerBills(Long customerId) {
         Customers customer = customersRepository.findById(customerId).orElseThrow(()
-                -> new EntityNotFoundException(Customers.class, "customer with id " + customerId + " not found"));
+                -> new EntityNotFoundException("No customer with ID " + customerId + " found!. Please Enter a Valid Customer ID"));
 
         List<Bills> bills = billRepository.findAllByCustomers(customer);
-        if (bills.isEmpty()) {
-            throw new ResourceNotFoundException("Bills not found. Customer have no bills available in the system");
-        }
         List<BillResponse> billResponses = new ArrayList<>();
         for (Bills bill : bills) {
             BillResponse billResponse = billMapper.toResponse(bill);
@@ -110,7 +102,7 @@ public class BillServicesImpl implements BillServices {
                 .timestamp(LocalDateTime.now())
                 .status(OK).statusCode(OK.value())
                 .data(responses.getContent())
-                .message("All bills gotten successfully")
+                .message("Toutes les factures des clients ont été récupérées avec succès")
                 .lastPage(responses.isLast()).firstPage(responses.isFirst())
                 .totalPages(responses.getTotalPages()).totalElements(responses.getNumberOfElements())
                 .empty(responses.isEmpty()).sorted(pageable.getSort().isSorted())
@@ -125,8 +117,11 @@ public class BillServicesImpl implements BillServices {
     }
 
     @Override
-    public void delete(Long id) {
-
+    public HttpResponse delete(Long id) {
+        Bills bills = billRepository.findById(id).orElseThrow(()
+                -> new EntityNotFoundException("Aucune facture avec cet identifiant " + id + "n'a été trouvée ! Veuillez saisir un numéro de facture valide"));
+        billRepository.delete(bills);
+        return HttpResponse.builder().message("Facture supprimée avec succès").statusCode(OK.value()).status(OK).build();
     }
 
     @Transactional

@@ -14,7 +14,7 @@ public class CustomerRefNumberGenerator {
     // Use the customer's ID and registration date to generate the reference number
     public String generateRefNumber(Long customerId) {
         LocalDate currentDate = LocalDate.now();
-        return "CUST-" + customerId + "-" + currentDate.getYear();
+        return "CLIENT-" + customerId + "-" + currentDate.getYear();
     }
 
 }

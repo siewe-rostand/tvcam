@@ -18,9 +18,9 @@ public class PaymentReferenceGenerator {
 
     public String generatePaymentReference() {
         LocalDate currentDate = LocalDate.now();
-        String datePart = currentDate.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        String datePart = currentDate.format(DateTimeFormatter.ofPattern("yyyyMMddHHss"));
         String seqPart = String.format("%04d", sequence.getAndIncrement());
-        return "REF"+ datePart + "-" + seqPart;
+        return "PAIE"+ datePart + "-" + seqPart;
     }
 
 }

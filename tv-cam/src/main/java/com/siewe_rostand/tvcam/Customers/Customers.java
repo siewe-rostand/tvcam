@@ -55,7 +55,7 @@ public class Customers extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @ColumnDefault("'MONTHLY'")
-    private PaymentFrequency paymentFrequency;;
+    private PaymentFrequency paymentFrequency;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime lastBillGenerationDate;

@@ -5,10 +5,9 @@ import com.siewe_rostand.tvcam.Bills.Bills;
 import com.siewe_rostand.tvcam.Customers.Customers;
 import com.siewe_rostand.tvcam.Customers.CustomersRepository;
 import com.siewe_rostand.tvcam.exceptions.ApiException;
-import com.siewe_rostand.tvcam.exceptions.ResourceNotFoundException;
-import com.siewe_rostand.tvcam.shared.Exceptions.EntityNotFoundException;
 import com.siewe_rostand.tvcam.shared.PaginatedResponse;
 import com.siewe_rostand.tvcam.validator.ObjectsValidator;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,6 +22,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Function;
 
 /**
  * @author rostand
@@ -46,10 +46,10 @@ public class PaymentServiceImpl implements PaymentService {
             throw new ApiException("Bill amount is invalid and must be greater than "+paymentRequest.amount, "must provide the payment amount");
         }
         Customers customers = customersRepository.findById(paymentRequest.customerId)
-                .orElseThrow(() -> new EntityNotFoundException(Customers.class, "customerId" + paymentRequest.customerId.toString()));
+                .orElseThrow(() -> new EntityNotFoundException("No customer with ID " + paymentRequest.customerId + " found!. Please Enter a Valid Customer ID"));
 
         Bills currentBills = billRepository.findByCustomersAndCurrentPeriodBill(customers, true)
-                .orElseThrow(() -> new EntityNotFoundException(Bills.class, "bill id" + paymentRequest.billId));
+                .orElseThrow(() -> new EntityNotFoundException("No Bill with ID " + paymentRequest.billId + " found!. Please Enter a Valid Bill ID"));
 
         if (currentBills.getPaymentStatus() == PaymentStatus.PAID) {
             throw new ApiException("Trying to pay a bill which have already been paid", "Current bill has already been paid");
@@ -88,7 +88,8 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public PaginatedResponse findAll(Integer page, Integer size, String sortBy, String direction, String name) throws ResourceNotFoundException {
+    public PaginatedResponse findAll(Integer page, Integer size, String sortBy,
+                                     String direction, String name) {
         Pageable pageable = createPageable(page, size, sortBy, direction);
         Page<Payments> payments;
         if (!name.isEmpty()) {
@@ -96,15 +97,13 @@ public class PaymentServiceImpl implements PaymentService {
         } else {
             payments = paymentRepository.findAll(pageable);
         }
-        if (payments.isEmpty()) {
-            throw new ResourceNotFoundException("Payments not found. The payment table maybe empty");
-        }
         return buildResponse(payments, pageable);
     }
 
     @Override
     public List<PaymentResponse> findPaymentByCustomerId(Long customerId) {
-        Customers customers = customersRepository.findById(customerId).orElseThrow(()-> new EntityNotFoundException(Customers.class, "customerId" + customerId));
+        Customers customers = customersRepository.findById(customerId).orElseThrow(() ->
+                new EntityNotFoundException("No customer with ID " + customerId + " found!. Please Enter a Valid Customer ID"));
         List<Payments> payments = paymentRepository.findByBills_CustomersCustomerId(customers.getCustomerId());
         List<PaymentResponse> paymentResponses = new ArrayList<>();
         for (Payments payment : payments) {
@@ -114,14 +113,11 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public List<PaymentResponse> findByBills_Month(String month) throws ResourceNotFoundException {
+    public List<PaymentResponse> findByBills_Month(String month) {
         List<Payments> payments = paymentRepository.findByBills_Month(month);
         List<PaymentResponse> paymentResponses = new ArrayList<>();
         for (Payments payment : payments) {
             paymentResponses.add(paymentMapper.toResponse(payment));
-        }
-        if (payments.isEmpty()) {
-            throw new ResourceNotFoundException("Payments not found for this month of " + month);
         }
         return paymentResponses;
     }
@@ -131,7 +127,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     private PaginatedResponse buildResponse(Page<Payments> payments, Pageable pageable) {
-        Page<PaymentResponse> responses = payments.map(paymentMapper::toResponse);
+        Page<PaymentResponse> responses = payments.map((Function<? super Payments, ? extends PaymentResponse>) paymentMapper::toResponse);
         return PaginatedResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.OK).statusCode(HttpStatus.OK.value())

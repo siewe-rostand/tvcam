@@ -11,4 +11,5 @@ export interface PaymentModel {
   paymentAmount?: number;
   customerName?: string;
   month?: string;
+  user?: string;
 }

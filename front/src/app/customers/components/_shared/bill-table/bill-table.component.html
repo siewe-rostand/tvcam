@@ -1,3 +1,5 @@
+<p-toast [breakpoints]="{ '920px': { width: '100%', right: '0', left: '0' } }" position="bottom-right" key="br"/>
+
 <p-table
   #dt
   [value]="bills"
@@ -91,10 +93,10 @@
         {{ bill.paidAmount }}
       </td>
       <td>
-        {{ bill.debt }}
+        {{ bill.remainingBalance }}
       </td>
       <td>
-        {{ bill.remainingBalance }}
+        {{ bill.debt }}
       </td>
       <td>
         {{ bill.depositDate }}
@@ -137,23 +139,39 @@
 
     <div class="flex align-items-center justify-content-between mb-3">
       <div>Facture De:</div>
-      <div class="font-bold md:font-light">{{ bill.customerName }}</div>
-      <div class="font-bold md:font-light mr-2">{{ bill.month }} - {{ bill.year }}</div>
+      <div class="font-bold md:font-semibold mr-2">{{ bill.month }} - {{ bill.year }}</div>
+    </div>
+
+    <p-divider layout="horizontal" styleClass="dotted"></p-divider>
+
+    <div class="flex align-items-center justify-content-between mb-2">
+      <div>Client:</div>
+      <div class="font-bold md:font-semibold mr-2">{{ bill.customerName }}</div>
     </div>
 
     <div class="flex align-items-center justify-content-between mb-2">
-      <div>Montant:</div>
-      <div class="font-bold md:font-light mr-2">{{ bill.amount }}</div>
+      <div>Mensualité:</div>
+      <div class="font-bold md:font-semibold mr-2">{{ bill.monthlyPayment }}</div>
     </div>
 
     <div class="flex align-items-center justify-content-between mb-2">
       <div>Arriérés:</div>
-      <div class="font-bold md:font-light mr-2">{{ bill.debt }}</div>
+      <div class="font-bold md:font-semibold mr-2">{{ bill.debt }}</div>
+    </div>
+
+    <div class="flex align-items-center justify-content-between mb-2">
+      <div>Montant payé:</div>
+      <div class="font-bold md:font-semibold mr-2">{{ bill.paidAmount }}</div>
+    </div>
+
+    <div class="flex align-items-center justify-content-between mb-2">
+      <div>Reste a payer:</div>
+      <div class="font-bold md:font-semibold mr-2">{{ bill.remainingBalance }}</div>
     </div>
 
     <div class="flex align-items-center justify-content-between mb-2">
       <div>montant net à payer:</div>
-      <div class="font-bold mr-2">{{ bill.netToPay }}</div>
+      <div class="font-bold md:font-semibold mr-2">{{ bill.netToPay }}</div>
     </div>
     <p-divider />
     <div class="field mt-4">
@@ -204,3 +222,5 @@
     />
   </ng-template>
 </p-dialog>
+
+<p-confirmDialog/>

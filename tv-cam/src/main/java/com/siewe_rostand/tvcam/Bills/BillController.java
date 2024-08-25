@@ -73,17 +73,24 @@ public class BillController {
                                                          @RequestParam(name = "size", defaultValue = "999999") Integer size,
                                                          @RequestParam(name = "sortBy", defaultValue = "createdAt") String sortBy,
                                                          @RequestParam(name = "direction", defaultValue = "desc") String direction,
-                                                         @RequestParam(name = "name", defaultValue = "") String name) throws ResourceNotFoundException {
+                                                         @RequestParam(name = "name", defaultValue = "") String name) {
         PaginatedResponse response = billServices.findAll(page, size, sortBy, direction, name);
         return ResponseEntity.status(OK).body(response);
     }
 
     @GetMapping("/customer/{customerId}")
-    public ResponseEntity<HttpResponse> getBillsByCustomerId(@PathVariable(name = "customerId") Long customerId) throws ResourceNotFoundException {
+    public ResponseEntity<HttpResponse> getBillsByCustomerId(@PathVariable(name = "customerId") Long customerId) {
         logger.debug("BillController::getBillsByCustomerId {}", customerId);
         HttpResponse response = billServices.findCustomerBills(customerId);
 
         return ResponseEntity.status(OK).body(response);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<HttpResponse> deleteBill(@PathVariable(name = "id") Long id) {
+        logger.debug("BillController:::deleteBill {}", id);
+        HttpResponse response = billServices.delete(id);
+        return ResponseEntity.ok().body(response);
     }
 
 }

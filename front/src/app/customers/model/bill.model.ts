@@ -1,4 +1,5 @@
 export interface BillModel {
+  monthlyPayment?: number;
   id?: number;
   month?: string;
   year?: string;

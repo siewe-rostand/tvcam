@@ -13,10 +13,10 @@ import java.util.List;
 public interface BillServices {
     BillResponse save(BillRequest request);
     Bills update(BillSDto billSDto);
-    PaginatedResponse findAll(Integer page, Integer size, String sortBy, String direction, String name) throws ResourceNotFoundException;
-    HttpResponse findCustomerBills(Long customerId) throws ResourceNotFoundException;
+    PaginatedResponse findAll(Integer page, Integer size, String sortBy, String direction, String name);
+    HttpResponse findCustomerBills(Long customerId);
     BillSDto findById(Long id);
-    void delete(Long id);
+    HttpResponse delete(Long id);
     BillResponse generateBills(BillRequest request);
     List<BillResponse> generateBillsForSelectedCustomers(List<Long> customerIds);
 }

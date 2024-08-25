@@ -1,5 +1,5 @@
 import {Component, Input} from '@angular/core';
-import {StatusService} from "../../../../../_shared/status.service";
+import {StatusService} from "../../../../../_shared/services/status.service";
 import {TagModule} from "primeng/tag";
 
 type SeverityType = 'success' | 'info' | 'warning' | 'danger';

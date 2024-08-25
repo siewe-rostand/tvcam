@@ -45,7 +45,6 @@ export class BillComponent implements OnInit {
   savePaymentDialog: boolean = false;
   submitted: boolean = false;
   selectedBills!: BillModel[] | null;
-  amount: number | undefined;
   paymentMethod: any[] | undefined;
 
   constructor(private billService: BillService) {
@@ -147,7 +146,7 @@ export class BillComponent implements OnInit {
     printWindow.document.write(`
     <div class="bill">
       <h2>Bill for ${bill.customerName}</h2>
-      <p>Amount: $${bill.amount.toFixed(2)}</p>
+      <p>Amount: $${bill.monthlyPayment.toFixed(2)}</p>
       <p>Due Date: ${new Date(bill.deadLine).toLocaleDateString()}</p>
     </div>
     <br>

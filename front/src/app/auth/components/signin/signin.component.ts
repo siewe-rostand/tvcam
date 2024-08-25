@@ -70,7 +70,7 @@ export class SigninComponent implements OnInit {
     this.submitted = true;
     this.loading = true;
     const data = this.signinForm.value;
-    this.authService.signin(data).subscribe({
+    this.authService.signup(data).subscribe({
       next: (res) => {
         console.log(res);
         this.messageService.add({

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { UserModel } from '../../user/model/user.model';
-import { LocalStorageService } from '../../_shared/local-storage.service';
+import { LocalStorageService } from '../../_shared/services/local-storage.service';
 
 const USER_KEY = 'auth_user';
 const JWT_TOKEN = 'auth_token';
@@ -11,7 +11,7 @@ const JWT_TOKEN = 'auth_token';
 export class StorageService {
   constructor(private localStorageService: LocalStorageService) {}
 
-  claen() {
+  clean() {
     this.localStorageService.clear();
   }
 
@@ -36,9 +36,7 @@ export class StorageService {
 
   public isLoggedIn(): boolean {
     const user = this.localStorageService.getItem(USER_KEY);
-    if (user) {
-      return true;
-    }
-    return false;
+    return !!user;
+
   }
 }

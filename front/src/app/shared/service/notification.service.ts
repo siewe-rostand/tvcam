@@ -6,11 +6,12 @@ import {MessageService} from "primeng/api";
 })
 export class NotificationService {
   constructor(private  messageService: MessageService) {}
-  showError(message: string): void {
+  showError(message: string,title: string): void {
     this.messageService.add({
-      severity: 'error',
-      summary: 'Error occurred',
+      severity: 'warn',
+      summary: title,
       detail: message,
+      sticky: true,
     })
   }
 }

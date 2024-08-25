@@ -1,9 +1,9 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {Component, OnInit} from '@angular/core';
 import {NavigationEnd, Router} from '@angular/router';
-import { MenuItem } from 'primeng/api';
-import { AvatarModule } from 'primeng/avatar';
-import { MenubarModule } from 'primeng/menubar';
+import {MenuItem} from 'primeng/api';
+import {AvatarModule} from 'primeng/avatar';
+import {MenubarModule} from 'primeng/menubar';
 import {RippleModule} from "primeng/ripple";
 import {filter} from "rxjs";
 
@@ -15,8 +15,8 @@ import {filter} from "rxjs";
   styleUrl: './navbar.component.css',
 })
 export class NavbarComponent implements OnInit {
-  items!: MenuItem[];
-  activeItem!: MenuItem;
+  items: MenuItem[] = [];
+  activeItem: MenuItem = {};
 
   constructor(private router: Router) {}
 

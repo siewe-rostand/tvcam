@@ -5,7 +5,15 @@ import {PrimeTemplate} from "primeng/api";
 import {TableModule} from "primeng/table";
 import {TagModule} from "primeng/tag";
 import {PaymentStatusComponent} from "./payment-status/payment-status.component";
-import {NgForOf} from "@angular/common";
+import {NgForOf, NgIf} from "@angular/common";
+import {DialogModule} from "primeng/dialog";
+import {DividerModule} from "primeng/divider";
+import {DropdownModule} from "primeng/dropdown";
+import {ReactiveFormsModule} from "@angular/forms";
+import {PaymentModel} from "../../../model/payment.model";
+import {
+  CustomerPaymentFrequencyComponent
+} from "../../customer-list/customer-payment-frequency/customer-payment-frequency.component";
 
 @Component({
   selector: 'app-payment-table',
@@ -17,7 +25,13 @@ import {NgForOf} from "@angular/common";
     TableModule,
     TagModule,
     PaymentStatusComponent,
-    NgForOf
+    NgForOf,
+    DialogModule,
+    DividerModule,
+    DropdownModule,
+    NgIf,
+    ReactiveFormsModule,
+    CustomerPaymentFrequencyComponent
   ],
   templateUrl: './payment-table.component.html',
   styleUrl: './payment-table.component.css'
@@ -28,8 +42,22 @@ export class PaymentTableComponent {
   @Output() selectedPaymentsChange = new EventEmitter<any[]>();
 
   selectedPayments: any[] = [];
+  detailDialog: boolean = false;
+  payment: PaymentModel = {};
 
   onSelectionChange(event: any) {
     this.selectedPaymentsChange.emit(this.selectedPayments);
+  }
+  getSelectedPayment(){
+    console.log(this.selectedPayments);
+  }
+
+  hideUpdateBill() {
+    this.detailDialog = false;
+  }
+
+  openDetail(payment: PaymentModel) {
+    this.payment = {...payment};
+    this.detailDialog = true;
   }
 }

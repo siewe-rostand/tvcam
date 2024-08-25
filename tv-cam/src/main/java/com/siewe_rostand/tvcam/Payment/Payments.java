@@ -1,6 +1,7 @@
 package com.siewe_rostand.tvcam.Payment;
 
 import com.siewe_rostand.tvcam.Bills.Bills;
+import com.siewe_rostand.tvcam.Users.Users;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -58,6 +59,10 @@ public class Payments {
     @ManyToOne
     @JoinColumn(name = "bill_id", referencedColumnName = "id")
     Bills bills;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    Users users;
 
     @Override
     public boolean equals(Object o) {

@@ -2,18 +2,18 @@ package com.siewe_rostand.tvcam.Bills;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.siewe_rostand.tvcam.Customers.Customers;
-import com.siewe_rostand.tvcam.Payment.PaymentFrequency;
 import com.siewe_rostand.tvcam.Payment.PaymentStatus;
 import com.siewe_rostand.tvcam.Payment.Payments;
 import com.siewe_rostand.tvcam.shared.model.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-import org.springframework.data.annotation.CreatedDate;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -25,7 +25,7 @@ import java.util.List;
 @SuperBuilder
 public class Bills extends BaseEntity {
     @JsonIgnore
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "bills",fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "bills",fetch = FetchType.EAGER, orphanRemoval = true)
     List<Payments> payments;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -1,14 +1,14 @@
 import {
+  PrimeTemplate,
+  SharedModule
+} from "./chunk-DMTEHVKZ.js";
+import {
   CommonModule,
   NgClass,
   NgIf,
   NgStyle,
   NgTemplateOutlet
 } from "./chunk-EHV74PGP.js";
-import {
-  PrimeTemplate,
-  SharedModule
-} from "./chunk-DMTEHVKZ.js";
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,

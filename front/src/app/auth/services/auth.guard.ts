@@ -8,7 +8,7 @@ import {
 } from '@angular/router';
 import { Observable } from 'rxjs';
 import { StorageService } from './storage.service';
-import { AlertService } from '../../_shared/alert.service';
+import { AlertService } from '../../_shared/services/alert.service';
 
 @Injectable({
   providedIn: 'root', // Assuming this guard is used application-wide

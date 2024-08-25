@@ -1,24 +1,24 @@
-import { Component, OnInit } from '@angular/core';
-import { TableModule } from 'primeng/table';
-import { CommonModule } from '@angular/common';
-import { RippleModule } from 'primeng/ripple';
-import { ConfirmationService, MessageService } from 'primeng/api';
-import { DialogModule } from 'primeng/dialog';
-import { ButtonModule } from 'primeng/button';
-import { ToastModule } from 'primeng/toast';
-import { ToolbarModule } from 'primeng/toolbar';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { InputTextModule } from 'primeng/inputtext';
-import { InputTextareaModule } from 'primeng/inputtextarea';
-import { DropdownModule } from 'primeng/dropdown';
-import { TagModule } from 'primeng/tag';
-import { RadioButtonModule } from 'primeng/radiobutton';
-import { InputNumberModule } from 'primeng/inputnumber';
-import { UserModel } from '../../model/user.model';
-import { UserService } from '../../services/user.service';
-import { FormsModule } from '@angular/forms';
-import { FileUploadModule } from 'primeng/fileupload';
-import { NavbarComponent } from '../../../_shared/components/navbar/navbar.component';
+import {Component, OnInit} from '@angular/core';
+import {TableModule} from 'primeng/table';
+import {CommonModule} from '@angular/common';
+import {RippleModule} from 'primeng/ripple';
+import {ConfirmationService, MessageService} from 'primeng/api';
+import {DialogModule} from 'primeng/dialog';
+import {ButtonModule} from 'primeng/button';
+import {ToastModule} from 'primeng/toast';
+import {ToolbarModule} from 'primeng/toolbar';
+import {ConfirmDialogModule} from 'primeng/confirmdialog';
+import {InputTextModule} from 'primeng/inputtext';
+import {InputTextareaModule} from 'primeng/inputtextarea';
+import {DropdownModule} from 'primeng/dropdown';
+import {TagModule} from 'primeng/tag';
+import {RadioButtonModule} from 'primeng/radiobutton';
+import {InputNumberModule} from 'primeng/inputnumber';
+import {UserModel} from '../../model/user.model';
+import {UserService} from '../../services/user.service';
+import {FormsModule} from '@angular/forms';
+import {FileUploadModule} from 'primeng/fileupload';
+import {NavbarComponent} from '../../../_shared/components/navbar/navbar.component';
 
 @Component({
   selector: 'app-users-list',
@@ -115,6 +115,7 @@ export class UsersListComponent implements OnInit {
   editUser() {
     this.userService.updateUser(this.user).subscribe({
       next: (res) => {
+        console.log(res)
         this.messageService.add({
           severity: 'success',
           summary: 'Successful',
@@ -139,7 +140,7 @@ export class UsersListComponent implements OnInit {
 
   deleteUser(user: UserModel) {
     this.confirmationService.confirm({
-      message: 'Are you sure you want to delete ' + user.firstname + '?',
+      message: `Êtes-vous sûr de vouloir supprimer utilisateur ${user.firstname} et toutes ces données?`,
       header: 'Confirm',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
@@ -170,6 +171,7 @@ export class UsersListComponent implements OnInit {
     console.log(this.user);
     this.userService.saveUser(this.user).subscribe({
       next: (res) => {
+        console.log(res)
         this.messageService.add({
           severity: 'success',
           summary: 'Successful',
@@ -194,25 +196,5 @@ export class UsersListComponent implements OnInit {
     // this.userDialog = false;
   }
 
-  findIndexById(id: Number): number {
-    let index = -1;
-    for (let i = 0; i < this.users.length; i++) {
-      if (this.users[i].id === id) {
-        index = i;
-        break;
-      }
-    }
 
-    return index;
-  }
-
-  createId(): number {
-    let id = '';
-    var chars =
-      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    for (var i = 0; i < 5; i++) {
-      id += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return Number(id);
-  }
 }

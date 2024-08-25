@@ -1,11 +1,8 @@
-import { Injectable } from '@angular/core';
-import {HttpClient, HttpHeaders} from "@angular/common/http";
+import {Injectable} from '@angular/core';
+import {HttpClient} from "@angular/common/http";
 import {catchError, Observable} from "rxjs";
 
-const AUTH_API = 'http://localhost:8085/api/v1/bills';
-const httpOptions = {
-  headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
-};
+
 @Injectable({
   providedIn: 'root'
 })
@@ -30,10 +27,11 @@ export class BillService {
       .pipe(catchError(this.handleError));
   }
 
-  getPaymentsForCustomer(customerId: number): Observable<any> {
-    return this.http.get(`payments/customer/${customerId}`)
+  deleteBill(billId: number): Observable<any> {
+    return this.http.delete(`bills/${billId}`)
       .pipe(catchError(this.handleError));
   }
+
 
   private handleError(error: any) {
     console.error('An error occurred', error);

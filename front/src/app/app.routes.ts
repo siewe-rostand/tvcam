@@ -1,16 +1,20 @@
-import { Routes } from '@angular/router';
-import { LoginComponent } from './auth/components/login/login.component';
-import { SigninComponent } from './auth/components/signin/signin.component';
-import { UsersListComponent } from './user/components/users-list/users-list.component';
-import { AuthGuardService } from './auth/services/auth.guard';
-import { CustomerListComponent } from './customers/components/customer-list/customer-list.component';
+import {Routes} from '@angular/router';
+import {LoginComponent} from './auth/components/login/login.component';
+import {SigninComponent} from './auth/components/signin/signin.component';
+import {UsersListComponent} from './user/components/users-list/users-list.component';
+import {AuthGuardService} from './auth/services/auth.guard';
+import {CustomerListComponent} from './customers/components/customer-list/customer-list.component';
 import {BillComponent} from "./customers/components/bill/bill.component";
 import {PaymentComponent} from "./customers/components/payment/payment.component";
 import {CustomerDetailComponent} from "./customers/components/customer-detail/customer-detail.component";
+import {ForgottenPasswordComponent} from "./auth/components/forgotten-password/forgotten-password.component";
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
-  { path: 'signin', component: SigninComponent },
+  {path: 'signup', component: SigninComponent},
+  {
+    path: 'forgottenPassword', component: ForgottenPasswordComponent,
+  },
   {
     path: 'users',
     component: UsersListComponent,

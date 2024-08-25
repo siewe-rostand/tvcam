@@ -177,9 +177,9 @@ export class CustomerListComponent implements OnInit {
 
   saveCustomer() {
     this.submitted = true;
-    console.log(this.customer);
     this.customerService.createCustomer(this.customer).subscribe({
       next: (res) => {
+        console.log(res)
         this.messageService.add({
           severity: 'success',
           summary: 'Successful',
@@ -231,7 +231,7 @@ export class CustomerListComponent implements OnInit {
 
   deleteCustomer(customer: CustomerModel) {
     this.confirmationService.confirm({
-      message: 'Êtes-vous sûr de vouloir supprimer  ' + customer.name?.toUpperCase() + ' ses données ?',
+      message: 'Êtes-vous sûr de vouloir supprimer  ' + customer.name?.toUpperCase() + ' et ses données ?',
       header: 'Confirm',
       acceptButtonStyleClass: 'p-button-danger',
       acceptLabel: 'OUI',

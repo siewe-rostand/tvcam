@@ -5,7 +5,7 @@ import {
 import {
   Tooltip,
   TooltipModule
-} from "./chunk-XQLRTSM5.js";
+} from "./chunk-R3B54S7I.js";
 import {
   TimesIcon
 } from "./chunk-QWOBHWSI.js";
@@ -13,10 +13,15 @@ import "./chunk-AAZTR5OM.js";
 import {
   Ripple,
   RippleModule
-} from "./chunk-C7ZNJOEP.js";
+} from "./chunk-E44AIM5L.js";
 import {
   DomHandler
 } from "./chunk-QU7AFVGG.js";
+import {
+  PrimeTemplate,
+  SharedModule,
+  UniqueComponentId
+} from "./chunk-DMTEHVKZ.js";
 import {
   CommonModule,
   NgClass,
@@ -26,11 +31,6 @@ import {
   NgTemplateOutlet,
   isPlatformBrowser
 } from "./chunk-EHV74PGP.js";
-import {
-  PrimeTemplate,
-  SharedModule,
-  UniqueComponentId
-} from "./chunk-DMTEHVKZ.js";
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
