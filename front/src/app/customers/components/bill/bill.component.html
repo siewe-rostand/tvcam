@@ -13,7 +13,7 @@
         severity="info"
         label="Generer Facture"
         icon="pi pi-receipt"
-        (onClick)="showMakePayment()"
+        routerLink="/receipts/generate"
         [disabled]="!selectedBills || !selectedBills.length"></p-button>
     </ng-template>
   </p-toolbar>
@@ -23,43 +23,5 @@
 
 
   <!-- make a new bill payment dialog  -->
-  <p-dialog
-    [(visible)]="savePaymentDialog"
-    [style]="{ width: '450px' }"
-    header="Effectuer un nouveau paiement"
-    [modal]="true"
-    styleClass="p-fluid"
-  >
-    <ng-template pTemplate="content">
 
-      <div class="field">
-        <label for="paymentAmount">Entrer le montant</label>
-        <input
-          type="text"
-          pInputText
-          id="paymentAmount"
-          [(ngModel)]="payment.paymentDate"
-          autofocus
-        />
-        <small class="p-error" *ngIf="submitted && !payment.paymentAmount">
-          Veuillez Entrer le montant.
-        </small>
-      </div>
-    </ng-template>
-
-    <ng-template pTemplate="footer">
-      <p-button
-        label="Cancel"
-        icon="pi pi-times"
-        [text]="true"
-        (onClick)="hidePaymentDialog()"
-      />
-      <p-button
-        label="Save"
-        icon="pi pi-check"
-        [text]="true"
-        (onClick)="makePayment()"
-      />
-    </ng-template>
-  </p-dialog>
 </div>

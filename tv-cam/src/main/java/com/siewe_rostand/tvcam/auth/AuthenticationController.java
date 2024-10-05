@@ -31,7 +31,8 @@ public class AuthenticationController {
         ObjectMapper objectMapper = new ObjectMapper();
         var response = service.register(request);
         Map<String, Object> data = objectMapper
-                .convertValue(response, new TypeReference<Map<String, Object>>() {});
+                .convertValue(response, new TypeReference<>() {
+                });
         return ResponseEntity.ok().body(
                 HttpResponse.builder()
                         .status(HttpStatus.CREATED).statusCode(HttpStatus.CREATED.value())

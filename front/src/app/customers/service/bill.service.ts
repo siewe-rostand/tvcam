@@ -1,6 +1,7 @@
-import {Injectable} from '@angular/core';
+import {Injectable, signal} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
-import {catchError, Observable} from "rxjs";
+import {BehaviorSubject, catchError, Observable} from "rxjs";
+import {BillModel} from "../model/bill.model";
 
 
 @Injectable({
@@ -8,17 +9,23 @@ import {catchError, Observable} from "rxjs";
 })
 
 export class BillService {
+  selectedBillsSignal = signal<BillModel[]>([]);
+  private statusSource = new BehaviorSubject<BillModel[]>([]);
+  selectedBills = this.statusSource.asObservable();
 
   constructor(private http: HttpClient) { }
 
+  setSelectedBills(selectedBills: BillModel[]) {
+    this.statusSource.next(selectedBills);
+  }
 
   fetchBills(): Observable<any> {
     return this.http.get(`bills`)
       .pipe(catchError(this.handleError));
   }
 
-  generateBills(customerIds: number[] | undefined): Observable<any> {
-    return this.http.post(`bills/generate`, customerIds)
+  generateBills(customerIds: number[],shouldGenerate: boolean): Observable<any> {
+    return this.http.post(`bills/generate?shouldGenerate=${shouldGenerate}`, customerIds)
       .pipe(catchError(this.handleError));
   }
 

@@ -1,0 +1,49 @@
+version: '3.3'
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_db
+    environment:
+      MYSQL_ROOT_PASSWORD: Mouf@2020
+      MYSQL_DATABASE: tv_cam
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    expose:
+      - '3306'
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - tv-cam
+
+  tv-cam-api:
+    container_name: tv-cam-api
+    image: tv-cam/tv-cam-api:1.0.0
+    build:
+      context: .
+      dockerfile: docker/backend/Dockerfile
+    ports:
+      - '8085:8085'
+    depends_on:
+      - mysql
+    networks:
+      - tv-cam
+  tv-cam-ui:
+    container_name: tv_cam-ui
+    image: tv_cam/tv-cam-ui:1.0.0
+    build:
+      context: .
+      dockerfile: docker/frontend/Dockerfile
+    ports:
+      - "8090:90"
+    networks:
+      - tv-cam
+    depends_on:
+      - tv-cam-api
+networks:
+  tv-cam:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local

@@ -1,7 +1,5 @@
 package com.siewe_rostand.tvcam.Bills;
 
-import lombok.Data;
-
 public record BillSDto (
          Long id,
          String month,

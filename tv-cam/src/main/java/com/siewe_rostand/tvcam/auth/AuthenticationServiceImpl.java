@@ -90,7 +90,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         var savedUser = usersRepository.save(user);
 
-        Map<String, Object> claims = buildClaims(user);
+        Map<String, Object> claims = buildClaims(savedUser);
         var jwtToken = jwtService.generateToken(claims, savedUser);
 
         return AuthenticationResponse.builder()

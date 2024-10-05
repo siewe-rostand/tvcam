@@ -1,0 +1,82 @@
+.bill-container {
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 20px;
+  border: 1px solid #000 !important;
+  font-family: Arial, sans-serif;
+}
+
+h2, h3 {
+  text-align: center;
+  margin: 5px 0;
+}
+
+h2{
+  border: 1px solid #000 !important;
+}
+
+.contact-info p {
+  margin: 5px 0;
+}
+
+.bill-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+}
+
+.bill-table th, .bill-table td {
+  border: 1px solid #000 !important;
+  padding: 5px;
+}
+
+.notes {
+  font-size: 0.9em;
+}
+
+.signature {
+  text-align: right;
+  margin-top: 20px;
+}
+
+@media print {
+  .print-container {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  button{
+    display: none;
+  }
+
+  .bill-container {
+    width: 49%;
+    page-break-inside: avoid;
+    box-sizing: border-box;
+    padding: 10px;
+  }
+  .bill-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+  }
+
+  .bill-table th, .bill-table td {
+    border: 1px solid #000 !important;
+    padding: 5px;
+  }
+
+  @page {
+    size: A4;
+    margin: auto;
+  }
+
+  body {
+    margin: 2px;
+  }
+
+  /* Ensure page break after every two bills */
+  .bill-container:nth-child(2n) {
+    page-break-after: always;
+  }
+}

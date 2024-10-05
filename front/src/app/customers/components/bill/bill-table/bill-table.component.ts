@@ -5,7 +5,7 @@ import {ConfirmationService, MessageService} from "primeng/api";
 import {TableModule} from "primeng/table";
 import {TagModule} from "primeng/tag";
 import {BillModel} from "../../../model/bill.model";
-import {PaymentStatusComponent} from "../payment-table/payment-status/payment-status.component";
+import {PaymentStatusComponent} from "../../_shared/payment-table/payment-status/payment-status.component";
 import {DialogModule} from "primeng/dialog";
 import {DividerModule} from "primeng/divider";
 import {DropdownModule} from "primeng/dropdown";

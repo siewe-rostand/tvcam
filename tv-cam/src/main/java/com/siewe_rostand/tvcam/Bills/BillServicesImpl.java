@@ -111,10 +111,6 @@ public class BillServicesImpl implements BillServices {
                 .build();
     }
 
-    @Override
-    public BillSDto findById(Long id) {
-        return null;
-    }
 
     @Override
     public HttpResponse delete(Long id) {
@@ -144,8 +140,9 @@ public class BillServicesImpl implements BillServices {
 
     @Transactional
     @Override
-    public List<BillResponse> generateBillsForSelectedCustomers(List<Long> customerIds) {
+    public List<BillResponse> generateBillsForSelectedCustomers(List<Long> customerIds, Boolean shouldGenerate) {
         log.debug("bill request: {}", customerIds);
+
         List<BillResponse> generatedBills = new ArrayList<>();
         LocalDateTime today = LocalDateTime.now();
 
@@ -153,7 +150,7 @@ public class BillServicesImpl implements BillServices {
 
         for (Customers c : customers) {
             try {
-                if (shouldGenerateBill(c, today)) {
+                if (shouldGenerateBill(c, today) || shouldGenerate) {
                     BillResponse response = generateBillForCustomer(c, today, new BillRequest());
                     generatedBills.add(response);
                 }
@@ -200,9 +197,14 @@ public class BillServicesImpl implements BillServices {
 
     private boolean shouldGenerateBill(Customers customer, LocalDateTime today) {
 
-        if (customer.getLastBillGenerationDate() == null) {
+        // Check if the last bill generation date is null or if the current date is the first of the month
+        boolean shouldGenerate = customer.getLastBillGenerationDate() == null ||
+                today.getDayOfMonth() == 1;
+
+        if (shouldGenerate) {
             return true;
         }
+
 
         long monthsSinceLastBill = ChronoUnit.MONTHS.between(customer.getLastBillGenerationDate(), today);
 

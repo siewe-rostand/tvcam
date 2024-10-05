@@ -1,0 +1,16 @@
+version: '3.3'
+services:
+  tvCamAPI:
+    container_name: tvCamApiContainer
+    build:
+      context: .
+      args:
+        CONTAINER_PORT: ${CONTAINER_PORT}
+    image: tvcamapi:v1
+    restart: unless-stopped
+    env_file:
+      - ${ENV_FILE}
+    expose:
+      - ${CONTAINER_PORT}
+    ports:
+      - ${CONTAINER_PORT}:${HOST_PORT}

@@ -34,7 +34,6 @@ public class Users implements UserDetails {
     @SequenceGenerator(name = "mySequence", sequenceName = "MY_SEQ", allocationSize = 1)
     private Long userId;
 
-
     private UUID uid;
 
     private String firstname;

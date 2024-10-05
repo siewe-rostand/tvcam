@@ -1,29 +1,29 @@
 
-server:
-  port: 8085
-  servlet:
-    context-path: /api/v1/
-  error:
-    include-message: always
-
 spring:
+  profiles:
+    active: ${ACTIVE_PROFILE:dev}
   datasource:
-    url: jdbc:mysql://localhost:3306/tvcam?createDatabaseIfNotExist=true&autoReconnect=true&useSSL=false&serverTimezone=UTC
+    url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DATABASE}
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username: root
-    password:
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: update
-#    show-sql: true
+    #    show-sql: true
     properties:
       hibernate:
         globally_quoted_indentifiers: true
-        dialect: org.hibernate.dialect.MySQLDialect
-#        format_sql: true
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
     open-in-view: false
-    database-platform: org.hibernate.dialect.MySQLDialect
+    database-platform: org.hibernate.dialect.MySQL8InnoDBDialect
+    generate-ddl: true
 
+  sql:
+    init:
+      mode: never
+      continue-on-error: false
   mvc:
     throw-exception-if-no-handler-found: true
     static-path-pattern: /**
@@ -33,5 +33,15 @@ spring:
 
 security:
   jwt:
-    security-key: 7638792F423F4428472B4B6250655368566D597133743677397A244326462948404D635166546A576E5A7234753778214125442A472D4B6150645267556B5870
-    expiration: 86400000 #1 day
+    security-key: ${JWT_SECRET_KEY}
+    expiration: ${JWT_EXPIRATION_TIME} #1 day
+
+
+server:
+  port: ${CONTAINER_PORT:8080}
+  servlet:
+    context-path: /api/v1/
+  error:
+    path: /user/error
+    whitelabel:
+      enabled: false

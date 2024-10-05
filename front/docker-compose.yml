@@ -1,0 +1,15 @@
+services:
+  tv_cam_ui:
+    container_name: tv_cam_ui_container
+    build: .
+    image: tv_cam_ui:v1
+    ports:
+      - 80:80
+    expose:
+      - 80
+    networks:
+      - tv_cam_internal_net
+
+networks:
+  tv_cam_internal_net:
+    driver: bridge

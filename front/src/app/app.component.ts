@@ -10,5 +10,5 @@ import {ToastModule} from "primeng/toast";
   styleUrl: './app.component.css',
 })
 export class AppComponent {
-  title = 'front';
+  title = 'TV CAM';
 }

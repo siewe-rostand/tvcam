@@ -9,4 +9,5 @@ export interface CustomerModel {
   hasPaid?: boolean;
   isActive?: boolean;
   isSuspended?: boolean;
+  lastBillGenerationDate?: string;
 }

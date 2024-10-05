@@ -47,7 +47,7 @@ export class CustomerListComponent implements OnInit {
   customer!: CustomerModel;
 
   customers!: CustomerModel[];
-  selectedCustomers!: CustomerModel[] | null;
+  selectedCustomers: CustomerModel[] = [];
   generatedBills: any[] = [];
 
   constructor(
@@ -66,8 +66,19 @@ export class CustomerListComponent implements OnInit {
     this.selectedCustomers = event;
   }
 
-  showGenerateBill() {
+  showConfirmGenerateBill() {
     this.confirmationService.confirm({
+      header: 'Confirmation',
+      message: 'La/les Facture(s) de certains client ont déjà été générées.\n Voulez-vous toujours générer les factures des clients sélectionnés ?',
+      accept: () => {
+        this.generateBills();
+      },
+    });
+  }
+
+  showGenerateBill(event: Event) {
+    this.confirmationService.confirm({
+      target: event.target as EventTarget,
       header: 'Confirmation',
       message: 'Voulez-vous générer les factures des clients sélectionnés ?',
       acceptIcon: 'pi pi-check mr-2',
@@ -77,16 +88,21 @@ export class CustomerListComponent implements OnInit {
       acceptLabel: 'OUI',
       rejectLabel: 'NON',
       accept: () => {
+        const shouldGenerate = this.selectedCustomers.map(item => item.lastBillGenerationDate != null);
+        console.log(shouldGenerate.length)
+        if (shouldGenerate.length >= 1) {
+          this.showConfirmGenerateBill();
+        } else {
         this.generateBills();
+        }
       },
     });
   }
 
   generateBills() {
-    // @ts-ignore
     const customerIds = this.selectedCustomers.map(customer => customer.id);
     // @ts-ignore
-    this.billService.generateBills(customerIds).subscribe({
+    this.billService.generateBills(customerIds, true).subscribe({
         next: (bills) => {
           this.generatedBills = bills;
           this.messageService.add({severity: 'success', summary: 'Success', detail: 'factures générées avec succès'});
@@ -145,7 +161,7 @@ export class CustomerListComponent implements OnInit {
         this.customers = this.customers.filter(
           (val) => !this.selectedCustomers?.includes(val)
         );
-        this.selectedCustomers = null;
+        this.selectedCustomers = [];
         this.messageService.add({
           severity: 'success',
           summary: 'Successful',
@@ -157,7 +173,7 @@ export class CustomerListComponent implements OnInit {
   }
 
   moveToDetail(customerId: number) {
-    this.router.navigate(['/customers', customerId,'detail']);
+    this.router.navigate(['/customers', customerId, 'detail']).then(r => r);
   }
   openEdit(customer: CustomerModel) {
     this.customer = {...customer};

@@ -5,10 +5,8 @@ import {PasswordModule} from 'primeng/password';
 import {InputTextModule} from 'primeng/inputtext';
 import {Router, RouterLink} from '@angular/router';
 import {AuthService} from '../../services/auth.service';
-import {AuthRequestModel} from '../../model/auth-request.model';
 import {CommonModule} from '@angular/common';
 import {InputNumberModule} from 'primeng/inputnumber';
-import {PasswordValidatorService} from '../../services/password.service';
 import {StorageService} from '../../services/storage.service';
 import {RippleModule} from "primeng/ripple";
 import {DividerModule} from "primeng/divider";
@@ -84,7 +82,7 @@ export class LoginComponent implements OnInit {
           this.storageService.saveUser(user);
           this.storageService.saveToken(accessToken);
           this.isLoading = false;
-          this.router.navigate(['users']);
+          this.router.navigate(['home']).then(r => r);
           // console.log(res.data.user);
         },
         error: (err) => {

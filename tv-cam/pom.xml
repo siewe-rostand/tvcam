@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.siewe_rostand</groupId>
     <artifactId>tv-cam</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>tv-cam</name>
     <description>Demo project for Spring Boot</description>
     <properties>
@@ -61,6 +61,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+            <version>1.18.32</version>
             <optional>true</optional>
         </dependency>
 

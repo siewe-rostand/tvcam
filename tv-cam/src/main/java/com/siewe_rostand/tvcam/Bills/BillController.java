@@ -3,7 +3,6 @@ package com.siewe_rostand.tvcam.Bills;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.siewe_rostand.tvcam.exceptions.ApiException;
-import com.siewe_rostand.tvcam.exceptions.ResourceNotFoundException;
 import com.siewe_rostand.tvcam.shared.HttpResponse;
 import com.siewe_rostand.tvcam.shared.PaginatedResponse;
 import org.slf4j.Logger;
@@ -54,10 +53,10 @@ public class BillController {
     }
 
     @PostMapping("/generate")
-    public ResponseEntity<HttpResponse> generateBillsForSelectedCustomers(@RequestBody List<Long> customerIds) {
-        logger.debug("BillController:::generateBillsForSelectedCustomers {}", customerIds);
+    public ResponseEntity<HttpResponse> generateBillsForSelectedCustomers(@RequestBody List<Long> customerIds, @RequestParam Boolean shouldGenerate) {
+        logger.debug("BillController:::generateBillsForSelectedCustomers {},{}", customerIds, shouldGenerate);
         try {
-            var response = billServices.generateBillsForSelectedCustomers(customerIds);
+            var response = billServices.generateBillsForSelectedCustomers(customerIds, shouldGenerate);
             return ResponseEntity.status(CREATED).body(
                     HttpResponse.builder().timestamp(now()).message("selected users bills created successfully")
                             .content(response)

@@ -1,6 +1,5 @@
 package com.siewe_rostand.tvcam.Bills;
 
-import com.siewe_rostand.tvcam.exceptions.ResourceNotFoundException;
 import com.siewe_rostand.tvcam.shared.HttpResponse;
 import com.siewe_rostand.tvcam.shared.PaginatedResponse;
 
@@ -15,8 +14,7 @@ public interface BillServices {
     Bills update(BillSDto billSDto);
     PaginatedResponse findAll(Integer page, Integer size, String sortBy, String direction, String name);
     HttpResponse findCustomerBills(Long customerId);
-    BillSDto findById(Long id);
     HttpResponse delete(Long id);
     BillResponse generateBills(BillRequest request);
-    List<BillResponse> generateBillsForSelectedCustomers(List<Long> customerIds);
+    List<BillResponse> generateBillsForSelectedCustomers(List<Long> customerIds,Boolean shouldGenerate);
 }

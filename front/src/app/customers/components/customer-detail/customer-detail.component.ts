@@ -15,7 +15,7 @@ import {PaymentModel} from "../../model/payment.model";
 import {StatusService} from "../../../_shared/services/status.service";
 import {PaymentService} from "../../service/payment.service";
 import {PaymentTableComponent} from "../_shared/payment-table/payment-table.component";
-import {BillTableComponent} from "../_shared/bill-table/bill-table.component";
+import {BillTableComponent} from "../bill/bill-table/bill-table.component";
 
 @Component({
   selector: 'app-customer-detail',

@@ -1,0 +1,10 @@
+**/node_modules/
+**/.git
+**/README.md
+**/LICENSE
+**/.vscode
+**/.idea
+**/.env
+**/.editorconfig
+**/.aws
+**/.dist

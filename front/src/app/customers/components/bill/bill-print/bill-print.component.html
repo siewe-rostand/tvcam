@@ -1,0 +1,58 @@
+<button (click)="print()">Print Bills</button>
+
+<div class="print-container">
+  <div *ngFor="let bill of bills; let i = index" class="bill-container">
+    <h2>TV CAM</h2>
+    <h3>FACTURE / BILL</h3>
+
+    <p>Mois de {{ bill.month }} {{ bill.year }}</p>
+
+    <div class="contact-info">
+      <p>Makèpe Missoke</p>
+      <p>Tél: 6 74 38 17 44 / 6 96 39 53 30</p>
+      <p>Responsable de zone: M. Jackson</p>
+      <p>Recouvreur: M. Anderson</p>
+      <p>6 75 16 86 97</p>
+      <p>Destinataire: M/Mme. <b>{{ bill.customerName }}</b></p>
+      <p>Zone: ______________________</p>
+      <p>Date de dépôt le : 01/07/2024</p>
+      <p>Date limite de paiement: Le <b>{{ bill.deadLine }}</b></p>
+    </div>
+
+    <table class="bill-table">
+      <tr>
+        <th>Montant</th>
+        <td>{{ bill.monthlyPayment }} frs</td>
+      </tr>
+      <tr>
+        <th>Arriérés</th>
+        <td>{{ bill.debt }}</td>
+      </tr>
+      <tr>
+        <th>Pénalités</th>
+        <td>{{ bill.penalties }}</td>
+      </tr>
+      <tr>
+        <th>Net a payer</th>
+        <td>{{ bill.netToPay }}</td>
+      </tr>
+      <tr>
+        <th>observations</th>
+        <td></td>
+      </tr>
+    </table>
+
+    <div class="notes">
+      <p>Vous pouvez désormais payer votre consommation dans notre agence qui a été rapprochée de vous et se situe en
+        face du Centre Médical la LIFE non loin de l'école la Solidarité de Makèpe Missoke.</p>
+      <p><strong>NB:</strong></p>
+      <ol>
+        <li>Exigez toujours vos reçus après chaque paiement.</li>
+        <li>Le câbleur ne vous appellera jamais avec un autre numéro de téléphone en dehors de ceux inscrits sur la
+          facture: Attention aux arnaqueurs !
+        </li>
+      </ol>
+      <p class="signature">Le Responsable</p>
+    </div>
+  </div>
+</div>

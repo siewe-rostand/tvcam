@@ -17,7 +17,9 @@ import {RippleModule} from "primeng/ripple";
 import {ToastModule} from "primeng/toast";
 import {SplitterModule} from "primeng/splitter";
 import {DividerModule} from "primeng/divider";
-import {BillTableComponent} from "../_shared/bill-table/bill-table.component";
+import {BillTableComponent} from "./bill-table/bill-table.component";
+import {BillPrintComponent} from "./bill-print/bill-print.component";
+import {RouterLink} from "@angular/router";
 
 @Component({
   selector: 'app-customer-bill',
@@ -31,7 +33,9 @@ import {BillTableComponent} from "../_shared/bill-table/bill-table.component";
     TableModule,
     ToastModule,
     NavbarComponent, CommonModule, TagModule,
-    DialogModule, PaginatorModule, ToolbarModule, SplitterModule, DividerModule, BillTableComponent,
+    DialogModule, PaginatorModule, ToolbarModule,
+    SplitterModule, DividerModule, BillTableComponent,
+    BillPrintComponent, RouterLink,
   ],
   templateUrl: './bill.component.html',
   styleUrl: './bill.component.css',
@@ -42,9 +46,8 @@ export class BillComponent implements OnInit {
   bills: BillModel[] = [];
   bill: BillModel = {};
   payment: PaymentModel = {};
-  savePaymentDialog: boolean = false;
   submitted: boolean = false;
-  selectedBills!: BillModel[] | null;
+  selectedBills: BillModel[] = [];
   paymentMethod: any[] | undefined;
 
   constructor(private billService: BillService) {
@@ -60,9 +63,6 @@ export class BillComponent implements OnInit {
   }
 
 
-  showMakePayment() {
-    this.savePaymentDialog = true;
-  }
 
   getBills(): void {
     this.billService.fetchBills().subscribe({
@@ -77,91 +77,11 @@ export class BillComponent implements OnInit {
   }
   handleSelectedBillsChange(newSelection: any[]): void {
     this.selectedBills = newSelection;
-    console.log('Selected payments updated:', this.selectedBills);
-  }
-/*
- printBills() {
-    // Implement printing logic here
-    // You could open a new window with formatted bill data
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      printWindow.document.write('<html><head><title>Bills</title></head><body>');
-      // @ts-ignore
-      this.selectedBills.forEach(bill => {
-        printWindow.document.write(`
-          <div style="page-break-after: always;">
-            <h2>Bill for ${bill.customerName}</h2>
-            <p>Amount: $${bill.amount}</p>
-            <p>Due Date: ${bill.deadLine}</p>
-          </div>
-        `);
-      });
-      printWindow.document.write('</body></html>');
-      printWindow.document.close();
-      printWindow.print();
-    }
-  }
- */
-  printBills() {
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      printWindow.document.write(`
-      <html>
-        <head>
-          <title>Bills</title>
-          <style>
-            body { font-family: Arial, sans-serif; }
-            .page { page-break-after: always; display: flex; }
-            .bill { width: 50%; padding: 10px; box-sizing: border-box; }
-          </style>
-        </head>
-        <body>
-    `);
-
-      if (this.selectedBills != null){
-        for (let i = 0; i < this.selectedBills.length; i += 2) {
-          printWindow.document.write('<div class="page">');
-
-          // First bill on the page
-          this.writeBillToDocument(printWindow, this.selectedBills[i]);
-
-          // Second bill on the page (if it exists)
-          if (i + 1 < this.selectedBills.length) {
-            this.writeBillToDocument(printWindow, this.selectedBills[i + 1]);
-          }
-
-          printWindow.document.write('</div>');
-        }
-      }else {
-        console.log(this.selectedBills)
-      }
-
-      printWindow.document.write('</body></html>');
-      printWindow.document.close();
-      printWindow.print();
-    }
-  }
-
-  private writeBillToDocument(printWindow: Window, bill: any) {
-    printWindow.document.write(`
-    <div class="bill">
-      <h2>Bill for ${bill.customerName}</h2>
-      <p>Amount: $${bill.monthlyPayment.toFixed(2)}</p>
-      <p>Due Date: ${new Date(bill.deadLine).toLocaleDateString()}</p>
-    </div>
-    <br>
-  `);
+    this.billService.setSelectedBills(this.selectedBills);
   }
 
   deleteBills() {
 
   }
 
-  hidePaymentDialog() {
-    console.log('hidePaymentDialog');
-  }
-
-  makePayment() {
-    this.billTable.makePayment();
-  }
 }
