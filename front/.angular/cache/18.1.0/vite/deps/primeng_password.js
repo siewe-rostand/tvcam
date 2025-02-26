@@ -6,15 +6,6 @@ import {
   TimesIcon
 } from "./chunk-QWOBHWSI.js";
 import {
-  NG_VALUE_ACCESSOR
-} from "./chunk-27A76D6T.js";
-import {
-  animate,
-  style,
-  transition,
-  trigger
-} from "./chunk-3BBYDTQR.js";
-import {
   BaseIcon
 } from "./chunk-AAZTR5OM.js";
 import {
@@ -25,6 +16,15 @@ import {
   ConnectedOverlayScrollHandler,
   DomHandler
 } from "./chunk-QU7AFVGG.js";
+import {
+  NG_VALUE_ACCESSOR
+} from "./chunk-27A76D6T.js";
+import {
+  animate,
+  style,
+  transition,
+  trigger
+} from "./chunk-3BBYDTQR.js";
 import {
   OverlayService,
   PrimeNGConfig,

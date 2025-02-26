@@ -9,11 +9,11 @@ import {
 import {
   TimesIcon
 } from "./chunk-QWOBHWSI.js";
-import "./chunk-AAZTR5OM.js";
 import {
   Ripple,
   RippleModule
 } from "./chunk-E44AIM5L.js";
+import "./chunk-AAZTR5OM.js";
 import {
   DomHandler
 } from "./chunk-QU7AFVGG.js";

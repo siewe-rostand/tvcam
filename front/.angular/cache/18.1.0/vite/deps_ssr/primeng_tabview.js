@@ -6,23 +6,18 @@ import {
 import {
   Tooltip,
   TooltipModule
-} from "./chunk-FZDJJWW3.js";
+} from "./chunk-HKURHLGW.js";
+import {
+  Ripple,
+  RippleModule
+} from "./chunk-K65LIRZL.js";
 import {
   TimesIcon
 } from "./chunk-WQBM3UTG.js";
 import "./chunk-36ULBKXV.js";
 import {
-  Ripple,
-  RippleModule
-} from "./chunk-RWBXE7EG.js";
-import {
   DomHandler
 } from "./chunk-BLVGPENJ.js";
-import {
-  PrimeTemplate,
-  SharedModule,
-  UniqueComponentId
-} from "./chunk-HTNZQI6Q.js";
 import {
   CommonModule,
   NgClass,
@@ -32,6 +27,11 @@ import {
   NgTemplateOutlet,
   isPlatformBrowser
 } from "./chunk-BRIAYAXG.js";
+import {
+  PrimeTemplate,
+  SharedModule,
+  UniqueComponentId
+} from "./chunk-HTNZQI6Q.js";
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,

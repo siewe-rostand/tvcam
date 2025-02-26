@@ -45,7 +45,8 @@
         <h5 class="m-0">Manage Users</h5>
         <span class="p-input-icon-left">
           <i class="pi pi-search"></i>
-          <input pInputText type="text" placeholder="Search..." />
+          <input pInputText type="text" [(ngModel)]="searchValue" (input)="dt.filterGlobal(searchValue, 'contains')"
+                 placeholder="Search..."/>
         </span>
       </div>
     </ng-template>
@@ -125,8 +126,7 @@
     [style]="{ width: '450px' }"
     header="Detail de L'utilisateur"
     [modal]="true"
-    styleClass="p-fluid"
-  >
+    styleClass="p-fluid">
     <ng-template pTemplate="content">
       <div class="field">
         <label for="lastname">Nom</label>

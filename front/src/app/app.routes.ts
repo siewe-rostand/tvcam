@@ -1,6 +1,6 @@
 import {Routes} from '@angular/router';
 import {LoginComponent} from './auth/components/login/login.component';
-import {SigninComponent} from './auth/components/signin/signin.component';
+import {RegistrationComponent} from './auth/components/registration/registration.component';
 import {UsersListComponent} from './user/components/users-list/users-list.component';
 import {AuthGuardService} from './auth/services/auth.guard';
 import {CustomerListComponent} from './customers/components/customer-list/customer-list.component';
@@ -14,10 +14,10 @@ import {HomeComponent} from "./home/home.component";
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
 
-  {path: 'signup', component: SigninComponent},
+  {path: 'signup', component: RegistrationComponent, data: {skipAuthCheck: true},},
 
   {
-    path: 'forgottenPassword', component: ForgottenPasswordComponent,
+    path: 'forgottenPassword', component: ForgottenPasswordComponent
   },
 
   {
@@ -62,5 +62,7 @@ export const routes: Routes = [
     canActivate: [AuthGuardService],
   },
 
-  {path: '', redirectTo: '/login', pathMatch: 'full'},
+  {path: '', component: HomeComponent, canActivate: [AuthGuardService]},
+
+  {path: '**', redirectTo: ''}
 ];

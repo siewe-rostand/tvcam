@@ -9,8 +9,8 @@ spring:
     password: ${MYSQL_PASSWORD}
   jpa:
     hibernate:
-      ddl-auto: update
-    #    show-sql: true
+      ddl-auto: none
+      show-sql: true
     properties:
       hibernate:
         globally_quoted_indentifiers: true
@@ -24,13 +24,29 @@ spring:
     init:
       mode: never
       continue-on-error: false
+
   mvc:
-    throw-exception-if-no-handler-found: true
     static-path-pattern: /**
+
+    view:
+      suffix: .html
+
   jackson:
     time-zone: Africa/Lagos
     date-format: dd-MM-yyyy HH:mm:ss
 
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.xml
+  #    change-log: classpath:db/changelog/db.changelog-master.xml
+  # Serve static content from /static folder
+  web:
+    resources:
+      static-locations: classpath:/static/
+      add-mappings: true
+      chain:
+        enabled: true
+        cache: true
+        compressed: true
 security:
   jwt:
     security-key: ${JWT_SECRET_KEY}
@@ -40,8 +56,13 @@ security:
 server:
   port: ${CONTAINER_PORT:8080}
   servlet:
-    context-path: /api/v1/
-  error:
-    path: /user/error
-    whitelabel:
-      enabled: false
+    context-path: /api/v1
+logging:
+  level:
+    info: INFO
+    org:
+      springframework:
+        security: DEBUG
+
+
+

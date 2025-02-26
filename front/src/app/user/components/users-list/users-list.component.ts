@@ -54,6 +54,8 @@ export class UsersListComponent implements OnInit {
 
   user!: UserModel;
 
+  searchValue: string |undefined;
+
   selectedUser!: UserModel[] | null;
 
   submitted: boolean = false;

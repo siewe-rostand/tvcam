@@ -35,6 +35,7 @@ public class SecurityFilterChainConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/auth/**",
+                                "/auth/login",
                                 "/v2/api-docs",
                                 "/v3/api-docs",
                                 "/v3/api-docs/**",
@@ -45,7 +46,8 @@ public class SecurityFilterChainConfig {
                                 "/swagger-ui/**",
                                 "/webjars/**",
                                 "/swagger-ui.html",
-                                "index.html"
+                                "/index.html",
+                                "/assets/**", "/*.js", "/*.css", "/*.ico", "/*.json"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

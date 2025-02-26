@@ -3,6 +3,14 @@ import {
   PlusIcon
 } from "./chunk-XR6HCLJS.js";
 import {
+  Ripple,
+  RippleModule
+} from "./chunk-K65LIRZL.js";
+import {
+  BaseIcon
+} from "./chunk-36ULBKXV.js";
+import "./chunk-BLVGPENJ.js";
+import {
   animate,
   state,
   style,
@@ -10,26 +18,18 @@ import {
   trigger
 } from "./chunk-MFVVK6T5.js";
 import {
-  BaseIcon
-} from "./chunk-36ULBKXV.js";
-import {
-  Ripple,
-  RippleModule
-} from "./chunk-RWBXE7EG.js";
-import "./chunk-BLVGPENJ.js";
-import {
-  Footer,
-  PrimeTemplate,
-  SharedModule,
-  UniqueComponentId
-} from "./chunk-HTNZQI6Q.js";
-import {
   CommonModule,
   NgClass,
   NgIf,
   NgStyle,
   NgTemplateOutlet
 } from "./chunk-BRIAYAXG.js";
+import {
+  Footer,
+  PrimeTemplate,
+  SharedModule,
+  UniqueComponentId
+} from "./chunk-HTNZQI6Q.js";
 import {
   ChangeDetectionStrategy,
   Component,

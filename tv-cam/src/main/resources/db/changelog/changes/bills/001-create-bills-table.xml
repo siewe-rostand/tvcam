@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
+
+    <changeSet id="1740502972821-1" author="siewe-rostand">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="bills"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="bills">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false" unique="true"/>
+            </column>
+            <column name="customer_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="month" type="VARCHAR(100)"/>
+            <column name="year" type="VARCHAR(100)"/>
+            <column name="deposit_date" type="VARCHAR(255)"/>
+            <column name="deadline" type="INTEGER"/>
+            <column name="penalties" type="VARCHAR(255)"/>
+            <column name="monthly_payment" type="JAVA.MATH.BIGDECIMAL"/>
+            <column name="net_to_pay" type="JAVA.MATH.BIGDECIMAL"/>
+            <column name="debt" type="JAVA.MATH.BIGDECIMAL"/>
+            <column name="paid_amount" type="JAVA.MATH.BIGDECIMAL"/>
+            <column name="observation" type="VARCHAR(255)"/>
+            <column name="payment_status" type="VARCHAR(255)"/>
+            <column name="current_period_bill" type="BOOLEAN"/>
+            <column name="created_by" type="BIGINT"/>
+            <column name="created_at" type="VARCHAR(255)"/>
+            <column name="modified_by" type="BIGINT"/>
+            <column name="updated_at" type="VARCHAR(255)"/>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="bills" baseColumnNames="customer_id"
+                                 constraintName="fk_bills_customer_id"
+                                 referencedTableName="customers"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="1740503617716-1" author="siewe-rostand">
+        <rollback>
+            <dropTable tableName="bills"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

@@ -19,9 +19,6 @@ services:
   tv-cam-api:
     container_name: tv-cam-api
     image: tv-cam/tv-cam-api:1.0.0
-    build:
-      context: .
-      dockerfile: docker/backend/Dockerfile
     ports:
       - '8085:8085'
     depends_on:
@@ -31,9 +28,6 @@ services:
   tv-cam-ui:
     container_name: tv_cam-ui
     image: tv_cam/tv-cam-ui:1.0.0
-    build:
-      context: .
-      dockerfile: docker/frontend/Dockerfile
     ports:
       - "8090:90"
     networks:

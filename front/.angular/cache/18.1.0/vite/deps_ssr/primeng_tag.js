@@ -1,15 +1,15 @@
 import { createRequire } from 'module';const require = createRequire(import.meta.url);
 import {
-  PrimeTemplate,
-  SharedModule
-} from "./chunk-HTNZQI6Q.js";
-import {
   CommonModule,
   NgClass,
   NgIf,
   NgStyle,
   NgTemplateOutlet
 } from "./chunk-BRIAYAXG.js";
+import {
+  PrimeTemplate,
+  SharedModule
+} from "./chunk-HTNZQI6Q.js";
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,

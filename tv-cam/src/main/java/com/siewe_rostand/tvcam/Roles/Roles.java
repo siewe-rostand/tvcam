@@ -1,7 +1,7 @@
 package com.siewe_rostand.tvcam.Roles;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.siewe_rostand.tvcam.Users.Users;
+import com.siewe_rostand.tvcam.Users.models.Users;
 import jakarta.persistence.*;
 import lombok.*;
 

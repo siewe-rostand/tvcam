@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "tvcam",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

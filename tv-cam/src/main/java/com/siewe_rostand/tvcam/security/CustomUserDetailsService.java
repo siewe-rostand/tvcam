@@ -1,6 +1,6 @@
 package com.siewe_rostand.tvcam.security;
 
-import com.siewe_rostand.tvcam.Users.UsersRepository;
+import com.siewe_rostand.tvcam.Users.repository.UsersRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;

@@ -2,20 +2,20 @@ import {
   PlusIcon
 } from "./chunk-CJLAP36F.js";
 import {
+  Ripple,
+  RippleModule
+} from "./chunk-E44AIM5L.js";
+import {
+  BaseIcon
+} from "./chunk-AAZTR5OM.js";
+import "./chunk-QU7AFVGG.js";
+import {
   animate,
   state,
   style,
   transition,
   trigger
 } from "./chunk-3BBYDTQR.js";
-import {
-  BaseIcon
-} from "./chunk-AAZTR5OM.js";
-import {
-  Ripple,
-  RippleModule
-} from "./chunk-E44AIM5L.js";
-import "./chunk-QU7AFVGG.js";
 import {
   Footer,
   PrimeTemplate,

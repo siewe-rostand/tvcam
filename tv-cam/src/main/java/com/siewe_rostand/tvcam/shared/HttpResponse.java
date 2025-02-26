@@ -2,13 +2,12 @@ package com.siewe_rostand.tvcam.shared;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.Data;
-import lombok.experimental.SuperBuilder;
-import org.springframework.http.HttpStatus;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import lombok.Data;
+import lombok.experimental.SuperBuilder;
+import org.springframework.http.HttpStatus;
 
 @Data
 @SuperBuilder
@@ -25,4 +24,5 @@ public class HttpResponse {
     protected Map<?, ?> data;
     protected List<?> content;
     private String errorSource;
+  protected Throwable errorCause;
 }

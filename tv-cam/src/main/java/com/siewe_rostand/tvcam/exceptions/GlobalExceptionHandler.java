@@ -1,11 +1,23 @@
 package com.siewe_rostand.tvcam.exceptions;
 
+import static com.siewe_rostand.tvcam.shared.model.BusinessErrorCodes.ACCOUNT_DISABLED;
+import static com.siewe_rostand.tvcam.shared.model.BusinessErrorCodes.ACCOUNT_LOCKED;
+import static java.time.LocalDateTime.now;
+import static org.springframework.http.HttpStatus.*;
+
 import com.siewe_rostand.tvcam.shared.Exceptions.EntityAlreadyExistException;
 import com.siewe_rostand.tvcam.shared.Exceptions.OperationNotPermittedException;
 import com.siewe_rostand.tvcam.shared.HttpResponse;
 import com.siewe_rostand.tvcam.shared.model.ExceptionResponse;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
+import java.nio.file.AccessDeniedException;
+import java.sql.SQLIntegrityConstraintViolationException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,17 +31,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
-import java.nio.file.AccessDeniedException;
-import java.sql.SQLIntegrityConstraintViolationException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
-import static com.siewe_rostand.tvcam.shared.model.BusinessErrorCodes.ACCOUNT_DISABLED;
-import static com.siewe_rostand.tvcam.shared.model.BusinessErrorCodes.ACCOUNT_LOCKED;
-import static java.time.LocalDateTime.now;
-import static org.springframework.http.HttpStatus.*;
-
 /**
  * @author rostand
  * @project tv-cam
@@ -39,9 +40,13 @@ import static org.springframework.http.HttpStatus.*;
 @Slf4j
 public class GlobalExceptionHandler {
 
+  private void logException(Exception ex) {
+    Logger.getLogger(GlobalExceptionHandler.class.getName()).log(Level.SEVERE, null, ex);
+  }
+
     @ExceptionHandler(ObjectValidationException.class)
     public  ResponseEntity<HttpResponse> handle(ObjectValidationException exception) {
-          log.trace(exception.getMessage());
+    logException(exception);
         return ResponseEntity
                 .status(BAD_REQUEST)
                 .body(
@@ -58,7 +63,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ConstraintViolationException.class)
     public  ResponseEntity<HttpResponse> handle(ConstraintViolationException exception) {
-          log.trace(exception.getMessage());
+    logException(exception);
         return ResponseEntity
                 .status(BAD_REQUEST)
                 .body(
@@ -74,6 +79,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(EmptyPasswordException.class)
     public ResponseEntity<ExceptionResponse> handleException(EmptyPasswordException exp) {
+    logException(exp);
         return ResponseEntity.status(BAD_REQUEST)
                 .body(ExceptionResponse.builder()
                         .statusCode(BAD_REQUEST.value())
@@ -84,6 +90,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(LockedException.class)
     public ResponseEntity<ExceptionResponse> handleException(LockedException exp) {
+    logException(exp);
         return ResponseEntity.status(UNAUTHORIZED)
                 .body(ExceptionResponse.builder()
                         .statusCode(ACCOUNT_LOCKED.getCode())
@@ -94,6 +101,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DisabledException.class)
     public ResponseEntity<ExceptionResponse> handleException(DisabledException exp) {
+    logException(exp);
         return ResponseEntity.status(UNAUTHORIZED)
                 .body(
                         ExceptionResponse.builder()
@@ -106,7 +114,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<HttpResponse> handleException(BadCredentialsException exception) {
-        log.trace(exception.getMessage());
+    logException(exception);
         return ResponseEntity
                 .status(BAD_REQUEST)
                 .body(
@@ -122,7 +130,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(SQLIntegrityConstraintViolationException.class)
     public ResponseEntity<HttpResponse> sQLIntegrityConstraintViolationException(SQLIntegrityConstraintViolationException exception) {
-        log.trace(exception.getMessage());
+    logException(exception);
         return new ResponseEntity<>(
                 HttpResponse.builder()
                         .timestamp(now())
@@ -135,7 +143,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(EntityAlreadyExistException.class)
     public ResponseEntity<HttpResponse> handleException(EntityAlreadyExistException exp) {
-        log.trace(exp.getMessage());
+    logException(exp);
         return new ResponseEntity<>(
                 HttpResponse.builder()
                         .timestamp(now())
@@ -148,7 +156,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<HttpResponse> handleException(EntityNotFoundException exp) {
-        log.trace(exp.getMessage());
+    logException(exp);
         return ResponseEntity
                 .status(NOT_FOUND)
                 .body(
@@ -164,6 +172,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(OperationNotPermittedException.class)
     public ResponseEntity<ExceptionResponse> handleException(OperationNotPermittedException exp) {
+    logException(exp);
         return ResponseEntity
                 .status(BAD_REQUEST)
                 .body(
@@ -175,6 +184,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ExceptionResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException exp) {
+    logException(exp);
         Set<String> errors = new HashSet<>();
         exp.getBindingResult().getAllErrors()
                 .forEach(error -> {
@@ -194,7 +204,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<HttpResponse> handleException(Exception exp) {
-        log.trace(exp.getMessage());
+    logException(exp);
         return  new ResponseEntity<>(
                 HttpResponse.builder()
                         .timestamp(now())
@@ -209,6 +219,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
     public ResponseEntity<HttpResponse> handleMethodNotAllowed(HttpRequestMethodNotSupportedException ex) {
+    logException(ex);
         return new ResponseEntity<>(
                 HttpResponse.builder()
                         .timestamp(now())
@@ -221,7 +232,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<HttpResponse> accessDeniedException(AccessDeniedException exception) {
-        log.error(exception.getMessage());
+    logException(exception);
         return new ResponseEntity<>(
                 HttpResponse.builder()
                         .timestamp(now())
@@ -235,7 +246,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<HttpResponse> processRuntimeException(RuntimeException exception) {
-        exception.printStackTrace();
+    logException(exception);
         log.trace(Arrays.toString(exception.getStackTrace()));
         return new ResponseEntity<>(
                 HttpResponse.builder()
@@ -250,6 +261,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ApiException.class)
     public ResponseEntity<HttpResponse> processRuntimeException(ApiException exception) {
+    logException(exception);
         return new ResponseEntity<>(
                 HttpResponse.builder()
                         .timestamp(now())
@@ -263,7 +275,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<HttpResponse> processRuntimeException(ResourceNotFoundException exception) {
-        log.trace(Arrays.toString(exception.getStackTrace()));
+    logException(exception);
         return new ResponseEntity<>(
                 HttpResponse.builder()
                         .timestamp(now())
@@ -276,6 +288,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(NoHandlerFoundException.class)
     public ResponseEntity<HttpResponse> handleNoHandlerFoundException(NoHandlerFoundException ex) {
+    logException(ex);
         String requestedUrl = ex.getRequestURL();
         return new ResponseEntity<>(
                 HttpResponse.builder()

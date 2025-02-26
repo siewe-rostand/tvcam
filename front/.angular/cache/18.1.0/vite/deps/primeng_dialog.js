@@ -1,6 +1,22 @@
 import {
+  ButtonDirective,
+  ButtonModule
+} from "./chunk-ZUPJIRSF.js";
+import {
   TimesIcon
 } from "./chunk-QWOBHWSI.js";
+import "./chunk-H7JSWHSS.js";
+import {
+  Ripple,
+  RippleModule
+} from "./chunk-E44AIM5L.js";
+import {
+  BaseIcon
+} from "./chunk-AAZTR5OM.js";
+import "./chunk-SLGUVPUN.js";
+import {
+  DomHandler
+} from "./chunk-QU7AFVGG.js";
 import {
   animate,
   animation,
@@ -9,22 +25,6 @@ import {
   trigger,
   useAnimation
 } from "./chunk-3BBYDTQR.js";
-import {
-  ButtonDirective,
-  ButtonModule
-} from "./chunk-GG3D3GYS.js";
-import "./chunk-H7JSWHSS.js";
-import {
-  BaseIcon
-} from "./chunk-AAZTR5OM.js";
-import "./chunk-SLGUVPUN.js";
-import {
-  Ripple,
-  RippleModule
-} from "./chunk-E44AIM5L.js";
-import {
-  DomHandler
-} from "./chunk-QU7AFVGG.js";
 import {
   Footer,
   Header,

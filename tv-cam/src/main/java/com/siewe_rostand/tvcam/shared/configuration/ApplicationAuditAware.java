@@ -1,6 +1,6 @@
 package com.siewe_rostand.tvcam.shared.configuration;
 
-import com.siewe_rostand.tvcam.Users.Users;
+import com.siewe_rostand.tvcam.Users.models.Users;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;

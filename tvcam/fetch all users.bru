@@ -1,0 +1,15 @@
+meta {
+  name: fetch all users
+  type: http
+  seq: 2
+}
+
+get {
+  url: http://localhost:8085/api/v1/users
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzUxMiJ9.eyJmaXJzdG5hbWUiOiJKb2huIiwicm9sZSI6W3sicm9sZUlkIjoxLCJuYW1lIjoiUk9MRV9VU0VSIn1dLCJhY3RpdmUiOnRydWUsImxhc3RuYW1lIjoiRG9lIiwic3ViIjoiNjc4MzEyMjU2IiwiaWF0IjoxNzQwNTYwODMzLCJleHAiOjE3NDA2NDcyMzMsImF1dGhvcml0aWVzIjpbIlJPTEVfVVNFUiJdfQ.FtTTv8KTc0srNr5DaryZNeb6UG7Yquscw6qDOcxIxcVnUozCc4KKleIK5jQknmiGG_8dl06Bmh7MRO6RPwtIdA
+}

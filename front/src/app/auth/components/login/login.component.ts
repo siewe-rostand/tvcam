@@ -7,7 +7,7 @@ import {Router, RouterLink} from '@angular/router';
 import {AuthService} from '../../services/auth.service';
 import {CommonModule} from '@angular/common';
 import {InputNumberModule} from 'primeng/inputnumber';
-import {StorageService} from '../../services/storage.service';
+import {StorageService} from '../../../_shared/services/storage.service';
 import {RippleModule} from "primeng/ripple";
 import {DividerModule} from "primeng/divider";
 
@@ -49,13 +49,13 @@ export class LoginComponent implements OnInit {
     // }
 
     this.loginForm = this.formBuilder.group({
-      telephone: ['', [Validators.required,
+      telephone: [null, [Validators.required,
         Validators.minLength(9),
         Validators.maxLength(9),
       ]
       ],
       password: [
-        '',
+        null,
         [Validators.required,
           Validators.minLength(6),
           Validators.maxLength(16),

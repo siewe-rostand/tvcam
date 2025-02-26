@@ -7,10 +7,15 @@ import org.springframework.security.core.AuthenticationException;
  * @project tv-cam
  */
 public class JwtAuthenticationException extends AuthenticationException {
-    String reason;
+    public String reason;
 
-    public JwtAuthenticationException(String msg, String reason) {
-        super(msg);
+    public JwtAuthenticationException(String message, String reason) {
+        super(message);
+        this.reason = reason;
+    }
+
+    public JwtAuthenticationException(String msg, Throwable cause, String reason) {
+        super(msg, cause);
         this.reason = reason;
     }
 }

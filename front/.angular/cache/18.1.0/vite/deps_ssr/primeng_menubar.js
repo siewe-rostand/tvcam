@@ -13,27 +13,19 @@ import {
 import {
   Tooltip,
   TooltipModule
-} from "./chunk-FZDJJWW3.js";
-import "./chunk-QIAZ7XKL.js";
-import "./chunk-OQ5OWBVD.js";
+} from "./chunk-HKURHLGW.js";
+import {
+  Ripple,
+  RippleModule
+} from "./chunk-K65LIRZL.js";
 import {
   BaseIcon
 } from "./chunk-36ULBKXV.js";
 import {
-  Ripple,
-  RippleModule
-} from "./chunk-RWBXE7EG.js";
-import {
   DomHandler
 } from "./chunk-BLVGPENJ.js";
-import {
-  ObjectUtils,
-  PrimeNGConfig,
-  PrimeTemplate,
-  SharedModule,
-  UniqueComponentId,
-  zindexutils
-} from "./chunk-HTNZQI6Q.js";
+import "./chunk-QIAZ7XKL.js";
+import "./chunk-OQ5OWBVD.js";
 import {
   CommonModule,
   DOCUMENT,
@@ -44,6 +36,14 @@ import {
   NgTemplateOutlet,
   isPlatformBrowser
 } from "./chunk-BRIAYAXG.js";
+import {
+  ObjectUtils,
+  PrimeNGConfig,
+  PrimeTemplate,
+  SharedModule,
+  UniqueComponentId,
+  zindexutils
+} from "./chunk-HTNZQI6Q.js";
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,

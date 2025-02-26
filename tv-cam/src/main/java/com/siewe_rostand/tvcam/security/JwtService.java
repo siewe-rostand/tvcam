@@ -4,17 +4,15 @@ import com.siewe_rostand.tvcam.exceptions.JwtAuthenticationException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Service;
-
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Service;
 
 /**
  * @author rostand
@@ -59,7 +57,7 @@ public class JwtService {
         } catch (MalformedJwtException ex) {
             throw new JwtAuthenticationException(ex.getMessage(),"Invalid JWT token");
         } catch (ExpiredJwtException ex) {
-            throw new JwtAuthenticationException(ex.getMessage(),"Expired JWT token");
+      throw new JwtAuthenticationException(ex.getMessage(), ex.getCause(), "Expired JWT token");
         } catch (UnsupportedJwtException ex) {
             throw new JwtAuthenticationException(ex.getMessage(), "Unsupported JWT token");
         } catch (IllegalArgumentException ex) {

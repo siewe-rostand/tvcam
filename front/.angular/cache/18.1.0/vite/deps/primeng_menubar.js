@@ -9,22 +9,22 @@ import {
   AngleDownIcon
 } from "./chunk-HWIUARGD.js";
 import {
+  Ripple,
+  RippleModule
+} from "./chunk-E44AIM5L.js";
+import {
+  BaseIcon
+} from "./chunk-AAZTR5OM.js";
+import {
+  DomHandler
+} from "./chunk-QU7AFVGG.js";
+import {
   RouterLink,
   RouterLinkActive,
   RouterModule
 } from "./chunk-5EBOSJ47.js";
 import "./chunk-3Q4XOZU4.js";
 import "./chunk-DFU7YPP5.js";
-import {
-  BaseIcon
-} from "./chunk-AAZTR5OM.js";
-import {
-  Ripple,
-  RippleModule
-} from "./chunk-E44AIM5L.js";
-import {
-  DomHandler
-} from "./chunk-QU7AFVGG.js";
 import {
   ObjectUtils,
   PrimeNGConfig,

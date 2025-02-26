@@ -1,12 +1,12 @@
 import {
-  NG_VALUE_ACCESSOR,
-  NgControl
-} from "./chunk-27A76D6T.js";
-import {
   AutoFocus,
   AutoFocusModule
 } from "./chunk-SLGUVPUN.js";
 import "./chunk-QU7AFVGG.js";
+import {
+  NG_VALUE_ACCESSOR,
+  NgControl
+} from "./chunk-27A76D6T.js";
 import {
   PrimeNGConfig
 } from "./chunk-DMTEHVKZ.js";

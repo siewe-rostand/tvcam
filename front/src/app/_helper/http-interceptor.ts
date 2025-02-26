@@ -1,13 +1,8 @@
-import {
-  HTTP_INTERCEPTORS,
-  HttpHandler,
-  HttpInterceptor,
-  HttpRequest,
-} from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { LocalStorageService } from '../_shared/services/local-storage.service';
+import {HTTP_INTERCEPTORS, HttpHandler, HttpInterceptor, HttpRequest,} from '@angular/common/http';
+import {Injectable} from '@angular/core';
+import {LocalStorageService} from '../_shared/services/local-storage.service';
 
-const JWT_TOKEN = 'auth_token';
+const JWT_TOKEN: string = 'auth_token';
 
 @Injectable()
 export class HttpRequestInterceptor implements HttpInterceptor {
@@ -19,8 +14,8 @@ export class HttpRequestInterceptor implements HttpInterceptor {
       const authReq = req.clone({
         setHeaders: {
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-
+          'Content-Type': 'application/json',
+          'Accept': "application/json"
         },
       });
       return next.handle(authReq);
