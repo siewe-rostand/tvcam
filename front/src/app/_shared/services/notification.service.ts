@@ -11,7 +11,6 @@ export class NotificationService {
       severity: 'warn',
       summary: title,
       detail: message,
-      sticky: true,
       life: 3000
     })
   }

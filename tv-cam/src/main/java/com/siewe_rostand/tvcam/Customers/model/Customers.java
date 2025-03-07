@@ -6,11 +6,10 @@ import com.siewe_rostand.tvcam.Payment.model.enumeration.PaymentFrequency;
 import com.siewe_rostand.tvcam.shared.model.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
+import java.time.LocalDateTime;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.ColumnDefault;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "customers")
@@ -63,8 +62,16 @@ public class Customers extends BaseEntity {
 
 
     public Customers toMap(CustomersDTO customersDto) {
-        return Customers.builder().customerId(customersDto.getId()).name(customersDto.getName()).address(customersDto.getAddress())
-                .hasPaid(customersDto.getHasPaid()).hasDebt(customersDto.getHasDebt()).telephone(customersDto.getTelephone()).isActive(customersDto.getIsActive())
-                .isSuspended(customersDto.getIsSuspended()).build();
+    return Customers.builder()
+        .customerId(customersDto.getId())
+        .ref(customersDto.getRef())
+        .name(customersDto.getName())
+        .address(customersDto.getAddress())
+        .hasPaid(customersDto.getHasPaid())
+        .hasDebt(customersDto.getHasDebt())
+        .telephone(customersDto.getTelephone())
+        .isActive(customersDto.getIsActive())
+        .isSuspended(customersDto.getIsSuspended())
+        .build();
     }
 }

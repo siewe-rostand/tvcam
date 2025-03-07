@@ -1,6 +1,6 @@
 import {HTTP_INTERCEPTORS, HttpHandler, HttpInterceptor, HttpRequest,} from '@angular/common/http';
 import {Injectable} from '@angular/core';
-import {LocalStorageService} from '../_shared/services/local-storage.service';
+import {LocalStorageService} from '../services/local-storage.service';
 
 const JWT_TOKEN: string = 'auth_token';
 

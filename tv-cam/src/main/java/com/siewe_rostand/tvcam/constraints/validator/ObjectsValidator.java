@@ -1,4 +1,4 @@
-package com.siewe_rostand.tvcam.validator;
+package com.siewe_rostand.tvcam.constraints.validator;
 
 import com.siewe_rostand.tvcam.exceptions.ObjectValidationException;
 import jakarta.validation.ConstraintViolation;

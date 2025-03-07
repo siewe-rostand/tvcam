@@ -37,18 +37,12 @@ export class StorageService {
   }
 
   get getToken(): string | null {
-    return localStorage.getItem(JWT_TOKEN);
-  }
-
-  public isLoggedIn(): boolean {
-    const user = this.localStorageService.getItem(USER_KEY);
-    return !!user;
-
+    return this.localStorageService.getItem(JWT_TOKEN);
   }
 
   isTokenValid(): boolean {
     try {
-      const expirationString = localStorage.getItem(JWT_TOKEN_EXPIRATION);
+      const expirationString = this.localStorageService.getItem(JWT_TOKEN_EXPIRATION);
       const token = this.getToken;
 
       // if token expiration  is not stored, or it is invalid, we assumed it has expired

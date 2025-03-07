@@ -31,7 +31,7 @@ public class CustomerController {
         this.customerService = customerService;
     }
 
-    @PostMapping("/save")
+    @PostMapping
     public ResponseEntity<HttpResponse> createCustomer(@RequestBody CustomersDTO customersDto) {
         log.error("Customer controller -> createCustomer(): {}", customersDto);
         ObjectMapper objectMapper = new ObjectMapper();
@@ -46,10 +46,9 @@ public class CustomerController {
         );
     }
 
-    @PutMapping("/edit")
+    @PutMapping
     public ResponseEntity<HttpResponse> updateCustomer(@RequestBody CustomersDTO customersDto) {
         log.error("Customer controller -> updateCustomer(): {}", customersDto);
-//        log.trace("Customer controller:::updateCustomer() {}",customersDto);
         CustomersDTO customersDTO1 = new CustomersDTO().CreateDTO(customerService.update(customersDto));
 
         return ResponseEntity.ok().body(HttpResponse.builder().
@@ -58,7 +57,7 @@ public class CustomerController {
                 statusCode(HttpStatus.OK.value()).status(HttpStatus.OK).build());
     }
 
-    @GetMapping()
+    @GetMapping
     public ResponseEntity<PaginatedResponse> getAllCustomers(@RequestParam(name = "page", defaultValue = "0") Integer page,
                                                              @RequestParam(name = "size", defaultValue = "999999") Integer size,
                                                              @RequestParam(name = "sortBy", defaultValue = "createdAt") String sortBy,

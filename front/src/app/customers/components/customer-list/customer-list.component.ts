@@ -101,23 +101,24 @@ export class CustomerListComponent implements OnInit {
 
   generateBills() {
     const customerIds = this.selectedCustomers.map(customer => customer.id);
-    // @ts-ignore
-    this.billService.generateBills(customerIds, true).subscribe({
-        next: (bills) => {
-          this.generatedBills = bills;
-          this.messageService.add({severity: 'success', summary: 'Success', detail: 'factures générées avec succès'});
-        },
-        error: (error) => {
-          console.log(error)
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'une erreur interne s\'est produite. Si le problème persiste, veuillez contacter l\'administrateur',
-            life: 5000
-          });
+    if (customerIds.length > 0) {
+      this.billService.generateBills(customerIds, true).subscribe({
+          next: (bills) => {
+            this.generatedBills = bills;
+            this.messageService.add({severity: 'success', summary: 'Success', detail: 'factures générées avec succès'});
+          },
+          error: (error) => {
+            console.log(error)
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'une erreur interne s\'est produite. Si le problème persiste, veuillez contacter l\'administrateur',
+              life: 5000
+            });
+          }
         }
-      }
-    );
+      );
+    }
   }
 
   getCustomers() {
@@ -194,8 +195,8 @@ export class CustomerListComponent implements OnInit {
   saveCustomer() {
     this.submitted = true;
     this.customerService.createCustomer(this.customer).subscribe({
-      next: (res) => {
-        console.log(res)
+      next: (_) => {
+        this.getCustomers();
         this.messageService.add({
           severity: 'success',
           summary: 'Successful',
@@ -206,8 +207,7 @@ export class CustomerListComponent implements OnInit {
         this.submitted = false;
         this.saveCustomerDialog = false;
       },
-      error: (err) => {
-        console.log(err);
+      error: (_) => {
         this.messageService.add({
           severity: 'error',
           summary: 'Erreur de mise à jour',
@@ -222,7 +222,7 @@ export class CustomerListComponent implements OnInit {
 
   editCustomer() {
     this.customerService.updateCustomer(this.customer).subscribe({
-      next: (res) => {
+      next: (_) => {
         this.messageService.add({
           severity: 'success',
           summary: 'Successful',
@@ -231,9 +231,9 @@ export class CustomerListComponent implements OnInit {
           key: 'br',
         });
         this.updateCustomerDialog = false;
+        this.getCustomers();
       },
-      error: (err) => {
-        console.log(err);
+      error: (_) => {
         this.messageService.add({
           severity: 'error',
           summary: 'Erreur de mise à jour',
@@ -253,7 +253,7 @@ export class CustomerListComponent implements OnInit {
       acceptLabel: 'OUI',
       accept: () => {
         this.customerService.deleteCustomer(customer.id).subscribe({
-          next: (res) => {
+          next: (_) => {
             this.customers = this.customers.filter((val) => val.id !== customer.id);
             this.customer = {};
             this.messageService.add({
@@ -262,14 +262,16 @@ export class CustomerListComponent implements OnInit {
               detail: 'le client a été supprimé avec succès',
               life: 3000,
             });
+            this.getCustomers()
           },
-          error: (err) => {
+          error: (_) => {
             this.messageService.add({
               severity: 'error',
               summary: 'Error',
               detail: 'Une erreur s\'est produite lors de la suppression',
               life: 3000,
             });
+            this.getCustomers()
           }
         })
       },

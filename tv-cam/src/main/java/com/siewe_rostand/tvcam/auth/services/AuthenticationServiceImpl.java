@@ -13,7 +13,7 @@ import com.siewe_rostand.tvcam.exceptions.EmptyPasswordException;
 import com.siewe_rostand.tvcam.security.JwtService;
 import com.siewe_rostand.tvcam.shared.Exceptions.EntityAlreadyExistException;
 import com.siewe_rostand.tvcam.shared.HttpResponse;
-import com.siewe_rostand.tvcam.validator.ObjectsValidator;
+import com.siewe_rostand.tvcam.constraints.validator.ObjectsValidator;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

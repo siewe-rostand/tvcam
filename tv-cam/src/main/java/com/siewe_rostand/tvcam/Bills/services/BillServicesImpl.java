@@ -12,7 +12,7 @@ import com.siewe_rostand.tvcam.Payment.model.enumeration.PaymentStatus;
 import com.siewe_rostand.tvcam.exceptions.ApiException;
 import com.siewe_rostand.tvcam.shared.HttpResponse;
 import com.siewe_rostand.tvcam.shared.PaginatedResponse;
-import com.siewe_rostand.tvcam.validator.ObjectsValidator;
+import com.siewe_rostand.tvcam.constraints.validator.ObjectsValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,13 +1,16 @@
 package com.siewe_rostand.tvcam.Customers.services;
 
-import com.siewe_rostand.tvcam.Customers.repository.CustomersRepository;
 import com.siewe_rostand.tvcam.Customers.dto.CustomersDTO;
 import com.siewe_rostand.tvcam.Customers.model.Customers;
+import com.siewe_rostand.tvcam.Customers.repository.CustomersRepository;
 import com.siewe_rostand.tvcam.Users.models.Users;
 import com.siewe_rostand.tvcam.shared.Exceptions.EntityAlreadyExistException;
 import com.siewe_rostand.tvcam.shared.Exceptions.EntityNotFoundException;
 import com.siewe_rostand.tvcam.shared.PaginatedResponse;
-import com.siewe_rostand.tvcam.validator.ObjectsValidator;
+import com.siewe_rostand.tvcam.constraints.validator.ObjectsValidator;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,11 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -29,20 +28,20 @@ public class CustomerServiceImpl implements CustomerService {
     private final ObjectsValidator<CustomersDTO> validator;
     private final CustomerRefNumberGenerator refNumberGenerator;
 
-
-    @Override
-    public Customers save(CustomersDTO customersDto) {
+  @Transactional
+  @Override
+  public Customers save(CustomersDTO customersDto) {
         validator.validate(customersDto);
         if (customersRepository.existsByTelephone(customersDto.getTelephone())) {
             throw new EntityAlreadyExistException("A customer with the telephone number " + customersDto.getTelephone() + " already exist");
-        } else {
-            customersDto.setIsActive(true);
-            customersDto.setRef(refNumberGenerator.generateRefNumber(customersDto.getId()));
-            customersDto.setIsSuspended(false);
-            customersDto.setHasDebt(false);
-            Customers customers = new Customers().toMap(customersDto);
-            return customersRepository.save(customers);
-        }
+    }
+    String ref = refNumberGenerator.generateRefNumber();
+    customersDto.setIsActive(true);
+    customersDto.setRef(ref);
+    customersDto.setIsSuspended(false);
+    customersDto.setHasDebt(false);
+    Customers customers = new Customers().toMap(customersDto);
+    return customersRepository.save(customers);
     }
 
     @Override
@@ -118,8 +117,9 @@ public class CustomerServiceImpl implements CustomerService {
         checkIfCustomerExistsOrThrow(id);
         Customers customers = customersRepository.findByCustomerId(id);
 
-        if (Optional.ofNullable(customers).isPresent())
-            customersRepository.deleteById(id);
+    customers.setIsActive(false);
+    customers.setIsSuspended(true);
+    customersRepository.save(customers);
     }
 
     @Override

@@ -24,7 +24,7 @@ export class BillService {
       .pipe(catchError(this.handleError));
   }
 
-  generateBills(customerIds: number[],shouldGenerate: boolean): Observable<any> {
+  generateBills(customerIds: (number | undefined)[], shouldGenerate: boolean): Observable<any> {
     return this.http.post(`bills/generate?shouldGenerate=${shouldGenerate}`, customerIds)
       .pipe(catchError(this.handleError));
   }

@@ -15,7 +15,7 @@ import com.siewe_rostand.tvcam.exceptions.ApiException;
 import com.siewe_rostand.tvcam.shared.Exceptions.EntityAlreadyExistException;
 import com.siewe_rostand.tvcam.shared.Exceptions.EntityNotFoundException;
 import com.siewe_rostand.tvcam.shared.PaginatedResponse;
-import com.siewe_rostand.tvcam.validator.ObjectsValidator;
+import com.siewe_rostand.tvcam.constraints.validator.ObjectsValidator;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -79,7 +79,7 @@ public class UserServiceImpl implements UserService {
             throw new EntityNotFoundException(Users.class, "id", usersDto.getId().toString());
         } else {
             Users existingUser = usersRepository.findByUserId(usersDto.getId());
-            existingUser.setActive(usersDto.getActivated());
+            existingUser.setActive(usersDto.getActivated() == null ? existingUser.getActive(): usersDto.getActivated());
             existingUser.setLastname(usersDto.getLastname());
             existingUser.setFirstname(usersDto.getFirstname());
             existingUser.setAddress(usersDto.getAddress());

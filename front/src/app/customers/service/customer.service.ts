@@ -19,11 +19,11 @@ export class CustomerService {
   }
 
   createCustomer(customer: CustomerModel): Observable<any> {
-    return this.http.post<any>('customers/save', customer);
+    return this.http.post<any>('customers', customer);
   }
 
   updateCustomer(customer: CustomerModel): Observable<any> {
-    return this.http.put<any>('customers/edit', customer,);
+    return this.http.put<any>('customers', customer,);
   }
 
   deleteCustomer(customerId: number | undefined): Observable<any> {

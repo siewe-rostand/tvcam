@@ -9,7 +9,7 @@ import {
 } from '@angular/common/http';
 import {inject, Injectable} from '@angular/core';
 import {catchError, map, Observable, throwError} from 'rxjs';
-import {NotificationService} from "./notification.service";
+import {NotificationService} from "../services/notification.service";
 
 @Injectable()
 export class HttpErrorInterceptor implements HttpInterceptor {

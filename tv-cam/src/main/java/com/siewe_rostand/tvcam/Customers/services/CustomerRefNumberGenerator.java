@@ -1,8 +1,8 @@
 package com.siewe_rostand.tvcam.Customers.services;
 
-import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
+import java.util.UUID;
+import org.springframework.stereotype.Service;
 
 /**
  * @author rostand
@@ -11,10 +11,11 @@ import java.time.LocalDate;
 
 @Service
 public class CustomerRefNumberGenerator {
-    // Use the customer's ID and registration date to generate the reference number
-    public String generateRefNumber(Long customerId) {
+  // Use the customer's ID and registration date to generate the reference number
+  public String generateRefNumber() {
+    String uuid = UUID.randomUUID().toString().substring(0, 8); // Get first 8 characters
         LocalDate currentDate = LocalDate.now();
-        return "CLIENT-" + customerId + "-" + currentDate.getYear();
+    return "CLIENT_" + uuid + "_" + currentDate.getYear();
     }
 
 }

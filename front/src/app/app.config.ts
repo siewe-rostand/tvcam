@@ -5,12 +5,12 @@ import {routes} from './app.routes';
 import {provideClientHydration} from '@angular/platform-browser';
 import {provideAnimations} from '@angular/platform-browser/animations';
 import {provideHttpClient, withFetch, withInterceptorsFromDi,} from '@angular/common/http';
-import {httpInterceptorProviders} from './_helper/http-interceptor';
+import {httpInterceptorProviders} from './_shared/interceptors/http-interceptor';
 import {MessageService} from "primeng/api";
 import {NotificationService} from "./_shared/services/notification.service";
-import {httpErrorInterceptorProvider} from "./_shared/services/http-error.interceptor";
+import {httpErrorInterceptorProvider} from "./_shared/interceptors/http-error.interceptor";
 import {environment} from "../environments/environment";
-import {baseUrlInterceptorProvider} from "./_helper/baseurl.interceptor";
+import {baseUrlInterceptorProvider} from "./_shared/interceptors/baseurl.interceptor";
 
 export const appConfig: ApplicationConfig = {
   providers: [
