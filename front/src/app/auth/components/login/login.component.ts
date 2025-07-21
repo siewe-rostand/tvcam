@@ -1,15 +1,15 @@
-import {Component, OnInit} from '@angular/core';
-import {AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators,} from '@angular/forms';
-import {ButtonModule} from 'primeng/button';
-import {PasswordModule} from 'primeng/password';
-import {InputTextModule} from 'primeng/inputtext';
-import {Router, RouterLink} from '@angular/router';
-import {AuthService} from '../../services/auth.service';
-import {CommonModule} from '@angular/common';
-import {InputNumberModule} from 'primeng/inputnumber';
-import {StorageService} from '../../../_shared/services/storage.service';
-import {RippleModule} from "primeng/ripple";
-import {DividerModule} from "primeng/divider";
+import { Component, OnInit } from '@angular/core';
+import { AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators, } from '@angular/forms';
+import { ButtonModule } from 'primeng/button';
+import { PasswordModule } from 'primeng/password';
+import { InputTextModule } from 'primeng/inputtext';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
+import { CommonModule } from '@angular/common';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { StorageService } from '../../../_shared/services/storage.service';
+import { RippleModule } from "primeng/ripple";
+import { DividerModule } from "primeng/divider";
 
 @Component({
   selector: 'app-login',
@@ -33,8 +33,9 @@ export class LoginComponent implements OnInit {
     private formBuilder: FormBuilder,
     private authService: AuthService,
     private router: Router,
+    private route: ActivatedRoute,
     private storageService: StorageService
-  ) {}
+  ) { }
 
   loginForm: FormGroup = new FormGroup({
     telephone: new FormControl(''),
@@ -42,23 +43,29 @@ export class LoginComponent implements OnInit {
   });
   submitted: boolean = false;
   isLoading: boolean = false;
+  returnUrl: string = '/dashboard';
 
   ngOnInit(): void {
-    // if (this.storageService.isLoggedIn()) {
-    //   this.router.navigate(['users']);
-    // }
+    // Check if user is already logged in
+    if (this.storageService.isTokenValid()) {
+      this.router.navigate(['/dashboard']);
+      return;
+    }
+
+    // Get return URL from route parameters or default to dashboard
+    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
 
     this.loginForm = this.formBuilder.group({
       telephone: [null, [Validators.required,
-        Validators.minLength(9),
-        Validators.maxLength(9),
+      Validators.minLength(9),
+      Validators.maxLength(9),
       ]
       ],
       password: [
         null,
         [Validators.required,
-          Validators.minLength(6),
-          Validators.maxLength(16),
+        Validators.minLength(6),
+        Validators.maxLength(16),
         ]
       ],
     });
@@ -82,8 +89,11 @@ export class LoginComponent implements OnInit {
           this.storageService.saveUser(user);
           this.storageService.saveToken(accessToken);
           this.isLoading = false;
-          this.router.navigate(['home']).then(r => r);
-          // console.log(res.data.user);
+
+          // Redirect to the originally requested URL or dashboard
+          this.router.navigate([this.returnUrl]);
+
+          console.log('Login successful, redirecting to:', this.returnUrl);
         },
         error: (err) => {
           console.log(err);

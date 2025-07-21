@@ -4,7 +4,7 @@ import {
 import {
   Ripple,
   RippleModule
-} from "./chunk-E44AIM5L.js";
+} from "./chunk-C7ZNJOEP.js";
 import {
   BaseIcon
 } from "./chunk-AAZTR5OM.js";
@@ -17,18 +17,18 @@ import {
   trigger
 } from "./chunk-3BBYDTQR.js";
 import {
-  Footer,
-  PrimeTemplate,
-  SharedModule,
-  UniqueComponentId
-} from "./chunk-DMTEHVKZ.js";
-import {
   CommonModule,
   NgClass,
   NgIf,
   NgStyle,
   NgTemplateOutlet
 } from "./chunk-EHV74PGP.js";
+import {
+  Footer,
+  PrimeTemplate,
+  SharedModule,
+  UniqueComponentId
+} from "./chunk-DMTEHVKZ.js";
 import {
   ChangeDetectionStrategy,
   Component,
@@ -78,8 +78,8 @@ import {
   ɵɵtext,
   ɵɵtextInterpolate
 } from "./chunk-5KGTYI27.js";
-import "./chunk-56Y3C3CL.js";
 import "./chunk-HMZ5JMOE.js";
+import "./chunk-56Y3C3CL.js";
 import "./chunk-E4U7SOWH.js";
 
 // node_modules/primeng/fesm2022/primeng-icons-minus.mjs

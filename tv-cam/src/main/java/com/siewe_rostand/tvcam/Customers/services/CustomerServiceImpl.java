@@ -7,7 +7,7 @@ import com.siewe_rostand.tvcam.Users.models.Users;
 import com.siewe_rostand.tvcam.shared.Exceptions.EntityAlreadyExistException;
 import com.siewe_rostand.tvcam.shared.Exceptions.EntityNotFoundException;
 import com.siewe_rostand.tvcam.shared.PaginatedResponse;
-import com.siewe_rostand.tvcam.constraints.validator.ObjectsValidator;
+import com.siewe_rostand.tvcam.common.constraints.validator.ObjectsValidator;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;

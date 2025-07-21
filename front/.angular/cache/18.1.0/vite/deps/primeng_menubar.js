@@ -2,16 +2,16 @@ import {
   AngleRightIcon
 } from "./chunk-UUQ264OD.js";
 import {
-  Tooltip,
-  TooltipModule
-} from "./chunk-R3B54S7I.js";
-import {
   AngleDownIcon
 } from "./chunk-HWIUARGD.js";
 import {
+  Tooltip,
+  TooltipModule
+} from "./chunk-XQLRTSM5.js";
+import {
   Ripple,
   RippleModule
-} from "./chunk-E44AIM5L.js";
+} from "./chunk-C7ZNJOEP.js";
 import {
   BaseIcon
 } from "./chunk-AAZTR5OM.js";
@@ -26,14 +26,6 @@ import {
 import "./chunk-3Q4XOZU4.js";
 import "./chunk-DFU7YPP5.js";
 import {
-  ObjectUtils,
-  PrimeNGConfig,
-  PrimeTemplate,
-  SharedModule,
-  UniqueComponentId,
-  zindexutils
-} from "./chunk-DMTEHVKZ.js";
-import {
   CommonModule,
   DOCUMENT,
   NgClass,
@@ -43,6 +35,14 @@ import {
   NgTemplateOutlet,
   isPlatformBrowser
 } from "./chunk-EHV74PGP.js";
+import {
+  ObjectUtils,
+  PrimeNGConfig,
+  PrimeTemplate,
+  SharedModule,
+  UniqueComponentId,
+  zindexutils
+} from "./chunk-DMTEHVKZ.js";
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -108,8 +108,8 @@ import {
   ɵɵtextInterpolate1,
   ɵɵviewQuery
 } from "./chunk-5KGTYI27.js";
-import "./chunk-56Y3C3CL.js";
 import "./chunk-HMZ5JMOE.js";
+import "./chunk-56Y3C3CL.js";
 import {
   Subject,
   __spreadProps,

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.siewe_rostand.tvcam.Bills.dto.BillRequest;
 import com.siewe_rostand.tvcam.Bills.dto.BillResponse;
 import com.siewe_rostand.tvcam.Bills.services.BillServices;
-import com.siewe_rostand.tvcam.exceptions.ApiException;
+import com.siewe_rostand.tvcam.common.exceptions.ApiException;
 import com.siewe_rostand.tvcam.shared.HttpResponse;
 import com.siewe_rostand.tvcam.shared.PaginatedResponse;
 import org.slf4j.Logger;

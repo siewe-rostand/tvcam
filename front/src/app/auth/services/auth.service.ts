@@ -16,7 +16,7 @@ export class AuthService {
 
   login(telephone: string, password: string): Observable<any> {
     return this.http.post<any>(
-      'auth/authenticate',
+      'auth/login',
       {
         password: password,
         telephone: telephone,
@@ -51,6 +51,6 @@ export class AuthService {
   }
 
   logout(): Observable<any> {
-    return this.http.post('auth/signout', {},);
+    return this.http.post('auth/logout', {},);
   }
 }

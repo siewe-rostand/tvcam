@@ -1,6 +1,6 @@
 package com.siewe_rostand.tvcam.security;
 
-import com.siewe_rostand.tvcam.exceptions.JwtAuthenticationException;
+import com.siewe_rostand.tvcam.common.exceptions.JwtAuthenticationException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;

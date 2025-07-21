@@ -5,7 +5,7 @@ import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.siewe_rostand.tvcam.exceptions.JwtAuthenticationException;
+import com.siewe_rostand.tvcam.common.exceptions.JwtAuthenticationException;
 import com.siewe_rostand.tvcam.shared.HttpResponse;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

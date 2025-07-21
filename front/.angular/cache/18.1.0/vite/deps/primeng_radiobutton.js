@@ -8,14 +8,14 @@ import {
   NgControl
 } from "./chunk-27A76D6T.js";
 import {
-  PrimeNGConfig
-} from "./chunk-DMTEHVKZ.js";
-import {
   CommonModule,
   NgClass,
   NgIf,
   NgStyle
 } from "./chunk-EHV74PGP.js";
+import {
+  PrimeNGConfig
+} from "./chunk-DMTEHVKZ.js";
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -60,8 +60,8 @@ import {
   ɵɵtextInterpolate,
   ɵɵviewQuery
 } from "./chunk-5KGTYI27.js";
-import "./chunk-56Y3C3CL.js";
 import "./chunk-HMZ5JMOE.js";
+import "./chunk-56Y3C3CL.js";
 import "./chunk-E4U7SOWH.js";
 
 // node_modules/primeng/fesm2022/primeng-radiobutton.mjs

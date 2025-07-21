@@ -1,0 +1,74 @@
+.dashboard-container {
+  display: flex;
+}
+
+.main-content {
+  flex: 1;
+  padding: 20px;
+}
+
+.metrics-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.card {
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  padding: 20px;
+  text-align: center;
+}
+
+.card h5 {
+  margin: 0;
+}
+
+.card span {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.card p {
+  color: #777;
+}
+
+.card i {
+  font-size: 24px;
+  color: #ccc;
+}
+
+.recent-sales,
+.revenue-stream,
+.best-selling-products,
+.notifications {
+  margin-top: 20px;
+  background-color: #fff;
+  padding: 20px;
+  border: 1px solid #e0e0e0;
+}
+
+.recent-sales table {
+  width: 100%;
+}
+
+.product-item {
+  margin-bottom: 10px;
+}
+
+.notification-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.notification-item img {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.increase {
+  color: green;
+}

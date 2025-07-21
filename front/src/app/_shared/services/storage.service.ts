@@ -1,14 +1,14 @@
-import {Injectable} from '@angular/core';
-import {UserModel} from '../../user/model/user.model';
-import {LocalStorageService} from './local-storage.service';
-import {JWT_TOKEN, JWT_TOKEN_EXPIRATION, USER_KEY} from "../utils/constant";
+import { Injectable } from '@angular/core';
+import { UserModel } from '../../user/model/user.model';
+import { LocalStorageService } from './local-storage.service';
+import { JWT_TOKEN, JWT_TOKEN_EXPIRATION, USER_KEY } from "../utils/constant";
 
 
 @Injectable({
   providedIn: 'root',
 })
 export class StorageService {
-  constructor(private localStorageService: LocalStorageService) {}
+  constructor(private localStorageService: LocalStorageService) { }
 
   clean() {
     this.localStorageService.clear();
@@ -27,7 +27,7 @@ export class StorageService {
     this.localStorageService.setItem(JWT_TOKEN_EXPIRATION, expirationDate.toString());
   }
 
-  public getUser(): any {
+  public getUser(): UserModel {
     const user = this.localStorageService.getItem(USER_KEY);
     if (user) {
       return JSON.parse(user);
@@ -59,5 +59,7 @@ export class StorageService {
     }
   }
 
-
+  public logout(): void {
+    this.clean();
+  }
 }
