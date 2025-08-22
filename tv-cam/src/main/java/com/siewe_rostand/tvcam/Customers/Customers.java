@@ -1,6 +1,7 @@
 package com.siewe_rostand.tvcam.Customers;
 
 import com.siewe_rostand.tvcam.Payment.PaymentFrequency;
+import com.siewe_rostand.tvcam.Zones.model.Zone;
 import com.siewe_rostand.tvcam.shared.model.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
@@ -11,6 +12,7 @@ import org.hibernate.annotations.ColumnDefault;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -60,9 +62,16 @@ public class Customers extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @ColumnDefault("'MONTHLY'")
-    private PaymentFrequency paymentFrequency;;
+    private PaymentFrequency paymentFrequency;
 
     private LocalDate lastBillGenerationDate;
+
+    @Column(name = "monthly_payment_amount", nullable = false)
+    private BigDecimal monthlyPaymentAmount = new BigDecimal("2000.00");
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "zone_id")
+    private Zone zone;
 
 
     public Customers toMap(CustomersDTO customersDto) {
