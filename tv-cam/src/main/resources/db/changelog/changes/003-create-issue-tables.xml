@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
+
+    <changeSet id="012-create-issue-types-table" author="rostand">
+        <createTable tableName="issue_types">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="code" type="VARCHAR(20)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="description" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="priority_level" type="VARCHAR(20)" defaultValue="MEDIUM">
+                <constraints nullable="false"/>
+            </column>
+            <column name="estimated_resolution_time" type="INTEGER">
+                <constraints nullable="true"/>
+            </column>
+            <column name="is_active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_by" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="modified_by" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="updated_at" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="013-create-issues-table" author="rostand">
+        <createTable tableName="issues">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="reference" type="VARCHAR(50)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="title" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(20)" defaultValue="OPEN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="priority" type="VARCHAR(20)" defaultValue="MEDIUM">
+                <constraints nullable="false"/>
+            </column>
+            <column name="reported_date" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="expected_resolution_date" type="DATETIME">
+                <constraints nullable="true"/>
+            </column>
+            <column name="actual_resolution_date" type="DATETIME">
+                <constraints nullable="true"/>
+            </column>
+            <column name="customer_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="issue_type_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="assigned_technician_id" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="zone_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="location_details" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="resolution_notes" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="customer_satisfaction_rating" type="INTEGER">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_at" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_by" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="modified_by" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="updated_at" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+        
+        <addForeignKeyConstraint
+                baseTableName="issues"
+                baseColumnNames="customer_id"
+                constraintName="fk_issues_customer"
+                referencedTableName="customers"
+                referencedColumnNames="id"/>
+                
+        <addForeignKeyConstraint
+                baseTableName="issues"
+                baseColumnNames="issue_type_id"
+                constraintName="fk_issues_issue_type"
+                referencedTableName="issue_types"
+                referencedColumnNames="id"/>
+                
+        <addForeignKeyConstraint
+                baseTableName="issues"
+                baseColumnNames="assigned_technician_id"
+                constraintName="fk_issues_technician"
+                referencedTableName="users"
+                referencedColumnNames="id"/>
+                
+        <addForeignKeyConstraint
+                baseTableName="issues"
+                baseColumnNames="zone_id"
+                constraintName="fk_issues_zone"
+                referencedTableName="zones"
+                referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="014-create-issue-comments-table" author="rostand">
+        <createTable tableName="issue_comments">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="issue_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="comment" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="comment_type" type="VARCHAR(20)" defaultValue="GENERAL">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_internal" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="attachment_url" type="VARCHAR(500)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_at" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_by" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="modified_by" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="updated_at" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+        
+        <addForeignKeyConstraint
+                baseTableName="issue_comments"
+                baseColumnNames="issue_id"
+                constraintName="fk_issue_comments_issue"
+                referencedTableName="issues"
+                referencedColumnNames="id"/>
+                
+        <addForeignKeyConstraint
+                baseTableName="issue_comments"
+                baseColumnNames="created_by"
+                constraintName="fk_issue_comments_user"
+                referencedTableName="users"
+                referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="015-insert-default-issue-types" author="rostand">
+        <insert tableName="issue_types">
+            <column name="name" value="Panne d'image"/>
+            <column name="code" value="NO_SIGNAL"/>
+            <column name="description" value="Absence de signal ou problème d'image"/>
+            <column name="priority_level" value="HIGH"/>
+            <column name="estimated_resolution_time" value="24"/>
+            <column name="created_at" value="2024-01-01 00:00:00"/>
+        </insert>
+        
+        <insert tableName="issue_types">
+            <column name="name" value="Poteau tombé"/>
+            <column name="code" value="FALLEN_POLE"/>
+            <column name="description" value="Poteau électrique ou de télévision tombé"/>
+            <column name="priority_level" value="URGENT"/>
+            <column name="estimated_resolution_time" value="48"/>
+            <column name="created_at" value="2024-01-01 00:00:00"/>
+        </insert>
+        
+        <insert tableName="issue_types">
+            <column name="name" value="Problème de décodeur"/>
+            <column name="code" value="DECODER_ISSUE"/>
+            <column name="description" value="Problème avec le décodeur de télévision"/>
+            <column name="priority_level" value="MEDIUM"/>
+            <column name="estimated_resolution_time" value="24"/>
+            <column name="created_at" value="2024-01-01 00:00:00"/>
+        </insert>
+        
+        <insert tableName="issue_types">
+            <column name="name" value="Câblage défectueux"/>
+            <column name="code" value="CABLE_DAMAGE"/>
+            <column name="description" value="Câbles endommagés ou défectueux"/>
+            <column name="priority_level" value="HIGH"/>
+            <column name="estimated_resolution_time" value="24"/>
+            <column name="created_at" value="2024-01-01 00:00:00"/>
+        </insert>
+        
+        <insert tableName="issue_types">
+            <column name="name" value="Réclamation facture"/>
+            <column name="code" value="BILLING_COMPLAINT"/>
+            <column name="description" value="Réclamation concernant la facturation"/>
+            <column name="priority_level" value="MEDIUM"/>
+            <column name="estimated_resolution_time" value="72"/>
+            <column name="created_at" value="2024-01-01 00:00:00"/>
+        </insert>
+        
+        <insert tableName="issue_types">
+            <column name="name" value="Demande de déplacement"/>
+            <column name="code" value="RELOCATION_REQUEST"/>
+            <column name="description" value="Demande de déplacement d'installation"/>
+            <column name="priority_level" value="LOW"/>
+            <column name="estimated_resolution_time" value="120"/>
+            <column name="created_at" value="2024-01-01 00:00:00"/>
+        </insert>
+        
+        <insert tableName="issue_types">
+            <column name="name" value="Autre"/>
+            <column name="code" value="OTHER"/>
+            <column name="description" value="Autres types de problèmes"/>
+            <column name="priority_level" value="MEDIUM"/>
+            <column name="estimated_resolution_time" value="48"/>
+            <column name="created_at" value="2024-01-01 00:00:00"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

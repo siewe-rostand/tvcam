@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
+
+    <!-- Include initial schema -->
+    <include file="db/changelog/changes/001-create-initial-schema.xml"/>
+    
+    <!-- Include zone management -->
+    <include file="db/changelog/changes/002-create-zone-tables.xml"/>
+    
+    <!-- Include issue management -->
+    <include file="db/changelog/changes/003-create-issue-tables.xml"/>
+    
+    <!-- Include enhanced user roles -->
+    <include file="db/changelog/changes/004-enhance-user-roles.xml"/>
+
+</databaseChangeLog>

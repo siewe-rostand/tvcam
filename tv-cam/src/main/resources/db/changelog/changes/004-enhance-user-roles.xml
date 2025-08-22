@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
+
+    <changeSet id="016-insert-enhanced-roles" author="rostand">
+        <insert tableName="roles">
+            <column name="name" value="ROLE_ADMIN"/>
+        </insert>
+        
+        <insert tableName="roles">
+            <column name="name" value="ROLE_CABLEUR_CHEF"/>
+        </insert>
+        
+        <insert tableName="roles">
+            <column name="name" value="ROLE_CABLEUR"/>
+        </insert>
+        
+        <insert tableName="roles">
+            <column name="name" value="ROLE_TECHNICIEN"/>
+        </insert>
+        
+        <insert tableName="roles">
+            <column name="name" value="ROLE_RECOUVREUR"/>
+        </insert>
+        
+        <insert tableName="roles">
+            <column name="name" value="ROLE_CUSTOMER"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="017-add-payment-frequency-discounts" author="rostand">
+        <createTable tableName="payment_frequency_discounts">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="payment_frequency" type="VARCHAR(20)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="discount_percentage" type="DECIMAL(5,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="minimum_months" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="is_active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_by" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="modified_by" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="updated_at" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="018-insert-default-payment-discounts" author="rostand">
+        <insert tableName="payment_frequency_discounts">
+            <column name="payment_frequency" value="MONTHLY"/>
+            <column name="discount_percentage" value="0.00"/>
+            <column name="minimum_months" value="1"/>
+            <column name="description" value="Paiement mensuel sans rabais"/>
+            <column name="created_at" value="2024-01-01 00:00:00"/>
+        </insert>
+        
+        <insert tableName="payment_frequency_discounts">
+            <column name="payment_frequency" value="QUARTERLY"/>
+            <column name="discount_percentage" value="5.00"/>
+            <column name="minimum_months" value="3"/>
+            <column name="description" value="Paiement trimestriel avec 5% de rabais"/>
+            <column name="created_at" value="2024-01-01 00:00:00"/>
+        </insert>
+        
+        <insert tableName="payment_frequency_discounts">
+            <column name="payment_frequency" value="SEMI_ANNUALLY"/>
+            <column name="discount_percentage" value="8.00"/>
+            <column name="minimum_months" value="6"/>
+            <column name="description" value="Paiement semestriel avec 8% de rabais"/>
+            <column name="created_at" value="2024-01-01 00:00:00"/>
+        </insert>
+        
+        <insert tableName="payment_frequency_discounts">
+            <column name="payment_frequency" value="ANNUALLY"/>
+            <column name="discount_percentage" value="12.00"/>
+            <column name="minimum_months" value="12"/>
+            <column name="description" value="Paiement annuel avec 12% de rabais"/>
+            <column name="created_at" value="2024-01-01 00:00:00"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="019-add-monthly-payment-amount-to-customers" author="rostand">
+        <addColumn tableName="customers">
+            <column name="monthly_payment_amount" type="DECIMAL(19,2)" defaultValue="2000.00">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="020-create-payment-history-table" author="rostand">
+        <createTable tableName="payment_history">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="payment_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="customer_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="collected_by_user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="collection_location" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="payment_details" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="transaction_reference" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_at" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_by" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="modified_by" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="updated_at" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+        
+        <addForeignKeyConstraint
+                baseTableName="payment_history"
+                baseColumnNames="payment_id"
+                constraintName="fk_payment_history_payment"
+                referencedTableName="payments"
+                referencedColumnNames="id"/>
+                
+        <addForeignKeyConstraint
+                baseTableName="payment_history"
+                baseColumnNames="customer_id"
+                constraintName="fk_payment_history_customer"
+                referencedTableName="customers"
+                referencedColumnNames="id"/>
+                
+        <addForeignKeyConstraint
+                baseTableName="payment_history"
+                baseColumnNames="collected_by_user_id"
+                constraintName="fk_payment_history_user"
+                referencedTableName="users"
+                referencedColumnNames="id"/>
+    </changeSet>
+
+</databaseChangeLog>

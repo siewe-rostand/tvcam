@@ -60,10 +60,10 @@ public class AuthenticationService {
                 .active(true)
                 .build();
         // set roles
-        Roles userRole = roleRepository.getByName(RoleType.ROLE_USER.name())
+        Roles userRole = roleRepository.getByName(RoleType.ROLE_CUSTOMER.name())
                 .orElse(
                         Roles.builder()
-                                .name(RoleType.ROLE_USER.name())
+                                .name(RoleType.ROLE_CUSTOMER.name())
                                 .build()
                 );
         if (userRole.getRoleId() == null) {
