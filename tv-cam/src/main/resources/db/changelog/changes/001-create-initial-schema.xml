@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.23.xsd">
+
+    <changeSet id="001-create-users-table" author="rostand">
+        <createTable tableName="users">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="uid" type="VARCHAR(36)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="firstname" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="lastname" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="password" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="telephone" type="VARCHAR(255)">
+                <constraints nullable="true" unique="true"/>
+            </column>
+            <column name="address" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="image_url" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="active" type="BOOLEAN">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_at" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="updated_at" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="002-create-roles-table" author="rostand">
+        <createTable tableName="roles">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="true" unique="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="003-create-user-roles-table" author="rostand">
+        <createTable tableName="user_roles">
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        
+        <addPrimaryKey tableName="user_roles" columnNames="user_id,role_id"/>
+        
+        <addForeignKeyConstraint
+                baseTableName="user_roles"
+                baseColumnNames="user_id"
+                constraintName="fk_user_roles_user"
+                referencedTableName="users"
+                referencedColumnNames="id"/>
+                
+        <addForeignKeyConstraint
+                baseTableName="user_roles"
+                baseColumnNames="role_id"
+                constraintName="fk_user_roles_role"
+                referencedTableName="roles"
+                referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="004-create-customers-table" author="rostand">
+        <createTable tableName="customers">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="address" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="ref" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="telephone" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="has_debt" type="BOOLEAN">
+                <constraints nullable="true"/>
+            </column>
+            <column name="has_paid" type="BOOLEAN">
+                <constraints nullable="true"/>
+            </column>
+            <column name="is_active" type="BOOLEAN">
+                <constraints nullable="true"/>
+            </column>
+            <column name="is_suspended" type="BOOLEAN">
+                <constraints nullable="true"/>
+            </column>
+            <column name="payment_frequency" type="VARCHAR(20)" defaultValue="MONTHLY">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_bill_generation_date" type="DATE">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_at" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_by" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="modified_by" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="updated_at" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="005-create-bills-table" author="rostand">
+        <createTable tableName="bills">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="month" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="year" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="deposit_date" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="deadline" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="paid_amount" type="DECIMAL(19,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="monthly_payment" type="DECIMAL(19,2)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="debt" type="DECIMAL(19,2)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="penalties" type="INTEGER">
+                <constraints nullable="true"/>
+            </column>
+            <column name="net_to_pay" type="DECIMAL(19,2)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="observation" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="payment_status" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="current_period_bill" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="customer_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_by" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="modified_by" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="updated_at" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+        
+        <addForeignKeyConstraint
+                baseTableName="bills"
+                baseColumnNames="customer_id"
+                constraintName="fk_bills_customer"
+                referencedTableName="customers"
+                referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="006-create-payments-table" author="rostand">
+        <createTable tableName="payments">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="amount" type="DECIMAL(19,2)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="payment_ref" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="observation" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="payment_method" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="payment_date" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_at" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_by" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="modified_by" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="bill_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        
+        <addForeignKeyConstraint
+                baseTableName="payments"
+                baseColumnNames="bill_id"
+                constraintName="fk_payments_bill"
+                referencedTableName="bills"
+                referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="007-create-sequence" author="rostand">
+        <createSequence sequenceName="MY_SEQ" incrementBy="1" startValue="1"/>
+    </changeSet>
+
+</databaseChangeLog>
