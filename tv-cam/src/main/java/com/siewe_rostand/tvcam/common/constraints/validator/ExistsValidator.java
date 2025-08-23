@@ -1,15 +1,16 @@
 package com.siewe_rostand.tvcam.common.constraints.validator;
 
-import static com.siewe_rostand.tvcam.utils.Helpers.logException;
-
 import com.siewe_rostand.tvcam.common.constraints.Exists;
-import com.siewe_rostand.tvcam.utils.Helpers;
+import com.siewe_rostand.tvcam.common.utils.Helpers;
+
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import java.lang.reflect.InvocationTargetException;
 import org.apache.commons.beanutils.BeanUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
+
+import static com.siewe_rostand.tvcam.common.utils.Helpers.logException;
 
 /**
  * @author rostand
@@ -44,9 +45,8 @@ public class ExistsValidator implements ConstraintValidator<Exists, Object> {
       final Object propertyObj = BeanUtils.getProperty(value, field);
       String finalPropertyName = Helpers.capitalize(field);
 
-      result =
-          type.getMethod("findBy" + finalPropertyName, String.class)
-              .invoke(instance, propertyObj.toString());
+      result = type.getMethod("findBy" + finalPropertyName, String.class)
+          .invoke(instance, propertyObj.toString());
     } catch (ClassNotFoundException
         | IllegalAccessException
         | InvocationTargetException

@@ -13,7 +13,7 @@
     <description>Parent POM for Spring Boot and Angular application</description>
 
     <modules>
-        <module>front</module>
+<!--        <module>front</module>-->
         <module>tv-cam</module>
     </modules>
 

@@ -23,17 +23,17 @@ import lombok.experimental.SuperBuilder;
 @Setter
 @SuperBuilder
 public class Bills extends BaseEntity {
-    @JsonIgnore
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "bills",fetch = FetchType.EAGER, orphanRemoval = true)
-    List<Payments> payments;
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Basic(optional = false)
-    @Column(name = "id")
-    private Long billId;
+  @JsonIgnore
+  @OneToMany(cascade = CascadeType.ALL, mappedBy = "bills", fetch = FetchType.LAZY, orphanRemoval = true)
+  List<Payments> payments;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Basic(optional = false)
+  @Column(name = "id")
+  private Long billId;
 
-    @NotNull(message = "need to specify the month of the bill")
-    private String month;
+  @NotNull(message = "need to specify the month of the bill")
+  private String month;
 
   @NotNull(message = "Year is required")
   private String year;
@@ -47,25 +47,24 @@ public class Bills extends BaseEntity {
 
   private Integer penalties;
 
-    @NotNull(message = "bill amount must not be null")
-    private BigDecimal paidAmount;
+  @NotNull(message = "bill amount must not be null")
+  private BigDecimal paidAmount;
 
   @Column(name = "net_to_pay")
   private BigDecimal netToPay;
 
   private BigDecimal monthlyPayment;
 
-    private String observation;
+  private String observation;
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private PaymentStatus paymentStatus;
 
-    private boolean currentPeriodBill;
+  private boolean currentPeriodBill;
 
-
-    @ManyToOne()
-    @JoinColumn(name = "customer_id")
-    private Customers customers;
+  @ManyToOne()
+  @JoinColumn(name = "customer_id")
+  private Customers customers;
 
 }

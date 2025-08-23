@@ -2,8 +2,15 @@ package com.siewe_rostand.tvcam.Users.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.siewe_rostand.tvcam.Roles.Roles;
+import com.siewe_rostand.tvcam.Zone.model.Zone;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
+import lombok.*;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
@@ -11,11 +18,6 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import lombok.*;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
 @Table(name = "users")
@@ -51,26 +53,28 @@ public class Users implements UserDetails {
 
     private String imageUrl;
 
-
     private Boolean active;
 
-
     private String createdAt;
-    
-    
+
     private String updatedAt;
 
-  private String deleted_at;
+    private String deleted_at;
 
-  private Long deleted_by;
+    private Long deleted_by;
 
-  private Boolean deleted;
+    private Boolean deleted;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "user_roles", joinColumns = {
             @JoinColumn(name = "user_id", referencedColumnName = "id")}, inverseJoinColumns = {
             @JoinColumn(name = "role_id", referencedColumnName = "id")})
     private Set<Roles> roles;
+
+    // Relations avec les zones - Un utilisateur peut être dans plusieurs zones
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "user_zones", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "zone_id"))
+    private Set<Zone> zones;
 
     @JsonIgnore
     @Override
@@ -82,39 +86,27 @@ public class Users implements UserDetails {
     }
 
     @PrePersist
-    protected  void PrePersist(){
+    protected void PrePersist() {
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", Locale.FRANCE);
         String formattedDate = formatter.format(now);
-        if(createdAt == null) createdAt = formattedDate;
-        if (this.updatedAt == null) updatedAt = formattedDate;
+        if (createdAt == null)
+            createdAt = formattedDate;
+        if (this.updatedAt == null)
+            updatedAt = formattedDate;
         uid = UUID.randomUUID();
     }
 
     @PreUpdate
-    protected  void PreUpdate(){
+    protected void PreUpdate() {
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", Locale.FRANCE);
         updatedAt = formatter.format(now);
     }
+
     @Override
     public String getUsername() {
         return telephone;
-    }
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
     }
 
     @Override

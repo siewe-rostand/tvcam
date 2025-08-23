@@ -29,4 +29,7 @@ public class Roles {
     @Column(unique = true)
     private String name;
 
+    @Column()
+    private String description;
+
 }

@@ -8,4 +8,6 @@
     <include file="db/changelog/changes/user/003-create-table-user-roles.xml"/>
     <include file="db/changelog/changes/customer/001-create-customers-table.xml"/>
     <include file="db/changelog/changes/bills/001-create-bills-table.xml"/>
+    <include file="db/changelog/004-add-zones-issues-discounts.xml"/>
+    <include file="db/changelog/changes/roles/002-update-table-roles-add-description.xml"/>
 </databaseChangeLog>

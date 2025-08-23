@@ -2,6 +2,7 @@ package com.siewe_rostand.tvcam.Payment.services;
 
 import com.siewe_rostand.tvcam.Bills.model.Bills;
 import com.siewe_rostand.tvcam.Bills.repository.BillRepository;
+import com.siewe_rostand.tvcam.Bills.service.BillCalculationService;
 import com.siewe_rostand.tvcam.Customers.model.Customers;
 import com.siewe_rostand.tvcam.Customers.repository.CustomersRepository;
 import com.siewe_rostand.tvcam.Payment.dto.PaymentMapper;
@@ -24,12 +25,14 @@ import java.util.List;
 import java.util.Locale;
 import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author rostand
@@ -37,6 +40,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PaymentServiceImpl implements PaymentService {
     private final PaymentRepository paymentRepository;
     private final PaymentMapper paymentMapper;
@@ -44,75 +48,100 @@ public class PaymentServiceImpl implements PaymentService {
     private final BillRepository billRepository;
     private final CustomersRepository customersRepository;
     private final ObjectsValidator<PaymentRequest> validator;
-
+    private final BillCalculationService billCalculationService;
 
     @Override
+    @Transactional
     public PaymentResponse save(PaymentRequest paymentRequest) {
+        log.info("Traitement du paiement pour le client ID: {}, montant: {}",
+                paymentRequest.getCustomerId(), paymentRequest.getAmount());
+
         validator.validate(paymentRequest);
-    if (paymentRequest.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
-      throw new ApiException(
-          "Bill amount is invalid and must be greater than " + paymentRequest.getAmount(),
-          "must provide the payment amount");
-        }
-    Customers customers =
-        customersRepository
-            .findById(paymentRequest.getCustomerId())
-            .orElseThrow(
-                () ->
-                    new EntityNotFoundException(
-                        "No customer with ID "
-                            + paymentRequest.getCustomerId()
-                            + " found!. Please Enter a Valid Customer ID"));
 
-    Bills currentBills =
-        billRepository
-            .findByCustomersAndCurrentPeriodBill(customers, true)
-            .orElseThrow(
-                () ->
-                    new EntityNotFoundException(
-                        "No Bill with ID "
-                            + paymentRequest.getBillId()
-                            + " found!. Please Enter a Valid Bill ID"));
-
-        if (currentBills.getPaymentStatus() == PaymentStatus.PAID) {
-            throw new ApiException("Trying to pay a bill which have already been paid", "Current bill has already been paid");
+        if (paymentRequest.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new ApiException(
+                    "Le montant du paiement est invalide et doit être supérieur à " + paymentRequest.getAmount(),
+                    "Veuillez fournir un montant de paiement valide");
         }
-        BigDecimal remainingAmount = currentBills.getNetToPay().subtract(currentBills.getPaidAmount());
+
+        Customers customer = customersRepository
+                .findById(paymentRequest.getCustomerId())
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Aucun client avec l'ID " + paymentRequest.getCustomerId()
+                                + " trouvé! Veuillez entrer un ID client valide"));
+
+        Bills currentBill = billRepository
+                .findByCustomersAndCurrentPeriodBill(customer, true)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Aucune facture avec l'ID " + paymentRequest.getBillId()
+                                + " trouvée! Veuillez entrer un ID de facture valide"));
+
+        if (currentBill.getPaymentStatus() == PaymentStatus.PAID) {
+            throw new ApiException("Tentative de paiement d'une facture déjà payée",
+                    "La facture actuelle a déjà été payée");
+        }
+
+        // Vérification des rabais disponibles avec BillCalculationService
+        if (billCalculationService.isEligibleForDiscount(customer)) {
+            BigDecimal discountPercentage = billCalculationService
+                    .getDiscountPercentage(customer.getPaymentFrequency());
+            log.info("Client {} éligible au rabais de {}% pour fréquence {}",
+                    customer.getCustomerId(), discountPercentage, customer.getPaymentFrequency());
+        }
+
+        BigDecimal remainingAmount = currentBill.getNetToPay().subtract(currentBill.getPaidAmount());
+        log.debug("Montant restant à payer: {}", remainingAmount);
 
         if (paymentRequest.getAmount().compareTo(remainingAmount) > 0) {
-            throw new ApiException("Payment amount is more than what is remaining to be paid");
+            throw new ApiException(
+                    "Le montant du paiement dépasse ce qui reste à payer. Montant restant: " + remainingAmount);
         }
-    if (paymentRequest.getCustomerPaymentFrequency() != null) {
-            customers.setPaymentFrequency(PaymentFrequency.valueOf(paymentRequest.getCustomerPaymentFrequency()));
-            customersRepository.save(customers);
+
+        // Mise à jour de la fréquence de paiement du client si spécifiée
+        if (paymentRequest.getCustomerPaymentFrequency() != null) {
+            PaymentFrequency newFrequency = PaymentFrequency.valueOf(paymentRequest.getCustomerPaymentFrequency());
+            customer.setPaymentFrequency(newFrequency);
+            customersRepository.save(customer);
+            log.info("Fréquence de paiement mise à jour pour le client {}: {}", customer.getCustomerId(), newFrequency);
         }
+
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", Locale.FRANCE);
 
-        Payments payments = new Payments();
-        payments.setBills(currentBills);
-        payments.setPaymentDate(formatter.format(now));
+        Payments payment = new Payments();
+        payment.setBills(currentBill);
+        payment.setPaymentDate(formatter.format(now));
+        payment.setPaymentRef(paymentReferenceGenerator.generatePaymentReference());
+        payment.setAmount(paymentRequest.getAmount());
+        payment.setPaymentMethod(paymentRequest.getPaymentMethod() == null ? PaymentMethod.CASH
+                : PaymentMethod.valueOf(paymentRequest.getPaymentMethod()));
+        payment.setObservation(paymentRequest.getObservation());
 
-        payments.setPaymentRef(paymentReferenceGenerator.generatePaymentReference());
-        payments.setAmount(paymentRequest.getAmount());
-        payments.setPaymentMethod(paymentRequest.getPaymentMethod() == null ? PaymentMethod.CASH : PaymentMethod.valueOf(paymentRequest.getPaymentMethod()));
-        payments.setObservation(paymentRequest.getObservation());
-        paymentRepository.save(payments);
+        paymentRepository.save(payment);
 
-        currentBills.setPaidAmount(currentBills.getPaidAmount().add(paymentRequest.getAmount()));
-        if (payments.getAmount().compareTo(currentBills.getNetToPay()) >= 0) {
-            currentBills.setPaymentStatus(PaymentStatus.PAID);
+        // Mise à jour du montant payé et du statut de la facture
+        BigDecimal newPaidAmount = currentBill.getPaidAmount().add(paymentRequest.getAmount());
+        currentBill.setPaidAmount(newPaidAmount);
+
+        // Correction de la logique de statut
+        if (newPaidAmount.compareTo(currentBill.getNetToPay()) >= 0) {
+            currentBill.setPaymentStatus(PaymentStatus.PAID);
+            log.info("Facture complètement payée pour le client {}", customer.getCustomerId());
         } else {
-            currentBills.setPaymentStatus(PaymentStatus.PARTIALLY_PAID);
+            currentBill.setPaymentStatus(PaymentStatus.PARTIALLY_PAID);
+            log.info("Facture partiellement payée pour le client {}: {}/{}",
+                    customer.getCustomerId(), newPaidAmount, currentBill.getNetToPay());
         }
 
-        billRepository.save(currentBills);
-        return paymentMapper.toResponse(payments);
+        billRepository.save(currentBill);
+
+        log.info("Paiement traité avec succès. Référence: {}", payment.getPaymentRef());
+        return paymentMapper.toResponse(payment);
     }
 
     @Override
     public PaginatedResponse findAll(Integer page, Integer size, String sortBy,
-                                     String direction, String name) {
+            String direction, String name) {
         Pageable pageable = createPageable(page, size, sortBy, direction);
         Page<Payments> payments;
         if (!name.isEmpty()) {
@@ -125,9 +154,10 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public List<PaymentResponse> findPaymentByCustomerId(Long customerId) {
-        Customers customers = customersRepository.findById(customerId).orElseThrow(() ->
-                new EntityNotFoundException("No customer with ID " + customerId + " found!. Please Enter a Valid Customer ID"));
-        List<Payments> payments = paymentRepository.findByBills_CustomersCustomerId(customers.getCustomerId());
+        Customers customer = customersRepository.findById(customerId).orElseThrow(() -> new EntityNotFoundException(
+                "Aucun client avec l'ID " + customerId + " trouvé! Veuillez entrer un ID client valide"));
+
+        List<Payments> payments = paymentRepository.findByBills_CustomersCustomerId(customer.getCustomerId());
         List<PaymentResponse> paymentResponses = new ArrayList<>();
         for (Payments payment : payments) {
             paymentResponses.add(paymentMapper.toResponse(payment));
@@ -150,11 +180,12 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     private PaginatedResponse buildResponse(Page<Payments> payments, Pageable pageable) {
-        Page<PaymentResponse> responses = payments.map((Function<? super Payments, ? extends PaymentResponse>) paymentMapper::toResponse);
+        Page<PaymentResponse> responses = payments
+                .map((Function<? super Payments, ? extends PaymentResponse>) paymentMapper::toResponse);
         return PaginatedResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.OK).statusCode(HttpStatus.OK.value())
-                .message("Payments gotten successfully")
+                .message("Paiements récupérés avec succès")
                 .data(responses.getContent())
                 .lastPage(responses.isLast()).firstPage(responses.isFirst())
                 .totalPages(responses.getTotalPages()).totalElements(responses.getNumberOfElements())

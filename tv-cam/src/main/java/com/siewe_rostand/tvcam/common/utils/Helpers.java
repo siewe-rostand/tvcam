@@ -1,4 +1,4 @@
-package com.siewe_rostand.tvcam.utils;
+package com.siewe_rostand.tvcam.common.utils;
 
 import com.siewe_rostand.tvcam.common.exceptions.GlobalExceptionHandler;
 import java.util.ArrayList;

@@ -3,6 +3,7 @@ package com.siewe_rostand.tvcam.Customers.model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.siewe_rostand.tvcam.Customers.dto.CustomersDTO;
 import com.siewe_rostand.tvcam.Payment.model.enumeration.PaymentFrequency;
+import com.siewe_rostand.tvcam.Zone.model.Zone;
 import com.siewe_rostand.tvcam.shared.model.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
@@ -57,21 +58,25 @@ public class Customers extends BaseEntity {
     @ColumnDefault("'MONTHLY'")
     private PaymentFrequency paymentFrequency;
 
+    // Zone géographique du client
+    @ManyToOne
+    @JoinColumn(name = "zone_id")
+    private Zone zone;
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime lastBillGenerationDate;
 
-
     public Customers toMap(CustomersDTO customersDto) {
-    return Customers.builder()
-        .customerId(customersDto.getId())
-        .ref(customersDto.getRef())
-        .name(customersDto.getName())
-        .address(customersDto.getAddress())
-        .hasPaid(customersDto.getHasPaid())
-        .hasDebt(customersDto.getHasDebt())
-        .telephone(customersDto.getTelephone())
-        .isActive(customersDto.getIsActive())
-        .isSuspended(customersDto.getIsSuspended())
-        .build();
+        return Customers.builder()
+                .customerId(customersDto.getId())
+                .ref(customersDto.getRef())
+                .name(customersDto.getName())
+                .address(customersDto.getAddress())
+                .hasPaid(customersDto.getHasPaid())
+                .hasDebt(customersDto.getHasDebt())
+                .telephone(customersDto.getTelephone())
+                .isActive(customersDto.getIsActive())
+                .isSuspended(customersDto.getIsSuspended())
+                .build();
     }
 }

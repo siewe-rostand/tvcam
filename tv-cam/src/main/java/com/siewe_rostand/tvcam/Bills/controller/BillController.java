@@ -71,11 +71,12 @@ public class BillController {
     }
 
     @GetMapping()
-    public ResponseEntity<PaginatedResponse> getAllBills(@RequestParam(name = "page", defaultValue = "0") Integer page,
-                                                         @RequestParam(name = "size", defaultValue = "999999") Integer size,
-                                                         @RequestParam(name = "sortBy", defaultValue = "createdAt") String sortBy,
-                                                         @RequestParam(name = "direction", defaultValue = "desc") String direction,
-                                                         @RequestParam(name = "name", defaultValue = "") String name) {
+    public ResponseEntity<PaginatedResponse> getAllBills(
+            @RequestParam(name = "page", defaultValue = "0") Integer page,
+            @RequestParam(name = "size", defaultValue = "10") Integer size,
+            @RequestParam(name = "sortBy", defaultValue = "createdAt") String sortBy,
+            @RequestParam(name = "direction", defaultValue = "desc") String direction,
+            @RequestParam(name = "name", defaultValue = "") String name) {
         PaginatedResponse response = billServices.findAll(page, size, sortBy, direction, name);
         return ResponseEntity.status(OK).body(response);
     }

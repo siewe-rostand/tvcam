@@ -1,9 +1,15 @@
 # DATABASE
-MYSQL_HOST: localhost
-MYSQL_DATABASE: tv_cam
-MYSQL_PORT: 3306
-MYSQL_USERNAME: root
-MYSQL_PASSWORD: Mouf@2020
+DB_HOST: localhost
+DB_DATABASE: cable_distribution
+DB_PORT: 5432
+DB_USERNAME: rostand
+DB_PASSWORD: rostand
+DB_URL: jdbc:postgresql
+DB_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
+DB_DRIVER: org.postgresql.Driver
+
+#MYSQL_USERNAME: root
+#MYSQL_PASSWORD: Mouf@2020
 
 # SERVER CONFIG
 CONTAINER_PORT: 8085

@@ -1,6 +1,7 @@
 package com.siewe_rostand.tvcam.Users.repository;
 
 import com.siewe_rostand.tvcam.Users.models.Users;
+import com.siewe_rostand.tvcam.Zone.model.Zone;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -40,4 +41,7 @@ public interface UsersRepository extends JpaRepository<Users, Long> {
     @Transactional
     @Query("UPDATE Users u set u.password = ?1")
     void changePassword(String password);
+
+    // Méthode pour ZoneService
+    List<Users> findByZones(Zone zone);
 }

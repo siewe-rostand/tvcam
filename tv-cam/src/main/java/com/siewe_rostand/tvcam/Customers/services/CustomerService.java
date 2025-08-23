@@ -18,4 +18,5 @@ public interface CustomerService {
     void delete(Long id);
     void checkIfCustomerExistsOrThrow(Long id);
     Page<CustomersDTO> findAllActive(Integer page, Integer size, String sortBy, String direction, Boolean isActive);
+    Customers getById(Long id);
 }

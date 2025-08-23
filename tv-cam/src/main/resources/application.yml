@@ -3,20 +3,34 @@ spring:
   profiles:
     active: ${ACTIVE_PROFILE:dev}
   datasource:
-    url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DATABASE}
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    username: ${MYSQL_USERNAME}
-    password: ${MYSQL_PASSWORD}
+    url: ${DB_URL}://${DB_HOST}:${DB_PORT}/${DB_DATABASE}?sslmode=disable
+    driver-class-name: ${DB_DRIVER}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 20000
+      idle-timeout: 300000
+      max-lifetime: 1200000
+      leak-detection-threshold: 60000
   jpa:
     hibernate:
       ddl-auto: none
     properties:
       hibernate:
         globally_quoted_indentifiers: true
-        dialect: org.hibernate.dialect.MySQL8Dialect
+        dialect: ${DB_PLATFORM}
         format_sql: true
+        jdbc:
+          batch_size: 25
+          order_inserts: true
+          order_updates: true
+        cache:
+          use_second_level_cache: true
+          region.factory_class: org.hibernate.cache.jcache.JCacheRegionFactory
     open-in-view: false
-    database-platform: org.hibernate.dialect.MySQL8InnoDBDialect
+    database-platform: ${DB_PLATFORM}
     generate-ddl: true
 
   sql:
@@ -58,6 +72,8 @@ server:
     context-path: /api/v1
 logging:
   level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
     info: INFO
     org:
       springframework:

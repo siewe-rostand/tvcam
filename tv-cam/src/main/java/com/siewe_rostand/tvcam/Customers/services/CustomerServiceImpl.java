@@ -4,13 +4,10 @@ import com.siewe_rostand.tvcam.Customers.dto.CustomersDTO;
 import com.siewe_rostand.tvcam.Customers.model.Customers;
 import com.siewe_rostand.tvcam.Customers.repository.CustomersRepository;
 import com.siewe_rostand.tvcam.Users.models.Users;
+import com.siewe_rostand.tvcam.common.constraints.validator.ObjectsValidator;
 import com.siewe_rostand.tvcam.shared.Exceptions.EntityAlreadyExistException;
 import com.siewe_rostand.tvcam.shared.Exceptions.EntityNotFoundException;
 import com.siewe_rostand.tvcam.shared.PaginatedResponse;
-import com.siewe_rostand.tvcam.common.constraints.validator.ObjectsValidator;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,6 +17,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class CustomerServiceImpl implements CustomerService {
@@ -28,36 +29,33 @@ public class CustomerServiceImpl implements CustomerService {
     private final ObjectsValidator<CustomersDTO> validator;
     private final CustomerRefNumberGenerator refNumberGenerator;
 
-  @Transactional
-  @Override
-  public Customers save(CustomersDTO customersDto) {
+    @Transactional
+    @Override
+    public Customers save(CustomersDTO customersDto) {
         validator.validate(customersDto);
         if (customersRepository.existsByTelephone(customersDto.getTelephone())) {
-            throw new EntityAlreadyExistException("A customer with the telephone number " + customersDto.getTelephone() + " already exist");
-    }
-    String ref = refNumberGenerator.generateRefNumber();
-    customersDto.setIsActive(true);
-    customersDto.setRef(ref);
-    customersDto.setIsSuspended(false);
-    customersDto.setHasDebt(false);
-    Customers customers = new Customers().toMap(customersDto);
-    return customersRepository.save(customers);
+            throw new EntityAlreadyExistException(
+                    "A customer with the telephone number " + customersDto.getTelephone() + " already exist");
+        }
+        String ref = refNumberGenerator.generateRefNumber();
+        customersDto.setIsActive(true);
+        customersDto.setRef(ref);
+        customersDto.setIsSuspended(false);
+        customersDto.setHasDebt(false);
+        Customers customers = new Customers().toMap(customersDto);
+        return customersRepository.save(customers);
     }
 
     @Override
     public Customers update(CustomersDTO customersDto) {
-        if (customersRepository.findByCustomerId(customersDto.getId()) == null) {
-            throw new EntityNotFoundException(Users.class, "id", customersDto.getId().toString());
-        } else {
-            Customers existingCustomer = customersRepository.findByCustomerId(customersDto.getId());
-            existingCustomer.setIsActive(customersDto.getIsActive());
-            existingCustomer.setName(customersDto.getName());
-            existingCustomer.setAddress(customersDto.getAddress());
-            existingCustomer.setTelephone(customersDto.getTelephone());
-            existingCustomer.setIsSuspended(customersDto.getIsSuspended());
-            existingCustomer.setHasDebt(customersDto.getHasDebt());
-            return customersRepository.saveAndFlush(existingCustomer);
-        }
+        Customers existingCustomer = getById(customersDto.getId());
+        existingCustomer.setIsActive(customersDto.getIsActive());
+        existingCustomer.setName(customersDto.getName());
+        existingCustomer.setAddress(customersDto.getAddress());
+        existingCustomer.setTelephone(customersDto.getTelephone());
+        existingCustomer.setIsSuspended(customersDto.getIsSuspended());
+        existingCustomer.setHasDebt(customersDto.getHasDebt());
+        return customersRepository.saveAndFlush(existingCustomer);
     }
 
     @Override
@@ -108,25 +106,31 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public CustomersDTO findById(Long id) {
-        Customers customers = customersRepository.findByCustomerId(id);
+        Customers customers = getById(id);
         return new CustomersDTO().CreateDTO(customers);
     }
 
     @Override
     public void delete(Long id) {
         checkIfCustomerExistsOrThrow(id);
-        Customers customers = customersRepository.findByCustomerId(id);
+        Customers customers = getById(id);
 
-    customers.setIsActive(false);
-    customers.setIsSuspended(true);
-    customersRepository.save(customers);
+        customers.setIsActive(false);
+        customers.setIsSuspended(true);
+        customersRepository.save(customers);
     }
 
     @Override
-    public Page<CustomersDTO> findAllActive(Integer page, Integer size, String sortBy, String direction, Boolean isActive) {
+    public Page<CustomersDTO> findAllActive(Integer page, Integer size, String sortBy, String direction,
+                                            Boolean isActive) {
         Pageable pageable = PageRequest.of(page, size, Sort.Direction.fromString(direction), sortBy);
         Page<Customers> customers = customersRepository.findAllByIsActive(isActive, pageable);
         return customers.map(customers1 -> new CustomersDTO().CreateDTO(customers1));
+    }
+
+    @Override
+    public Customers getById(Long id) {
+        return  customersRepository.findByCustomerId(id).orElseThrow(() -> new EntityNotFoundException(Customers.class, "id", id.toString()));
     }
 
     @Override
