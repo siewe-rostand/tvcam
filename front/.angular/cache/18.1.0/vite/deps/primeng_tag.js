@@ -42,8 +42,8 @@ import {
   ɵɵtext,
   ɵɵtextInterpolate
 } from "./chunk-5KGTYI27.js";
-import "./chunk-HMZ5JMOE.js";
 import "./chunk-56Y3C3CL.js";
+import "./chunk-HMZ5JMOE.js";
 import "./chunk-E4U7SOWH.js";
 
 // node_modules/primeng/fesm2022/primeng-tag.mjs

@@ -10,4 +10,5 @@
     <include file="db/changelog/changes/bills/001-create-bills-table.xml"/>
     <include file="db/changelog/004-add-zones-issues-discounts.xml"/>
     <include file="db/changelog/changes/roles/002-update-table-roles-add-description.xml"/>
+    <include file="db/changelog/changes/bills/002-change-penalties-type.xml"/>
 </databaseChangeLog>

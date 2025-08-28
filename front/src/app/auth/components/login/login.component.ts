@@ -46,13 +46,11 @@ export class LoginComponent implements OnInit {
   returnUrl: string = '/dashboard';
 
   ngOnInit(): void {
-    // Check if user is already logged in
     if (this.storageService.isTokenValid()) {
-      this.router.navigate(['/dashboard']);
+      this.router.navigate(['/dashboard']).then(() => true);
       return;
     }
 
-    // Get return URL from route parameters or default to dashboard
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
 
     this.loginForm = this.formBuilder.group({
@@ -84,19 +82,30 @@ export class LoginComponent implements OnInit {
       .login(this.loginForm.value.telephone, this.loginForm.value.password)
       .subscribe({
         next: (res) => {
-          const user = res.data.user;
-          const accessToken = res.data.access_token;
-          this.storageService.saveUser(user);
-          this.storageService.saveToken(accessToken);
+          console.log('Login response:', res);
+          let authResponse;
+          if (res.data && res.data.access_token) {
+            authResponse = {
+              token: res.data.access_token,
+              fullname: res.data.user?.firstname + ' ' + res.data.user?.lastname || 'User',
+              telephone: res.data.user?.telephone || this.loginForm.value.telephone,
+              userId: res.data.user?.id || 0
+            };
+          } else if (res.token) {
+            authResponse = res;
+          } else {
+            console.error('Unexpected response structure:', res);
+            this.isLoading = false;
+            this.submitted = false;
+            return;
+          }
+          this.authService.handleLoginSuccess(authResponse);
           this.isLoading = false;
-
-          // Redirect to the originally requested URL or dashboard
-          this.router.navigate([this.returnUrl]);
 
           console.log('Login successful, redirecting to:', this.returnUrl);
         },
         error: (err) => {
-          console.log(err);
+          console.log('Login error:', err);
           this.isLoading = false;
           this.submitted = false;
         },

@@ -8,32 +8,38 @@ import {
   RouterStateSnapshot,
 } from '@angular/router';
 import {StorageService} from "../../_shared/services/storage.service";
+import {AuthStateService} from "../../_shared/services/auth-state.service";
+import {map} from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthGuardService implements CanActivate {
-  constructor(private router: Router,
-              private storageService: StorageService) {
+  constructor(
+    private router: Router,
+    private storageService: StorageService,
+    private authStateService: AuthStateService
+  ) {
   }
 
   canActivate(
     _route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): MaybeAsync<GuardResult> {
-    const isTokenValid = this.storageService.isTokenValid();
-
-    if (isTokenValid) {
-      // User is authenticated, allow access
-      return true;
-    } else {
-      // User is not authenticated, redirect to log in
-      console.log('Access denied - redirecting to login');
-      this.storageService.clean(); // Clean any invalid tokens
-      this.router.navigate(['/login'], {
-        queryParams: {returnUrl: state.url}
-      }).then(() => true);
-      return false;
-    }
+    return this.authStateService.waitForBrowserInitialization().pipe(
+      map(authState => {
+        console.log('################# ==', authState.isInitialized);
+        if (authState.isAuthenticated) {
+          return true;
+        } else {
+          console.log(`Access denied - redirecting to login${authState.isInitialized}`);
+          this.storageService.clean();
+          this.router.navigate(['/login'], {
+            queryParams: {returnUrl: state.url}
+          }).then(() => true);
+          return false;
+        }
+      })
+    );
   }
 }

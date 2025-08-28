@@ -1,7 +1,7 @@
-import {Injectable, signal} from '@angular/core';
-import {HttpClient} from "@angular/common/http";
-import {BehaviorSubject, catchError, Observable} from "rxjs";
-import {BillModel} from "../model/bill.model";
+import { Injectable, signal } from '@angular/core';
+import { HttpClient } from "@angular/common/http";
+import { BehaviorSubject, catchError, Observable, throwError } from "rxjs";
+import { BillModel } from "../model/bill.model";
 
 
 @Injectable({
@@ -39,9 +39,13 @@ export class BillService {
       .pipe(catchError(this.handleError));
   }
 
+  deleteBills(billIds: number[]): Observable<any> {
+    return this.http.delete(`bills/batch`, { body: billIds })
+      .pipe(catchError(this.handleError));
+  }
 
-  private handleError(error: any) {
+  private handleError(error: any): Observable<never> {
     console.error('An error occurred', error);
-    return Promise.reject(error.message || error);
+    return throwError(() => error);
   }
 }

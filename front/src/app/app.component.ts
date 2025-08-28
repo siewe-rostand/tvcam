@@ -1,41 +1,46 @@
-import { Component, OnInit } from '@angular/core';
-import { Router, RouterOutlet } from '@angular/router';
-import { ToastModule } from "primeng/toast";
-import { StorageService } from './_shared/services/storage.service';
+import {Component, Inject, OnInit, PLATFORM_ID} from '@angular/core';
+import {Router, RouterOutlet} from '@angular/router';
+import {ToastModule} from "primeng/toast";
+import {CommonModule, isPlatformBrowser} from '@angular/common';
+import {AuthState, AuthStateService} from './_shared/services/auth-state.service';
+import {LoadingScreenComponent} from './_shared/components/loading-screen/loading-screen.component';
+import {Observable} from 'rxjs';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, ToastModule],
+  imports: [RouterOutlet, ToastModule, CommonModule, LoadingScreenComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
 })
 export class AppComponent implements OnInit {
   title = 'TV CAM';
+  authState$: Observable<AuthState>;
+  isInitializing = true;
 
   constructor(
-    private storageService: StorageService,
-    private router: Router
-  ) { }
+    private router: Router,
+    private authStateService: AuthStateService,
+  @Inject(PLATFORM_ID) private platformId: Object
+) {
+ isPlatformBrowser(this.platformId);
+    this.authState$ = this.authStateService.authState$;
+    this.isInitializing = authStateService.isInitialized();
+  }
 
   ngOnInit() {
     this.checkAuthenticationStatus();
   }
 
   private checkAuthenticationStatus() {
-    const isTokenValid = this.storageService.isTokenValid();
     const currentRoute = this.router.url;
-
-    // Public routes that don't require authentication
     const publicRoutes = ['/login', '/signup', '/forgottenPassword'];
     const isPublicRoute = publicRoutes.some(route => currentRoute.startsWith(route));
 
-    if (isTokenValid && isPublicRoute) {
-      // User is logged in but on a public route, redirect to dashboard
-      this.router.navigate(['/dashboard']);
-    } else if (!isTokenValid && !isPublicRoute && currentRoute !== '/') {
-      // User is not logged in and trying to access a protected route
-      this.router.navigate(['/login']);
+    if (this.authStateService.isAuthenticated() && isPublicRoute) {
+      this.router.navigate(['/dashboard']).then(() => true);
+    } else if (!this.authStateService.isAuthenticated() && !isPublicRoute && currentRoute !== '/') {
+      this.router.navigate(['/login']).then(() => true);
     }
   }
 }

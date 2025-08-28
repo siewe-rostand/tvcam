@@ -5,7 +5,7 @@ import { isPlatformBrowser } from '@angular/common';
   providedIn: 'root',
 })
 export class LocalStorageService {
-  constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
+  constructor(@Inject(PLATFORM_ID) private platformId: Object) { }
 
   setItem(key: string, value: string): void {
     if (isPlatformBrowser(this.platformId)) {
@@ -30,5 +30,9 @@ export class LocalStorageService {
     if (isPlatformBrowser(this.platformId)) {
       localStorage.clear();
     }
+  }
+
+  isReady(): boolean {
+    return typeof Storage !== 'undefined';
   }
 }

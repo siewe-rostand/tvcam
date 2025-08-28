@@ -1,2 +1,9 @@
-<p-toast />
-<router-outlet></router-outlet>
+<div class="app-container">
+  <app-loading-screen *ngIf="isInitializing"></app-loading-screen>
+
+  <div *ngIf="!isInitializing">
+    <router-outlet></router-outlet>
+  </div>
+
+  <p-toast></p-toast>
+</div>

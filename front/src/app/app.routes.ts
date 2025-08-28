@@ -10,6 +10,10 @@ import { ForgottenPasswordComponent } from "./auth/components/forgotten-password
 import { BillPrintComponent } from "./customers/components/bill/bill-print/bill-print.component";
 import { HomeComponent } from "./home/home.component";
 import { AuthGuardService } from "./auth/services/auth-guard.service";
+import { EnhancedDashboardComponent } from "./dashboard/enhanced-dashboard.component";
+import { EnhancedBillGenerationComponent } from "./customers/components/bill/enhanced-bill-generation.component";
+import { EnhancedPaymentComponent } from "./customers/components/payment/enhanced-payment.component";
+import { AuthDebugComponent } from "./home/auth-debug/auth-debug.component";
 
 export const routes: Routes = [
   // Public routes (no authentication required)
@@ -20,7 +24,7 @@ export const routes: Routes = [
   // Protected routes (authentication required)
   {
     path: 'dashboard',
-    component: HomeComponent,
+    component: EnhancedDashboardComponent,
     canActivate: [AuthGuardService],
   },
 
@@ -50,12 +54,24 @@ export const routes: Routes = [
 
   {
     path: 'receipts/generate',
+    component: EnhancedBillGenerationComponent,
+    canActivate: [AuthGuardService],
+  },
+
+  {
+    path: 'receipts/generate/legacy',
     component: BillPrintComponent,
     canActivate: [AuthGuardService],
   },
 
   {
     path: 'payment',
+    component: EnhancedPaymentComponent,
+    canActivate: [AuthGuardService],
+  },
+
+  {
+    path: 'payment/legacy',
     component: PaymentComponent,
     canActivate: [AuthGuardService],
   },
@@ -66,9 +82,13 @@ export const routes: Routes = [
     canActivate: [AuthGuardService],
   },
 
-  // Default route - redirect based on authentication status
+  {
+    path: 'debug-auth',
+    component: AuthDebugComponent,
+    canActivate: [AuthGuardService],
+  },
+
   { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
 
-  // Wildcard route - redirect to login for unknown paths
   { path: '**', redirectTo: '/login' }
 ];

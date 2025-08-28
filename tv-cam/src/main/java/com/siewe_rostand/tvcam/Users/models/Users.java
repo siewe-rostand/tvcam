@@ -65,14 +65,14 @@ public class Users implements UserDetails {
 
     private Boolean deleted;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_roles", joinColumns = {
             @JoinColumn(name = "user_id", referencedColumnName = "id")}, inverseJoinColumns = {
             @JoinColumn(name = "role_id", referencedColumnName = "id")})
     private Set<Roles> roles;
 
     // Relations avec les zones - Un utilisateur peut être dans plusieurs zones
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_zones", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "zone_id"))
     private Set<Zone> zones;
 

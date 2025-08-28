@@ -1,13 +1,13 @@
 import { createRequire } from 'module';const require = createRequire(import.meta.url);
 import {
-  NG_VALUE_ACCESSOR,
-  NgControl
-} from "./chunk-HP43BDIZ.js";
-import {
   AutoFocus,
   AutoFocusModule
 } from "./chunk-3J4YMBRH.js";
 import "./chunk-BLVGPENJ.js";
+import {
+  NG_VALUE_ACCESSOR,
+  NgControl
+} from "./chunk-HP43BDIZ.js";
 import {
   PrimeNGConfig
 } from "./chunk-YK3IAWLL.js";

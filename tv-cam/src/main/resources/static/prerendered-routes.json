@@ -1,0 +1,17 @@
+{
+  "routes": [
+    "/customers",
+    "/dashboard",
+    "/debug-auth",
+    "/forgottenPassword",
+    "/home",
+    "/login",
+    "/payment",
+    "/payment/legacy",
+    "/receipts",
+    "/receipts/generate",
+    "/receipts/generate/legacy",
+    "/signup",
+    "/users"
+  ]
+}

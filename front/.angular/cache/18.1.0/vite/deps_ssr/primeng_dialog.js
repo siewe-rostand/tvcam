@@ -1,19 +1,11 @@
 import { createRequire } from 'module';const require = createRequire(import.meta.url);
 import {
-  TimesIcon
-} from "./chunk-3TSBTR77.js";
-import {
-  animate,
-  animation,
-  style,
-  transition,
-  trigger,
-  useAnimation
-} from "./chunk-ICHEW76C.js";
-import {
   ButtonDirective,
   ButtonModule
 } from "./chunk-SB7PJXEL.js";
+import {
+  TimesIcon
+} from "./chunk-3TSBTR77.js";
 import "./chunk-TDEWN4JB.js";
 import {
   Ripple,
@@ -26,6 +18,14 @@ import {
 import {
   DomHandler
 } from "./chunk-BLVGPENJ.js";
+import {
+  animate,
+  animation,
+  style,
+  transition,
+  trigger,
+  useAnimation
+} from "./chunk-ICHEW76C.js";
 import {
   Footer,
   Header,

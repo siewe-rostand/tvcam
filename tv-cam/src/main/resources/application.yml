@@ -21,7 +21,7 @@ spring:
       hibernate:
         globally_quoted_indentifiers: true
         dialect: ${DB_PLATFORM}
-        format_sql: true
+#        format_sql: true
         jdbc:
           batch_size: 25
           order_inserts: true
