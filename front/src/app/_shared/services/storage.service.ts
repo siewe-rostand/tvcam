@@ -1,7 +1,7 @@
 import {Inject, Injectable, PLATFORM_ID} from '@angular/core';
-import { UserModel } from '../../user/model/user.model';
-import { LocalStorageService } from './local-storage.service';
-import { JWT_TOKEN, JWT_TOKEN_EXPIRATION, USER_KEY } from "../utils/constant";
+import {UserModel} from '../../user/model/user.model';
+import {LocalStorageService} from './local-storage.service';
+import {JWT_TOKEN, JWT_TOKEN_EXPIRATION, USER_KEY} from "../utils/constant";
 import {isPlatformBrowser} from "@angular/common";
 
 
@@ -10,6 +10,7 @@ import {isPlatformBrowser} from "@angular/common";
 })
 export class StorageService {
   private isBrowser: boolean;
+
   constructor(
     private localStorageService: LocalStorageService,
     @Inject(PLATFORM_ID) private platformId: Object
@@ -31,9 +32,8 @@ export class StorageService {
       const payload = JSON.parse(atob(token.split('.')[1]));
       const expirationDate = new Date(payload.exp * 1000);
 
-      // Validation du token
       if (!payload.exp || isNaN(expirationDate.getTime())) {
-        throw new Error('Token invalide');
+        return;
       }
 
       this.localStorageService.removeItem(JWT_TOKEN);
@@ -60,7 +60,6 @@ export class StorageService {
 
   isTokenValid(): boolean {
     try {
-      // Vérifier si on est côté serveur
       if (!this.isBrowser) {
         return false;
       }
@@ -75,7 +74,6 @@ export class StorageService {
       const expirationDate = new Date(expirationString);
       const currentDate = new Date();
 
-      // Marge de sécurité de 5 minutes
       const safetyMargin = 5 * 60 * 1000;
 
       return expirationDate.getTime() > (currentDate.getTime() + safetyMargin);

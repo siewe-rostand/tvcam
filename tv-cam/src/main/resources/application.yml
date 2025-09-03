@@ -77,7 +77,7 @@ logging:
     info: INFO
     org:
       springframework:
-        security: DEBUG
+        security: WARN
 
 
 

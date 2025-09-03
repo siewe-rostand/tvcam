@@ -23,12 +23,14 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 // Services
 import { BillManagementService } from '../../service/bill-management.service';
 import { BillService } from '../../service/bill.service';
+import { NotificationService } from '../../../_shared/services/notification.service';
 
 // Models
 import { BillModel } from '../../model/bill.model';
 
 // Components
 import { NavbarComponent } from '../../../_shared/components/navbar/navbar.component';
+import { BillTemplatePreviewComponent } from './bill-template-preview/bill-template-preview.component';
 
 interface Customer {
   id: number;
@@ -68,7 +70,8 @@ interface BillGenerationRequest {
     CalendarModule,
     InputNumberModule,
     ConfirmDialogModule,
-    NavbarComponent
+    NavbarComponent,
+    BillTemplatePreviewComponent
   ],
   providers: [MessageService, ConfirmationService],
   template: `
@@ -115,6 +118,11 @@ interface BillGenerationRequest {
 
         <!-- Formulaire de génération -->
         <p-card header="Paramètres de Génération" styleClass="mb-4">
+          <div class="flex justify-content-between align-items-center mb-3">
+            <h5 class="m-0">Configuration des Factures</h5>
+            <app-bill-template-preview></app-bill-template-preview>
+          </div>
+          
           <form (ngSubmit)="generateBills()" #billForm="ngForm">
             <div class="grid">
               <div class="col-12 md:col-6">
@@ -361,6 +369,7 @@ export class EnhancedBillGenerationComponent implements OnInit {
     private billService: BillService,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
+    private notificationService: NotificationService,
     private router: Router
   ) {
     this.initializeYears();
@@ -419,30 +428,84 @@ export class EnhancedBillGenerationComponent implements OnInit {
   }
 
   confirmGenerateBills(): void {
-    this.confirmationService.confirm({
-      message: `Êtes-vous sûr de vouloir générer les factures pour ${this.selectedCustomers.length} client(s) ?`,
-      header: 'Confirmation de génération',
-      icon: 'pi pi-exclamation-triangle',
-      accept: () => {
-        this.generateBills();
+    if (!this.billRequest.month || !this.billRequest.year) {
+      this.notificationService.showWarning('Veuillez sélectionner le mois et l\'année');
+      return;
+    }
+
+    if (this.selectedCustomers.length === 0) {
+      this.notificationService.showWarning('Veuillez sélectionner au moins un client');
+      return;
+    }
+
+    // Vérifier d'abord s'il y a des factures existantes pour ce mois
+    this.loading = true;
+    this.billManagementService.checkExistingBillsForMonth(
+      this.selectedCustomers.map(c => c.id),
+      this.billRequest.month!,
+      this.billRequest.year!
+    ).subscribe({
+      next: (response) => {
+        this.loading = false;
+
+        if (response.hasExistingBills && !this.billRequest.shouldGenerate) {
+          // Des factures existent déjà pour ce mois
+          const monthLabel = this.getMonthLabel(this.billRequest.month!);
+          this.notificationService.showBillAlreadyGenerated(monthLabel, this.billRequest.year!);
+
+          this.confirmationService.confirm({
+            message: `Des factures ont déjà été générées pour ${monthLabel} ${this.billRequest.year} pour certains clients sélectionnés.\n\nCliquez sur "Oui" pour régénérer les factures (cela remplacera les factures existantes) ou sur "Non" pour annuler.`,
+            header: 'Factures déjà générées ce mois',
+            icon: 'pi pi-exclamation-triangle',
+            acceptLabel: 'Oui, régénérer',
+            rejectLabel: 'Non, annuler',
+            accept: () => {
+              this.billRequest.shouldGenerate = true;
+              this.performBillGeneration();
+            }
+          });
+        } else {
+          // Pas de factures existantes ou génération forcée
+          const monthLabel = this.getMonthLabel(this.billRequest.month!);
+          this.confirmationService.confirm({
+            message: `Êtes-vous sûr de vouloir générer les factures pour ${this.selectedCustomers.length} client(s) pour ${monthLabel} ${this.billRequest.year} ?`,
+            header: 'Confirmation de génération',
+            icon: 'pi pi-exclamation-triangle',
+            accept: () => {
+              this.performBillGeneration();
+            }
+          });
+        }
+      },
+      error: (error) => {
+        this.loading = false;
+        console.error('Erreur lors de la vérification:', error);
+        this.notificationService.showError('Erreur lors de la vérification des factures existantes');
       }
     });
   }
 
+  private getMonthLabel(monthValue: string): string {
+    const month = this.months.find(m => m.value === monthValue);
+    return month ? month.label : monthValue;
+  }
+
+  private performBillGeneration(): void {
+    this.generateBills();
+  }
+
   generateBills(): void {
     if (this.selectedCustomers.length === 0) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Attention',
-        detail: 'Veuillez sélectionner au moins un client',
-        life: 3000
-      });
+      this.notificationService.showWarning('Veuillez sélectionner au moins un client');
       return;
     }
 
     this.loading = true;
     this.generationProgress = 0;
     this.billRequest.customerIds = this.selectedCustomers.map(c => c.id);
+
+    // Afficher le message de progression
+    this.notificationService.showBillGenerationInProgress(this.selectedCustomers.length);
 
     // Simuler la progression
     const progressInterval = setInterval(() => {
@@ -461,12 +524,12 @@ export class EnhancedBillGenerationComponent implements OnInit {
         this.generationProgress = 100;
         this.generationResults = Array.isArray(results) ? results : [results];
 
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Succès',
-          detail: `${this.generationResults.length} facture(s) générée(s) avec succès`,
-          life: 5000
-        });
+        const monthLabel = this.getMonthLabel(this.billRequest.month!);
+        this.notificationService.showBillGenerationSuccess(
+          this.generationResults.length,
+          monthLabel,
+          this.billRequest.year!
+        );
 
         // Réinitialiser la sélection
         this.selectedCustomers = [];
@@ -477,12 +540,16 @@ export class EnhancedBillGenerationComponent implements OnInit {
         clearInterval(progressInterval);
 
         console.error('Erreur lors de la génération:', error);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Erreur',
-          detail: 'Erreur lors de la génération des factures',
-          life: 5000
-        });
+
+        // Afficher un message d'erreur approprié selon le type d'erreur
+        let errorMessage = 'Erreur lors de la génération des factures';
+        if (error.error && error.error.message) {
+          errorMessage = error.error.message;
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+
+        this.notificationService.showBillGenerationError(errorMessage);
       }
     });
   }

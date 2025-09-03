@@ -1,16 +1,16 @@
 package com.siewe_rostand.tvcam.Customers.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.siewe_rostand.tvcam.Customers.dto.CustomersDTO;
 import com.siewe_rostand.tvcam.Payment.model.enumeration.PaymentFrequency;
 import com.siewe_rostand.tvcam.Zone.model.Zone;
 import com.siewe_rostand.tvcam.shared.model.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
-import java.time.LocalDateTime;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.ColumnDefault;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "customers")
@@ -65,18 +65,4 @@ public class Customers extends BaseEntity {
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime lastBillGenerationDate;
-
-    public Customers toMap(CustomersDTO customersDto) {
-        return Customers.builder()
-                .customerId(customersDto.getId())
-                .ref(customersDto.getRef())
-                .name(customersDto.getName())
-                .address(customersDto.getAddress())
-                .hasPaid(customersDto.getHasPaid())
-                .hasDebt(customersDto.getHasDebt())
-                .telephone(customersDto.getTelephone())
-                .isActive(customersDto.getIsActive())
-                .isSuspended(customersDto.getIsSuspended())
-                .build();
-    }
 }

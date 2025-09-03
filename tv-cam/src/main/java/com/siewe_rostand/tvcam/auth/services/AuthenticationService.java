@@ -5,6 +5,7 @@ import com.siewe_rostand.tvcam.auth.dto.AuthenticationResponse;
 import com.siewe_rostand.tvcam.auth.dto.ForgetPasswordForm;
 import com.siewe_rostand.tvcam.auth.dto.RegisterRequest;
 import com.siewe_rostand.tvcam.shared.HttpResponse;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * @author rostand
@@ -15,7 +16,9 @@ import com.siewe_rostand.tvcam.shared.HttpResponse;
 public interface AuthenticationService {
     AuthenticationResponse register(RegisterRequest request);
 
-    HttpResponse authenticate(AuthenticationRequest request);
+    HttpResponse<Object> authenticate(AuthenticationRequest request);
 
-    HttpResponse forgottenPassword(ForgetPasswordForm forgetPasswordForm);
+    HttpResponse<Object> forgottenPassword(ForgetPasswordForm forgetPasswordForm);
+
+    HttpResponse<Object> getUserInfo(HttpServletRequest request);
 }

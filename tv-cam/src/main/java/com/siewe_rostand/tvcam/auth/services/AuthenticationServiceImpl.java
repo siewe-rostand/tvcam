@@ -1,37 +1,44 @@
 package com.siewe_rostand.tvcam.auth.services;
 
-import com.siewe_rostand.tvcam.Roles.RoleType;
 import com.siewe_rostand.tvcam.Roles.Roles;
 import com.siewe_rostand.tvcam.Roles.RolesRepository;
+import com.siewe_rostand.tvcam.Users.dto.UserMapper;
+import com.siewe_rostand.tvcam.Users.dto.UserResponse;
 import com.siewe_rostand.tvcam.Users.models.Users;
 import com.siewe_rostand.tvcam.Users.repository.UsersRepository;
 import com.siewe_rostand.tvcam.auth.dto.AuthenticationRequest;
 import com.siewe_rostand.tvcam.auth.dto.AuthenticationResponse;
 import com.siewe_rostand.tvcam.auth.dto.ForgetPasswordForm;
 import com.siewe_rostand.tvcam.auth.dto.RegisterRequest;
+import com.siewe_rostand.tvcam.common.constraints.validator.ObjectsValidator;
 import com.siewe_rostand.tvcam.common.exceptions.EmptyPasswordException;
+import com.siewe_rostand.tvcam.common.exceptions.JwtAuthenticationException;
 import com.siewe_rostand.tvcam.security.JwtService;
 import com.siewe_rostand.tvcam.shared.Exceptions.EntityAlreadyExistException;
 import com.siewe_rostand.tvcam.shared.HttpResponse;
-import com.siewe_rostand.tvcam.common.constraints.validator.ObjectsValidator;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import static com.siewe_rostand.tvcam.Roles.RoleType.ROLE_USER;
+import static com.siewe_rostand.tvcam.security.JwtUtils.getJwtFromRequest;
+import static java.time.LocalDateTime.now;
 import static java.util.Map.of;
-import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.HttpStatus.*;
 
 /**
  * @author rostand
@@ -50,6 +57,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final RolesRepository roleRepository;
     private final ObjectsValidator<RegisterRequest> validator;
     private final ObjectsValidator<ForgetPasswordForm> passwordFormObjectsValidator;
+    private final UserDetailsService userDetailsService;
+    private final UserMapper mapper;
 
     private static final Map<String, Object> EMPTY_CLAIMS = Collections.unmodifiableMap(new HashMap<>());
 
@@ -79,11 +88,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 )
                 .active(true)
                 .build();
-        // set roles
-        Roles userRole = roleRepository.getByName(RoleType.ROLE_USER.name())
+        Roles userRole = roleRepository.getByName(ROLE_USER.name())
                 .orElse(
                         Roles.builder()
-                                .name(RoleType.ROLE_USER.name())
+                                .name(ROLE_USER.name())
                                 .build()
                 );
         if (userRole.getRoleId() == null) {
@@ -106,7 +114,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public HttpResponse authenticate(AuthenticationRequest request) {
+    public HttpResponse<Object> authenticate(AuthenticationRequest request) {
         if (request.getPassword() == null || request.getPassword().isEmpty()) {
             throw new EmptyPasswordException("Encoded password cannot be empty");
         }
@@ -117,22 +125,22 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 )
         );
         Users user = usersRepository.getByTelephone(request.getTelephone())
-                .orElseThrow();
+                .orElseThrow(() -> new EntityNotFoundException("No User found with this telephone number. Please check your number well"));
 
         Map<String, Object> claims = buildClaims(user);
         String jwtToken = jwtService.generateToken(claims, user);
 
         return HttpResponse.builder()
-                .timestamp(LocalDateTime.now())
+                .timestamp(now())
                 .message("login successfully")
                 .status(OK)
                 .statusCode(OK.value())
-                .data(of("user", user, "access_token", jwtToken))
+                .data(of("user", "Bearer", "access_token", jwtToken))
                 .build();
     }
 
     @Override
-    public HttpResponse forgottenPassword(ForgetPasswordForm forgetPasswordForm) {
+    public HttpResponse<Object> forgottenPassword(ForgetPasswordForm forgetPasswordForm) {
         System.out.println(forgetPasswordForm);
         log.trace(forgetPasswordForm.toString());
         passwordFormObjectsValidator.validate(forgetPasswordForm);
@@ -142,10 +150,62 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
         usersRepository.changePassword(passwordEncoder.encode(forgetPasswordForm.getNewPassword()));
         return HttpResponse.builder()
-                .timestamp(LocalDateTime.now())
+                .timestamp(now())
                 .message("Password changed successfully")
                 .status(OK)
                 .statusCode(OK.value())
+                .build();
+    }
+
+    @Override
+    public HttpResponse<Object> getUserInfo(HttpServletRequest request) {
+        String jwt = getJwtFromRequest(request);
+
+        String userEmail;
+        try {
+            userEmail = jwtService.extractUsername(jwt);
+        } catch (Exception e) {
+            return HttpResponse.builder()
+                    .timestamp(now())
+                    .message("Invalid or expired access token")
+                    .statusCode(UNAUTHORIZED.value())
+                    .status(UNAUTHORIZED)
+                    .build();
+        }
+
+        if (userEmail == null) {
+            return HttpResponse.builder()
+                    .timestamp(now())
+                    .message("An error occurred when trying to parse the token")
+                    .statusCode(INTERNAL_SERVER_ERROR.value())
+                    .status(INTERNAL_SERVER_ERROR)
+                    .build();
+        }
+
+        UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
+        if (userDetails == null || !jwtService.isTokenValid(jwt, userDetails)) {
+            throw new JwtAuthenticationException(
+                    "Access Token invalid or expired:: please reconnect",
+                    "Logout From System");
+        }
+
+        Users user = usersRepository.findByTelephone(userEmail);
+        if (user == null) {
+            return HttpResponse.builder()
+                    .timestamp(now())
+                    .message("User not found")
+                    .statusCode(INTERNAL_SERVER_ERROR.value())
+                    .status(INTERNAL_SERVER_ERROR)
+                    .build();
+        }
+
+        UserResponse userResponse = mapper.toResponse(user);
+        return HttpResponse.builder()
+                .timestamp(now())
+                .message("User info retrieved successfully")
+                .status(OK)
+                .statusCode(OK.value())
+                .data(userResponse)
                 .build();
     }
 }

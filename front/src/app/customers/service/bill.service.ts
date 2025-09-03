@@ -29,6 +29,11 @@ export class BillService {
       .pipe(catchError(this.handleError));
   }
 
+  checkExistingBillsForMonth(customerIds: number[], month: string, year: string): Observable<any> {
+    return this.http.post(`bills/check-existing`, { customerIds, month, year })
+      .pipe(catchError(this.handleError));
+  }
+
   getBillsForCustomer(customerId: number): Observable<any> {
     return this.http.get(`bills/customer/${customerId}`)
       .pipe(catchError(this.handleError));

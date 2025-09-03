@@ -26,6 +26,7 @@ public class BillMapper {
                 .build();
     }
 
+
     public BillResponse toResponse(Bills bills) {
         return BillResponse.builder()
                 .id(bills.getBillId())

@@ -4,6 +4,7 @@ import com.siewe_rostand.tvcam.Users.dto.UserRequest;
 import com.siewe_rostand.tvcam.Users.dto.UserResponse;
 import com.siewe_rostand.tvcam.Users.dto.UsersDto;
 import com.siewe_rostand.tvcam.Users.models.Users;
+import com.siewe_rostand.tvcam.shared.HttpResponse;
 import com.siewe_rostand.tvcam.shared.PaginatedResponse;
 
 import java.util.List;

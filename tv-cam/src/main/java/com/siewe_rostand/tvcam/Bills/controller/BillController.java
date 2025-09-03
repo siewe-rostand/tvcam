@@ -56,8 +56,8 @@ public class BillController {
     }
 
     @PostMapping("/generate")
-    public ResponseEntity<HttpResponse> generateBillsForSelectedCustomers(@RequestBody List<Long> customerIds, @RequestParam Boolean shouldGenerate) {
-        logger.debug("BillController:::generateBillsForSelectedCustomers {},{}", customerIds, shouldGenerate);
+    public ResponseEntity<HttpResponse<Object>> generateBillsForSelectedCustomers(@RequestBody List<Long> customerIds, @RequestParam Boolean shouldGenerate) {
+        logger.warn("BillController:::generateBillsForSelectedCustomers {},{}", customerIds, shouldGenerate);
         try {
             var response = billServices.generateBillsForSelectedCustomers(customerIds, shouldGenerate);
             return ResponseEntity.status(CREATED).body(

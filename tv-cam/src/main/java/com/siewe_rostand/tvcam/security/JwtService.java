@@ -4,15 +4,16 @@ import com.siewe_rostand.tvcam.common.exceptions.JwtAuthenticationException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Service;
+
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Service;
 
 /**
  * @author rostand
@@ -22,11 +23,11 @@ import org.springframework.stereotype.Service;
 public class JwtService {
 
 
-    private final String secretKey; 
+    private final String secretKey;
 
     private final long jwtExpiration;
 
-    public JwtService(@Value("${security.jwt.security-key}") String secretKey, @Value("${security.jwt.expiration}") Long jwtExpiration){
+    public JwtService(@Value("${security.jwt.security-key}") String secretKey, @Value("${security.jwt.expiration}") Long jwtExpiration) {
         this.secretKey = secretKey;
         this.jwtExpiration = jwtExpiration;
     }
@@ -35,16 +36,20 @@ public class JwtService {
         return extractClaim(token, Claims::getSubject);
     }
 
+    public Map<String, Object> extractAllInfo(String token) {
+        return extractAllClaims(token);
+    }
+
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) throws JwtAuthenticationException {
-        try{
+        try {
             final Claims claims = extractAllClaims(token);
             return claimsResolver.apply(claims);
         } catch (JwtException | IllegalArgumentException e) {
-            throw new JwtAuthenticationException(e.getMessage(),"Error parsing JWT token");
+            throw new JwtAuthenticationException(e.getMessage(), "Error parsing JWT token");
         }
     }
 
-    private Claims extractAllClaims(String token)   throws JwtAuthenticationException {
+    private Claims extractAllClaims(String token) throws JwtAuthenticationException {
         try {
             return Jwts
                     .parserBuilder()
@@ -52,16 +57,16 @@ public class JwtService {
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
-        }catch (SecurityException ex) {
-            throw new JwtAuthenticationException(ex.getMessage(),"Invalid JWT signature");
+        } catch (SecurityException ex) {
+            throw new JwtAuthenticationException(ex.getMessage(), "Invalid JWT signature");
         } catch (MalformedJwtException ex) {
-            throw new JwtAuthenticationException(ex.getMessage(),"Invalid JWT token");
+            throw new JwtAuthenticationException(ex.getMessage(), "Invalid JWT token");
         } catch (ExpiredJwtException ex) {
-      throw new JwtAuthenticationException(ex.getMessage(), ex.getCause(), "Expired JWT token");
+            throw new JwtAuthenticationException(ex.getMessage(), ex.getCause(), "Expired JWT token");
         } catch (UnsupportedJwtException ex) {
             throw new JwtAuthenticationException(ex.getMessage(), "Unsupported JWT token");
         } catch (IllegalArgumentException ex) {
-            throw new JwtAuthenticationException(ex.getMessage(),"JWT claims string is empty");
+            throw new JwtAuthenticationException(ex.getMessage(), "JWT claims string is empty");
         }
     }
 
@@ -102,7 +107,7 @@ public class JwtService {
     ) {
         var authorities = userDetails.getAuthorities()
                 .stream().
-                        map(GrantedAuthority::getAuthority)
+                map(GrantedAuthority::getAuthority)
                 .toList();
         return Jwts
                 .builder()

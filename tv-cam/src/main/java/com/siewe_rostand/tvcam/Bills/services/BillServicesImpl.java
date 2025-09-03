@@ -1,19 +1,19 @@
 package com.siewe_rostand.tvcam.Bills.services;
 
-import com.siewe_rostand.tvcam.Bills.repository.BillRepository;
 import com.siewe_rostand.tvcam.Bills.dto.BillMapper;
 import com.siewe_rostand.tvcam.Bills.dto.BillRequest;
 import com.siewe_rostand.tvcam.Bills.dto.BillResponse;
 import com.siewe_rostand.tvcam.Bills.dto.BillSDto;
 import com.siewe_rostand.tvcam.Bills.model.Bills;
+import com.siewe_rostand.tvcam.Bills.repository.BillRepository;
 import com.siewe_rostand.tvcam.Bills.service.BillCalculationService;
 import com.siewe_rostand.tvcam.Customers.model.Customers;
 import com.siewe_rostand.tvcam.Customers.repository.CustomersRepository;
 import com.siewe_rostand.tvcam.Payment.model.enumeration.PaymentStatus;
+import com.siewe_rostand.tvcam.common.constraints.validator.ObjectsValidator;
 import com.siewe_rostand.tvcam.common.exceptions.ApiException;
 import com.siewe_rostand.tvcam.shared.HttpResponse;
 import com.siewe_rostand.tvcam.shared.PaginatedResponse;
-import com.siewe_rostand.tvcam.common.constraints.validator.ObjectsValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,12 +26,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
+import static com.siewe_rostand.tvcam.shared.utils.CommonUtils.FORMATTER;
+import static java.time.LocalDateTime.now;
 import static org.springframework.http.HttpStatus.OK;
 
 /**
@@ -49,8 +49,8 @@ public class BillServicesImpl implements BillServices {
     private final CustomersRepository customersRepository;
 
     public BillServicesImpl(BillRepository billRepository,
-            BillCalculationService billCalculationService,
-            ObjectsValidator<BillRequest> validator, BillMapper billMapper, CustomersRepository customersRepository) {
+                            BillCalculationService billCalculationService,
+                            ObjectsValidator<BillRequest> validator, BillMapper billMapper, CustomersRepository customersRepository) {
         this.billRepository = billRepository;
         this.billCalculationService = billCalculationService;
         this.validator = validator;
@@ -86,7 +86,7 @@ public class BillServicesImpl implements BillServices {
     }
 
     @Override
-    public HttpResponse findCustomerBills(Long customerId) {
+    public HttpResponse<Object> findCustomerBills(Long customerId) {
         Customers customer = customersRepository.findById(customerId).orElseThrow(() -> new EntityNotFoundException(
                 "No customer with ID " + customerId + " found!. Please Enter a Valid Customer ID"));
 
@@ -109,7 +109,7 @@ public class BillServicesImpl implements BillServices {
     private PaginatedResponse buildResponse(Page<Bills> bills, Pageable pageable) {
         Page<BillResponse> responses = bills.map(billMapper::toResponse);
         return PaginatedResponse.builder()
-                .timestamp(LocalDateTime.now())
+                .timestamp(now())
                 .status(OK).statusCode(OK.value())
                 .data(responses.getContent())
                 .message("Toutes les factures des clients ont été récupérées avec succès")
@@ -122,7 +122,7 @@ public class BillServicesImpl implements BillServices {
     }
 
     @Override
-    public HttpResponse delete(Long id) {
+    public HttpResponse<Object> delete(Long id) {
         Bills bills = billRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Aucune facture avec cet identifiant " + id
                         + "n'a été trouvée ! Veuillez saisir un numéro de facture valide"));
@@ -134,7 +134,7 @@ public class BillServicesImpl implements BillServices {
     @Transactional
     @Override
     public BillResponse generateBills(BillRequest request) {
-        LocalDateTime today = LocalDateTime.now();
+        LocalDateTime today = now();
         BillResponse response = new BillResponse();
         List<Customers> customers = customersRepository.findAll();
         for (Customers c : customers) {
@@ -156,7 +156,7 @@ public class BillServicesImpl implements BillServices {
         List<Customers> customers = customersRepository.findAllById(customerIds);
 
         List<BillResponse> generatedBills = new ArrayList<>();
-        LocalDateTime today = LocalDateTime.now();
+        LocalDateTime today = now();
 
         for (Customers c : customers) {
             try {
@@ -167,8 +167,6 @@ public class BillServicesImpl implements BillServices {
             } catch (Exception e) {
                 log.trace("Error generating bill for customer {}", e.getMessage());
                 throw new ApiException("Error generating bill for customer" + c.getCustomerId() + " " + e);
-                // Optionally, you could throw a custom exception here to be handled by the
-                // controller
             }
         }
         return generatedBills;
@@ -180,10 +178,10 @@ public class BillServicesImpl implements BillServices {
 
         BigDecimal netToPay = calculateBillAmount(customer);
         BigDecimal debt = getUnpaidAmount(customer);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", Locale.FRANCE);
         LocalDateTime dueDate = billingDate.plusDays(10);
-        String deadLine = formatter.format(dueDate);
+        String deadLine = FORMATTER.format(dueDate);
 
+        log.warn("Generating bill for the customer } ==========////==========");
         Bills newBill = Bills.builder()
                 .customers(customer)
                 .monthlyPayment(
@@ -204,9 +202,11 @@ public class BillServicesImpl implements BillServices {
                 .paidAmount(request.getPaidAmount() == null ? BigDecimal.ZERO : request.getPaidAmount())
                 .netToPay(netToPay)
                 .build();
+        log.warn("Generating bill for the customer } ====================");
 
         Bills savedBill = billRepository.save(newBill);
         customer.setLastBillGenerationDate(billingDate);
+        log.warn("Generating bill for the customer } =======++++++++++++++++=============");
         customersRepository.save(customer);
         return billMapper.toResponse(savedBill);
     }

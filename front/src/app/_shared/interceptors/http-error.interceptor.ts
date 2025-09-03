@@ -7,10 +7,10 @@ import {
   HttpRequest,
   HttpResponse,
 } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
-import { catchError, map, Observable, throwError } from 'rxjs';
-import { NotificationService } from "../services/notification.service";
-import { AuthService } from "../../auth/services/auth.service";
+import {inject, Injectable} from '@angular/core';
+import {catchError, map, Observable, throwError} from 'rxjs';
+import {NotificationService} from "../services/notification.service";
+import {AuthService} from "../../auth/services/auth.service";
 import {environment} from "../../../environments/environment";
 
 @Injectable()
@@ -44,11 +44,15 @@ export class HttpErrorInterceptor implements HttpInterceptor {
               break;
             case 403:
               title = 'Accès interdit';
-              errorMessage = 'Vous ne disposez pas d\'un droit d\'accès suffisant à ces données';
+              errorMessage = "Vous ne disposez pas d''un droit d''accès suffisant à ces données";
               break;
             case 404:
               title = 'Introuvable';
               errorMessage = error.error?.message || error.error?.developerMessage || 'La ressource demandée est introuvable';
+              break;
+            case 409:
+              title = 'Conflit';
+              errorMessage = error.error?.message || error.error?.developerMessage || 'Conflit entre les donnees transmise';
               break;
             case 500:
               title = 'Erreur interne';
@@ -90,5 +94,5 @@ export class HttpErrorInterceptor implements HttpInterceptor {
 
 
 export const httpErrorInterceptorProvider = [
-  { provide: HTTP_INTERCEPTORS, useClass: HttpErrorInterceptor, multi: true },
+  {provide: HTTP_INTERCEPTORS, useClass: HttpErrorInterceptor, multi: true},
 ];

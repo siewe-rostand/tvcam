@@ -99,7 +99,7 @@ export class AuthStateService {
     const newState = {
       ...currentState,
       isAuthenticated,
-      user: isAuthenticated ? user : null,
+      user: user,
       hasToken: isAuthenticated
     };
 

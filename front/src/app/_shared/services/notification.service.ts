@@ -188,6 +188,47 @@ export class NotificationService {
   }
 
   /**
+   * Affiche un message pour la génération de factures
+   */
+  showBillGenerationSuccess(count: number, month: string, year: string): void {
+    this.showSuccess(
+      `${count} facture(s) générée(s) avec succès pour ${month} ${year}`,
+      'Génération de factures réussie',
+      5000
+    );
+  }
+
+  /**
+   * Affiche un avertissement pour les factures déjà générées
+   */
+  showBillAlreadyGenerated(month: string, year: string): void {
+    this.showWarning(
+      `Des factures ont déjà été générées pour ${month} ${year}. Veuillez confirmer pour régénérer.`,
+      'Factures déjà générées',
+      6000
+    );
+  }
+
+  /**
+   * Affiche une erreur pour la génération de factures
+   */
+  showBillGenerationError(error?: string): void {
+    const message = error || 'Une erreur est survenue lors de la génération des factures';
+    this.showError(message, 'Erreur de génération', false);
+  }
+
+  /**
+   * Affiche un message d'information pour le processus de génération
+   */
+  showBillGenerationInProgress(count: number): void {
+    this.showInfo(
+      `Génération en cours pour ${count} client(s)...`,
+      'Traitement des factures',
+      3000
+    );
+  }
+
+  /**
    * Efface tous les messages
    */
   clear(): void {

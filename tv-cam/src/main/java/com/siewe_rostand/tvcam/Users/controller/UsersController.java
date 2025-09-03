@@ -1,7 +1,5 @@
 package com.siewe_rostand.tvcam.Users.controller;
 
-import static java.time.LocalDateTime.now;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.siewe_rostand.tvcam.Users.dto.UserRequest;
@@ -13,10 +11,6 @@ import com.siewe_rostand.tvcam.shared.Exceptions.EntityNotFoundException;
 import com.siewe_rostand.tvcam.shared.HttpResponse;
 import com.siewe_rostand.tvcam.shared.PaginatedResponse;
 import jakarta.servlet.http.HttpServletRequest;
-import java.net.URI;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,47 +18,54 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static java.time.LocalDateTime.now;
+
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
 public class UsersController {
-    private  final Logger logger = LoggerFactory.getLogger(UsersController.class);
+    private final Logger logger = LoggerFactory.getLogger(UsersController.class);
 
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<HttpResponse> saveUser(@RequestBody UserRequest usersDto) {
+    public ResponseEntity<HttpResponse<Object>> saveUser(@RequestBody UserRequest usersDto) {
         ObjectMapper objectMapper = new ObjectMapper();
         UserResponse dto = userService.create(usersDto);
         Map<String, Object> data = objectMapper
                 .convertValue(dto, new TypeReference<>() {
                 });
-    return ResponseEntity.created(URI.create(""))
-        .body(
-            HttpResponse.builder()
-                .timestamp(now())
-                .message("User created successfully")
-                .data(data)
-                .status(HttpStatus.CREATED)
-                .statusCode(HttpStatus.CREATED.value())
-                .build());
+        return ResponseEntity.created(URI.create(""))
+                .body(
+                        HttpResponse.builder()
+                                .timestamp(now())
+                                .message("User created successfully")
+                                .data(data)
+                                .status(HttpStatus.CREATED)
+                                .statusCode(HttpStatus.CREATED.value())
+                                .build());
     }
 
     @PutMapping("/edit")
-    public ResponseEntity<HttpResponse> updateUser(@RequestBody UsersDto usersDto) {
+    public ResponseEntity<HttpResponse<Object>> updateUser(@RequestBody UsersDto usersDto) {
         ObjectMapper objectMapper = new ObjectMapper();
         UsersDto dto = new UsersDto().CreateDTO(userService.updateUser(usersDto));
         Map<String, Object> data = objectMapper.convertValue(dto, new TypeReference<>() {
         });
-    return ResponseEntity.ok()
-        .body(
-            HttpResponse.builder()
-                .timestamp(now())
-                .message("User data updated successfully")
-                .data(data)
-                .status(HttpStatus.OK)
-                .statusCode(HttpStatus.OK.value())
-                .build());
+        return ResponseEntity.ok()
+                .body(
+                        HttpResponse.builder()
+                                .timestamp(now())
+                                .message("User data updated successfully")
+                                .data(data)
+                                .status(HttpStatus.OK)
+                                .statusCode(HttpStatus.OK.value())
+                                .build());
     }
 
     @GetMapping
@@ -84,43 +85,43 @@ public class UsersController {
         return map;
     }
 
-     @GetMapping("user/{id}")
-    public ResponseEntity<HttpResponse> findBYId(@PathVariable Long id) {
+    @GetMapping("user/{id}")
+    public ResponseEntity<HttpResponse<Object>> findBYId(@PathVariable Long id) {
 //        log.trace("User controller:::getById() {}",id);
         if (userService.getById(id) == null) {
             throw new EntityNotFoundException(Users.class, "id", id.toString());
         } else {
             UsersDto usersDto = userService.getById(id);
-      return ResponseEntity.ok()
-          .body(
-              HttpResponse.builder()
-                  .data(Map.of("user", usersDto))
-                  .status(HttpStatus.OK)
-                  .statusCode(HttpStatus.OK.value())
-                  .message("User with id " + id + " gotten successfully!!!")
-                  .timestamp(now())
-                  .build());
+            return ResponseEntity.ok()
+                    .body(
+                            HttpResponse.builder()
+                                    .data(Map.of("user", usersDto))
+                                    .status(HttpStatus.OK)
+                                    .statusCode(HttpStatus.OK.value())
+                                    .message("User with id " + id + " gotten successfully!!!")
+                                    .timestamp(now())
+                                    .build());
         }
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<HttpResponse> findByUserId(@PathVariable Long id, HttpServletRequest request) {
+    public ResponseEntity<HttpResponse<Object>> findByUserId(@PathVariable Long id, HttpServletRequest request) {
         ObjectMapper objectMapper = new ObjectMapper();
         UserResponse response = userService.findById(id);
         Map<String, Object> data = objectMapper.convertValue(response, new TypeReference<>() {
         });
 
-        logger.debug("findByUserId data : {}",data);
-    return ResponseEntity.ok()
-        .body(
-            HttpResponse.builder()
-                .message("User gotten successfully")
-                .timestamp(now())
-                .status(HttpStatus.OK)
-                .statusCode(HttpStatus.OK.value())
-                .data(Map.of("user", response))
-                .path(request.getRequestURI())
-                .build());
+        logger.debug("findByUserId data : {}", data);
+        return ResponseEntity.ok()
+                .body(
+                        HttpResponse.builder()
+                                .message("User gotten successfully")
+                                .timestamp(now())
+                                .status(HttpStatus.OK)
+                                .statusCode(HttpStatus.OK.value())
+                                .data(Map.of("user", response))
+                                .path(request.getRequestURI())
+                                .build());
     }
 
 }

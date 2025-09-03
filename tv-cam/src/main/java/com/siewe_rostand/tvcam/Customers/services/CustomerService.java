@@ -1,22 +1,31 @@
 package com.siewe_rostand.tvcam.Customers.services;
 
-import com.siewe_rostand.tvcam.Customers.dto.CustomersDTO;
+import com.siewe_rostand.tvcam.Customers.dto.CustomerRequest;
+import com.siewe_rostand.tvcam.Customers.dto.CustomerResponse;
 import com.siewe_rostand.tvcam.Customers.model.Customers;
+import com.siewe_rostand.tvcam.shared.HttpResponse;
 import com.siewe_rostand.tvcam.shared.PaginatedResponse;
 import org.springframework.data.domain.Page;
 
-import java.util.List;
-
 public interface CustomerService {
 
-    Customers save(CustomersDTO customersDto);
-    Customers update(CustomersDTO customersDto);
-    Page<CustomersDTO> findAll(Integer page, Integer size, String sortBy, String direction);
+    HttpResponse<Object> save(CustomerRequest customersDto);
+
+    HttpResponse<Object> update(CustomerRequest request, Long id);
+
+    Page<CustomerResponse> findAll(Integer page, Integer size, String sortBy, String direction);
+
     PaginatedResponse findAll(Integer page, Integer size, String sortBy, String direction, String name);
-    List<CustomersDTO> findByKeyword(String keyword);
-    CustomersDTO findById(Long id);
+
+    HttpResponse<Object> findByKeyword(String keyword);
+
+    HttpResponse<Object> findById(Long id);
+
     void delete(Long id);
+
     void checkIfCustomerExistsOrThrow(Long id);
-    Page<CustomersDTO> findAllActive(Integer page, Integer size, String sortBy, String direction, Boolean isActive);
+
+    Page<CustomerResponse> findAllActive(Integer page, Integer size, String sortBy, String direction, Boolean isActive);
+
     Customers getById(Long id);
 }

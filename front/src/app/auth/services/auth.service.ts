@@ -27,7 +27,8 @@ export class AuthService {
     private storageService: StorageService,
     private router: Router,
     private authStateService: AuthStateService
-  ) { }
+  ) {
+  }
 
   login(telephone: string, password: string): Observable<any> {
     return this.http.post<any>(
@@ -43,17 +44,14 @@ export class AuthService {
    * Handle successful login response
    */
   handleLoginSuccess(response: AuthResponseModel): void {
-    console.log('Handling login success');
+    console.log('Handling login successful, redirecting to:', response);
 
     if (response.token) {
       this.storageService.saveToken(response.token);
 
-      if (response.user) {
-        console.info('Login response user data', response.user);
-        const user: UserModel = response.user;
-
-        this.storageService.saveUser(user);
-        this.authStateService.updateAuthState(true, user);
+      if (response.telephone) {
+        console.info('Login response user data', response.telephone);
+        this.authStateService.updateAuthState(true, null);
       }
 
       this.isLoggedIn = true;

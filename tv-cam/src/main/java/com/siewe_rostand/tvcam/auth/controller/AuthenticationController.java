@@ -11,12 +11,16 @@ import com.siewe_rostand.tvcam.shared.HttpResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+
+import static org.springframework.http.HttpStatus.CREATED;
 
 /**
  * @author rostand
@@ -29,11 +33,12 @@ import java.util.Map;
 @Tag(name = "Authentication")
 public class AuthenticationController {
 
+    private static final Logger log = LoggerFactory.getLogger(AuthenticationController.class);
     private final AuthenticationService service;
 
 
     @PostMapping("/register")
-    public ResponseEntity<HttpResponse> register(
+    public ResponseEntity<HttpResponse<Object>> register(
             @RequestBody RegisterRequest request
     ) {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -43,7 +48,7 @@ public class AuthenticationController {
                 });
         return ResponseEntity.ok().body(
                 HttpResponse.builder()
-                        .status(HttpStatus.CREATED).statusCode(HttpStatus.CREATED.value())
+                        .status(CREATED).statusCode(CREATED.value())
                         .message("User successfully created")
                         .data(data)
                         .build()
@@ -62,7 +67,7 @@ public class AuthenticationController {
     @ApiResponse(description = "Login end point", responseCode = "200")
     @ApiResponse(responseCode = "400", description = "password and/or telephone number is/are incorrect")
     @PostMapping("/login")
-    public ResponseEntity<HttpResponse> login(
+    public ResponseEntity<HttpResponse<Object>> login(
             @RequestBody AuthenticationRequest request
     ) {
         return ResponseEntity.ok(service.authenticate(request));
@@ -70,8 +75,14 @@ public class AuthenticationController {
 
     @Operation(summary = "change password", description = "change the user password")
     @PostMapping("/password/change")
-    public ResponseEntity<HttpResponse> forgotPassword(@RequestBody ForgetPasswordForm forgetPasswordForm) {
+    public ResponseEntity<HttpResponse<Object>> forgotPassword(@RequestBody ForgetPasswordForm forgetPasswordForm) {
         return ResponseEntity.ok(service.forgottenPassword(forgetPasswordForm));
+    }
+
+    @GetMapping("/user")
+    public ResponseEntity<HttpResponse<Object>> getUserInfo(HttpServletRequest request) {
+        log.info("get user info {}", request);
+        return ResponseEntity.ok().body(service.getUserInfo(request));
     }
 
 }

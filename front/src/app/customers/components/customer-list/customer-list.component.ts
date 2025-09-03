@@ -88,12 +88,12 @@ export class CustomerListComponent implements OnInit {
       acceptLabel: 'OUI',
       rejectLabel: 'NON',
       accept: () => {
-        const shouldGenerate = this.selectedCustomers.map(item => item.lastBillGenerationDate != null);
-        console.log(shouldGenerate.length)
-        if (shouldGenerate.length >= 1) {
+        const shouldGenerate = this.selectedCustomers.some(item => item.lastBillGenerationDate != null);
+        console.log(shouldGenerate)
+        if (shouldGenerate) {
           this.showConfirmGenerateBill();
         } else {
-        this.generateBills();
+          this.generateBills();
         }
       },
     });
@@ -176,6 +176,7 @@ export class CustomerListComponent implements OnInit {
   moveToDetail(customerId: number) {
     this.router.navigate(['/customers', customerId, 'detail']).then(r => r);
   }
+
   openEdit(customer: CustomerModel) {
     this.customer = {...customer};
     this.updateCustomerDialog = true;
@@ -200,18 +201,19 @@ export class CustomerListComponent implements OnInit {
         this.messageService.add({
           severity: 'success',
           summary: 'Successful',
-          detail: `les données de l'utilisateur ${this.customer.name} ont été sauvegarder avec succès`,
+          detail: `les données de l''utilisateur ${this.customer.name} ont été sauvegarder avec succès`,
           life: 3000,
           key: 'br',
         });
         this.submitted = false;
         this.saveCustomerDialog = false;
       },
-      error: (_) => {
+      error: (e) => {
+        console.error(' error occurred while saving a new customer ', e)
         this.messageService.add({
           severity: 'error',
           summary: 'Erreur de mise à jour',
-          detail: `une erreur s'est produite lors de la mise à jour des données`,
+          detail: `une erreur s\\'est produite lors de la mise à jour des données`,
           life: 5000,
           key: 'br',
         });

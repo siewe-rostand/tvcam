@@ -91,6 +91,38 @@ export class BillManagementService {
     }
 
     /**
+     * Vérifie si des factures existent déjà pour le mois donné
+     */
+    checkExistingBillsForMonth(customerIds: number[], month: string, year: string): Observable<any> {
+        return this.billService.checkExistingBillsForMonth(customerIds, month, year);
+    }
+
+    /**
+     * Génère des factures avec vérification mensuelle
+     */
+    generateBillsWithMonthlyCheck(
+        customerIds: number[],
+        month: string,
+        year: string,
+        forceGeneration: boolean = false
+    ): Observable<any> {
+        this.loadingSubject.next(true);
+
+        // Si forceGeneration est true, générer directement
+        if (forceGeneration) {
+            return this.generateBillsForCustomers(customerIds, true);
+        }
+
+        // Sinon, vérifier d'abord s'il y a des factures existantes
+        return this.checkExistingBillsForMonth(customerIds, month, year).pipe(
+            map(response => {
+                this.loadingSubject.next(false);
+                return response;
+            })
+        );
+    }
+
+    /**
      * Calcule le montant restant à payer pour une facture
      */
     private calculateRemainingBalance(bill: BillModel): number {

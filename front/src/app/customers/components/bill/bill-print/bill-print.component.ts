@@ -1,7 +1,8 @@
-import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
-import {CommonModule} from "@angular/common";
-import {BillModel} from "../../../model/bill.model";
-import {BillService} from "../../../service/bill.service";
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { CommonModule } from "@angular/common";
+import { BillModel } from "../../../model/bill.model";
+import { BillService } from "../../../service/bill.service";
+import { BillUtils } from "../../../../_shared/utils/bill.utils";
 
 @Component({
   selector: 'app-bill-print',
@@ -10,33 +11,61 @@ import {BillService} from "../../../service/bill.service";
   templateUrl: './bill-print.component.html',
   styleUrl: './bill-print.component.css'
 })
-export class BillPrintComponent implements OnInit{
+export class BillPrintComponent implements OnInit {
   constructor(private billService: BillService) {
   }
 
   bills: BillModel[] = [];
   @ViewChild('printSection') printSection!: ElementRef;
-  factures = [
-    {id: 'bill 2', amount: 300, customer: "client 2"},
-    {id: 'bill 2', amount: 300, customer: "client 2"},
-    {id: 'bill 2', amount: 300, customer: "client 2"},
-    {id: 'bill 2', amount: 300, customer: "client 2"},
-    {id: 'bill 2', amount: 300, customer: "client 2"},
-    {id: 'bill 2', amount: 300, customer: "client 2"},
-    {id: 'bill 2', amount: 300, customer: "client 2"},
-    {id: 'bill 2', amount: 300, customer: "client 2"},
-    {id: 'bill 2', amount: 300, customer: "client 2"},
-  ];
-
 
   print() {
     window.print();
   }
 
   ngOnInit(): void {
-    this.billService.selectedBills.subscribe(bills =>this.bills = bills);
-    console.log(this.bills);
+    this.billService.selectedBills.subscribe(bills => this.bills = bills);
+    console.log('Bills to print:', this.bills);
   }
 
+  /**
+   * Format month value to display label using BillUtils
+   */
+  getMonthLabel(monthValue?: string): string {
+    return BillUtils.getMonthLabelFr(monthValue);
+  }
 
+  /**
+   * Format date for display using BillUtils
+   */
+  formatDate(dateValue?: string): string {
+    return BillUtils.formatDateFr(dateValue);
+  }
+
+  /**
+   * Format amount with proper FCFA formatting using BillUtils
+   */
+  formatAmount(amount?: number): string {
+    return BillUtils.formatAmountFCFA(amount);
+  }
+
+  /**
+   * Generate bill reference number
+   */
+  getBillReference(bill: BillModel): string {
+    return BillUtils.generateBillReference(bill.id, bill.month, bill.year);
+  }
+
+  /**
+   * Get default deposit date if not provided
+   */
+  getDepositDate(bill: BillModel): string {
+    return bill.depositDate ? this.formatDate(bill.depositDate) : BillUtils.getDefaultDepositDate();
+  }
+
+  /**
+   * Get deadline date, with fallback to default
+   */
+  getDeadlineDate(bill: BillModel): string {
+    return bill.deadLine ? this.formatDate(bill.deadLine) : BillUtils.getDefaultDeadlineDate();
+  }
 }
