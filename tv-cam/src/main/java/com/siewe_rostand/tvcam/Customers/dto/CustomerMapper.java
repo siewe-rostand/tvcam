@@ -11,7 +11,7 @@ import static com.siewe_rostand.tvcam.shared.utils.CommonUtils.FORMATTER;
 @Component
 public class CustomerMapper {
     public CustomerResponse toResponse(Customers customers) {
-        return CustomerResponse.builder().id(customers.getCustomerId()).name(customers.getName())
+        return CustomerResponse.builder().id(customers.getCustomerId()).name(customers.getName()).ref(customers.getRef())
                 .address(customers.getAddress()).telephone(customers.getTelephone()).hasDebt(customers.getHasDebt()).hasPaid(customers.getHasPaid())
                 .isActive(customers.getIsActive()).isSuspended(customers.getIsSuspended())
                 .paymentFrequency(customers.getPaymentFrequency() == null ? MONTHLY.name() : customers.getPaymentFrequency().name())

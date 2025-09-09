@@ -89,7 +89,7 @@ public class ZoneServiceImpl implements ZoneService {
 
     @Override
     @Transactional
-    public HttpResponse deleteZone(Long zoneId) {
+    public HttpResponse<Object> deleteZone(Long zoneId) {
         log.info("Suppression de la zone ID: {}", zoneId);
 
         Zone zone = zoneRepository.findById(zoneId)
@@ -118,9 +118,9 @@ public class ZoneServiceImpl implements ZoneService {
 
         return HttpResponse.builder()
                 .message("Zone supprimée avec succès")
-                .status(OK)
+                .status(OK.getReasonPhrase())
                 .statusCode(OK.value())
-                .timestamp(now())
+                .timestamp(now()).success(true)
                 .build();
     }
 
@@ -207,7 +207,7 @@ public class ZoneServiceImpl implements ZoneService {
 
     @Override
     @Transactional
-    public HttpResponse assignUserToZone(Long zoneId, Long userId) {
+    public HttpResponse<Object> assignUserToZone(Long zoneId, Long userId) {
         log.info("Assignation de l''utilisateur {} à la zone {}", userId, zoneId);
 
         Zone zone = zoneRepository.findById(zoneId)
@@ -232,15 +232,15 @@ public class ZoneServiceImpl implements ZoneService {
 
         return HttpResponse.builder()
                 .message("Utilisateur assigné à la zone avec succès")
-                .status(OK)
+                .status(OK.getReasonPhrase())
                 .statusCode(OK.value())
-                .timestamp(now())
+                .timestamp(now()).success(true)
                 .build();
     }
 
     @Override
     @Transactional
-    public HttpResponse removeUserFromZone(Long zoneId, Long userId) {
+    public HttpResponse<Object> removeUserFromZone(Long zoneId, Long userId) {
         log.info("Suppression de l''utilisateur {} de la zone {}", userId, zoneId);
 
         Zone zone = zoneRepository.findById(zoneId)
@@ -264,15 +264,15 @@ public class ZoneServiceImpl implements ZoneService {
 
         return HttpResponse.builder()
                 .message("Utilisateur retiré de la zone avec succès")
-                .status(OK)
+                .status(OK.getReasonPhrase())
                 .statusCode(OK.value())
-                .timestamp(now())
+                .timestamp(now()).success(true)
                 .build();
     }
 
     @Override
     @Transactional
-    public HttpResponse assignCustomerToZone(Long zoneId, Long customerId) {
+    public HttpResponse<Object> assignCustomerToZone(Long zoneId, Long customerId) {
         log.info("Assignation du client {} à la zone {}", customerId, zoneId);
 
         Zone zone = zoneRepository.findById(zoneId)
@@ -293,9 +293,9 @@ public class ZoneServiceImpl implements ZoneService {
 
         return HttpResponse.builder()
                 .message("Client assigné à la zone avec succès")
-                .status(OK)
+                .status(OK.getReasonPhrase())
                 .statusCode(OK.value())
-                .timestamp(now())
+                .timestamp(now()).success(true)
                 .build();
     }
 }

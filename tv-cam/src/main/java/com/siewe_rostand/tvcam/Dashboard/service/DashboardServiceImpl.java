@@ -4,6 +4,7 @@ import com.siewe_rostand.tvcam.Bills.repository.BillRepository;
 import com.siewe_rostand.tvcam.Customers.repository.CustomersRepository;
 import com.siewe_rostand.tvcam.Issue.model.enumeration.IssueStatus;
 import com.siewe_rostand.tvcam.Issue.repository.IssueRepository;
+import com.siewe_rostand.tvcam.Payment.model.Payments;
 import com.siewe_rostand.tvcam.Payment.model.enumeration.PaymentStatus;
 import com.siewe_rostand.tvcam.Payment.repository.PaymentRepository;
 import com.siewe_rostand.tvcam.Users.repository.UsersRepository;
@@ -318,7 +319,7 @@ public class DashboardServiceImpl implements DashboardService {
     private BigDecimal calculateTotalRevenue() {
         // Implémentation du calcul du chiffre d'affaires total
         return paymentRepository.findAll().stream()
-                .map(payment -> payment.getAmount())
+                .map(Payments::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
@@ -347,7 +348,7 @@ public class DashboardServiceImpl implements DashboardService {
                         return false;
                     }
                 })
-                .map(payment -> payment.getAmount())
+                .map(Payments::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
@@ -403,31 +404,31 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     private Long getResolvedIssuesCountByUser(Long userId) {
-        return 0L; // À implémenter
+        return 0L; // TODO
     }
 
     private Map<String, Object> getUserMonthlyPerformance(Long userId) {
-        return new HashMap<>(); // À implémenter
+        return new HashMap<>(); // TODO
     }
 
     private Object getRecentPayments(Integer limit) {
-        return "Recent payments"; // À implémenter
+        return "Recent payments"; // TODO
     }
 
     private Object getRecentIssues(Integer limit) {
-        return "Recent issues"; // À implémenter
+        return "Recent issues"; // TODO
     }
 
     private Object getRecentCustomers(Integer limit) {
-        return "Recent customers"; // À implémenter
+        return "Recent customers"; // TODO
     }
 
     private Long getOverduePaymentsCount() {
-        return 0L; // À implémenter
+        return 0L; // TODO
     }
 
     private Long getUrgentIssuesCount() {
-        return 0L; // À implémenter
+        return 0L; // TODO
     }
 
     private Long getInactiveCustomersCount() {
@@ -437,6 +438,6 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     private Object getMissedTargets() {
-        return "Missed targets"; // À implémenter
+        return "Missed targets"; // TODO
     }
 }

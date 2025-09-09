@@ -7,11 +7,11 @@ import {
   HttpRequest,
   HttpResponse,
 } from '@angular/common/http';
-import {inject, Injectable} from '@angular/core';
-import {catchError, map, Observable, throwError} from 'rxjs';
-import {NotificationService} from "../services/notification.service";
-import {AuthService} from "../../auth/services/auth.service";
-import {environment} from "../../../environments/environment";
+import { inject, Injectable } from '@angular/core';
+import { catchError, map, Observable, throwError } from 'rxjs';
+import { NotificationService } from "../services/notification.service";
+import { AuthService } from "../../auth/services/auth.service";
+import { environment } from "../../../environments/environment";
 
 @Injectable()
 export class HttpErrorInterceptor implements HttpInterceptor {
@@ -27,7 +27,6 @@ export class HttpErrorInterceptor implements HttpInterceptor {
       catchError((error) => {
         if (error instanceof HttpErrorResponse) {
           let errorMessage: string = '', title: string;
-          console.log('HTTP Error Response:', error);
 
           if (!environment.production) {
             console.log('HTTP Error Response:', error);
@@ -71,9 +70,6 @@ export class HttpErrorInterceptor implements HttpInterceptor {
             this.notificationService.showError(errorMessage, title);
           }
 
-          // Log the error
-          console.error('HTTP Error:', error);
-
           return throwError(() => new Error(errorMessage));
         } else {
           console.error('Network error:', error);
@@ -94,5 +90,5 @@ export class HttpErrorInterceptor implements HttpInterceptor {
 
 
 export const httpErrorInterceptorProvider = [
-  {provide: HTTP_INTERCEPTORS, useClass: HttpErrorInterceptor, multi: true},
+  { provide: HTTP_INTERCEPTORS, useClass: HttpErrorInterceptor, multi: true },
 ];

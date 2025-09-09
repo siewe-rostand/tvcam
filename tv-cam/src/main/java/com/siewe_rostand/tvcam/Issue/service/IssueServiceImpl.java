@@ -23,15 +23,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static java.time.LocalDateTime.now;
+import static org.springframework.http.HttpStatus.OK;
 
 /**
  * Implémentation du service Issue
@@ -117,7 +118,7 @@ public class IssueServiceImpl implements IssueService {
 
     @Override
     @Transactional
-    public HttpResponse deleteIssue(Long issueId) {
+    public HttpResponse<Object> deleteIssue(Long issueId) {
         log.info("Suppression de la réclamation ID: {}", issueId);
 
         Issue issue = issueRepository.findById(issueId)
@@ -132,9 +133,9 @@ public class IssueServiceImpl implements IssueService {
 
         return HttpResponse.builder()
                 .message("Réclamation supprimée avec succès")
-                .status(HttpStatus.OK)
-                .statusCode(HttpStatus.OK.value())
-                .timestamp(LocalDateTime.now())
+                .status(OK.getReasonPhrase())
+                .statusCode(OK.value())
+                .timestamp(now()).success(true)
                 .build();
     }
 
@@ -213,7 +214,7 @@ public class IssueServiceImpl implements IssueService {
 
     @Override
     @Transactional
-    public HttpResponse assignIssue(Long issueId, Long userId) {
+    public HttpResponse<Object> assignIssue(Long issueId, Long userId) {
         log.info("Assignation de la réclamation {} à l'utilisateur {}", issueId, userId);
 
         Issue issue = issueRepository.findById(issueId)
@@ -233,15 +234,15 @@ public class IssueServiceImpl implements IssueService {
 
         return HttpResponse.builder()
                 .message("Réclamation assignée avec succès")
-                .status(HttpStatus.OK)
-                .statusCode(HttpStatus.OK.value())
-                .timestamp(LocalDateTime.now())
+                .status(OK.getReasonPhrase())
+                .statusCode(OK.value())
+                .timestamp(now()).success(true)
                 .build();
     }
 
     @Override
     @Transactional
-    public HttpResponse resolveIssue(Long issueId, String resolution) {
+    public HttpResponse<Object> resolveIssue(Long issueId, String resolution) {
         log.info("Résolution de la réclamation ID: {}", issueId);
 
         Issue issue = issueRepository.findById(issueId)
@@ -251,21 +252,21 @@ public class IssueServiceImpl implements IssueService {
 
         issue.setStatus(IssueStatus.RESOLVED);
         issue.setResolution(resolution);
-        issue.setResolvedAt(LocalDateTime.now());
+        issue.setResolvedAt(now());
 
         issueRepository.save(issue);
 
-        return HttpResponse.builder()
+        return HttpResponse.builder().success(true)
                 .message("Réclamation résolue avec succès")
-                .status(HttpStatus.OK)
-                .statusCode(HttpStatus.OK.value())
-                .timestamp(LocalDateTime.now())
+                .status(OK.getReasonPhrase())
+                .statusCode(OK.value())
+                .timestamp(now())
                 .build();
     }
 
     @Override
     @Transactional
-    public HttpResponse closeIssue(Long issueId) {
+    public HttpResponse<Object> closeIssue(Long issueId) {
         log.info("Fermeture de la réclamation ID: {}", issueId);
 
         Issue issue = issueRepository.findById(issueId)
@@ -276,17 +277,17 @@ public class IssueServiceImpl implements IssueService {
         issue.setStatus(IssueStatus.CLOSED);
         issueRepository.save(issue);
 
-        return HttpResponse.builder()
+        return HttpResponse.builder().success(true)
                 .message("Réclamation fermée avec succès")
-                .status(HttpStatus.OK)
-                .statusCode(HttpStatus.OK.value())
-                .timestamp(LocalDateTime.now())
+                .status(OK.getReasonPhrase())
+                .statusCode(OK.value())
+                .timestamp(now())
                 .build();
     }
 
     @Override
     @Transactional
-    public HttpResponse provideFeedback(Long issueId, Integer rating, String feedback) {
+    public HttpResponse<Object> provideFeedback(Long issueId, Integer rating, String feedback) {
         log.info("Ajout de feedback pour la réclamation ID: {}", issueId);
 
         Issue issue = issueRepository.findById(issueId)
@@ -300,11 +301,11 @@ public class IssueServiceImpl implements IssueService {
         issue.setCustomerFeedback(feedback);
         issueRepository.save(issue);
 
-        return HttpResponse.builder()
+        return HttpResponse.builder().success(true)
                 .message("Feedback ajouté avec succès")
-                .status(HttpStatus.OK)
-                .statusCode(HttpStatus.OK.value())
-                .timestamp(LocalDateTime.now())
+                .status(OK.getReasonPhrase())
+                .statusCode(OK.value())
+                .timestamp(now())
                 .build();
     }
 
@@ -333,7 +334,7 @@ public class IssueServiceImpl implements IssueService {
     @Override
     @Transactional(readOnly = true)
     public List<IssueResponse> getOverdueIssues() {
-        List<Issue> overdueIssues = issueRepository.findOverdueIssues(LocalDateTime.now());
+        List<Issue> overdueIssues = issueRepository.findOverdueIssues(now());
         return overdueIssues.stream()
                 .map(issueMapper::toResponse)
                 .collect(Collectors.toList());

@@ -97,7 +97,8 @@ public class BillServicesImpl implements BillServices {
             billResponses.add(billResponse);
         }
 
-        return HttpResponse.builder().content(billResponses).status(OK)
+        return HttpResponse.builder().success(true).timestamp(now())
+                .data(billResponses).status(OK.getReasonPhrase())
                 .message("Bills for customer " + customer.getName() + " gotten successfully").statusCode(OK.value())
                 .build();
     }
@@ -127,7 +128,8 @@ public class BillServicesImpl implements BillServices {
                 .orElseThrow(() -> new EntityNotFoundException("Aucune facture avec cet identifiant " + id
                         + "n'a été trouvée ! Veuillez saisir un numéro de facture valide"));
         billRepository.delete(bills);
-        return HttpResponse.builder().message("Facture supprimée avec succès").statusCode(OK.value()).status(OK)
+        return HttpResponse.builder().timestamp(now()).success(true)
+                .message("Facture supprimée avec succès").statusCode(OK.value()).status(OK.getReasonPhrase())
                 .build();
     }
 

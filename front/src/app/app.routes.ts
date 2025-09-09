@@ -13,7 +13,6 @@ import { AuthGuardService } from "./auth/services/auth-guard.service";
 import { EnhancedDashboardComponent } from "./dashboard/enhanced-dashboard.component";
 import { EnhancedBillGenerationComponent } from "./customers/components/bill/enhanced-bill-generation.component";
 import { EnhancedPaymentComponent } from "./customers/components/payment/enhanced-payment.component";
-import { AuthDebugComponent } from "./home/auth-debug/auth-debug.component";
 
 export const routes: Routes = [
   // Public routes (no authentication required)
@@ -79,12 +78,6 @@ export const routes: Routes = [
   {
     path: 'home',
     component: HomeComponent,
-    canActivate: [AuthGuardService],
-  },
-
-  {
-    path: 'debug-auth',
-    component: AuthDebugComponent,
     canActivate: [AuthGuardService],
   },
 

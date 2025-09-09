@@ -8,7 +8,7 @@ import {
   RouterStateSnapshot,
 } from '@angular/router';
 import { StorageService } from "../../_shared/services/storage.service";
-import { AuthStateService } from "../../_shared/services/auth-state.service";
+import { AuthStateService } from "./auth-state.service";
 import { map } from 'rxjs';
 
 @Injectable({
@@ -28,7 +28,6 @@ export class AuthGuardService implements CanActivate {
   ): MaybeAsync<GuardResult> {
     return this.authStateService.waitForBrowserInitialization().pipe(
       map(authState => {
-        console.log('################# ==', authState.isAuthenticated, authState.isInitialized);
         if (authState.isAuthenticated) {
           return true;
         } else {

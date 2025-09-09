@@ -39,7 +39,7 @@ public class BillController {
     }
 
     @PostMapping("/save")
-    public ResponseEntity<HttpResponse> saveBill(@RequestBody BillRequest request) {
+    public ResponseEntity<HttpResponse<Object>> saveBill(@RequestBody BillRequest request) {
         logger.debug("BillController:::saveBills {}", request);
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -48,9 +48,9 @@ public class BillController {
                 .convertValue(response, new TypeReference<>() {
                 });
         return ResponseEntity.created(URI.create("save_bill")).body(
-                HttpResponse.builder()
+                HttpResponse.builder().success(true)
                         .timestamp(now()).message("Bills created successfully")
-                        .status(CREATED).statusCode(CREATED.value()).data(data)
+                        .status(CREATED.getReasonPhrase()).statusCode(CREATED.value()).data(data)
                         .build()
         );
     }
@@ -59,11 +59,11 @@ public class BillController {
     public ResponseEntity<HttpResponse<Object>> generateBillsForSelectedCustomers(@RequestBody List<Long> customerIds, @RequestParam Boolean shouldGenerate) {
         logger.warn("BillController:::generateBillsForSelectedCustomers {},{}", customerIds, shouldGenerate);
         try {
-            var response = billServices.generateBillsForSelectedCustomers(customerIds, shouldGenerate);
+            List<BillResponse> response = billServices.generateBillsForSelectedCustomers(customerIds, shouldGenerate);
             return ResponseEntity.status(CREATED).body(
-                    HttpResponse.builder().timestamp(now()).message("selected users bills created successfully")
-                            .content(response)
-                            .status(CREATED).statusCode(CREATED.value()).build()
+                    HttpResponse.builder().success(true).timestamp(now()).message("selected users bills created successfully")
+                            .data(response)
+                            .status(CREATED.getReasonPhrase()).statusCode(CREATED.value()).build()
             );
         } catch (Exception e) {
             throw new ApiException(e.getMessage(), "An error occurred while generating bills ");
@@ -82,17 +82,17 @@ public class BillController {
     }
 
     @GetMapping("/customer/{customerId}")
-    public ResponseEntity<HttpResponse> getBillsByCustomerId(@PathVariable(name = "customerId") Long customerId) {
+    public ResponseEntity<HttpResponse<Object>> getBillsByCustomerId(@PathVariable(name = "customerId") Long customerId) {
         logger.debug("BillController::getBillsByCustomerId {}", customerId);
-        HttpResponse response = billServices.findCustomerBills(customerId);
+        HttpResponse<Object> response = billServices.findCustomerBills(customerId);
 
         return ResponseEntity.status(OK).body(response);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<HttpResponse> deleteBill(@PathVariable(name = "id") Long id) {
+    public ResponseEntity<HttpResponse<Object>> deleteBill(@PathVariable(name = "id") Long id) {
         logger.debug("BillController:::deleteBill {}", id);
-        HttpResponse response = billServices.delete(id);
+        HttpResponse<Object> response = billServices.delete(id);
         return ResponseEntity.ok().body(response);
     }
 

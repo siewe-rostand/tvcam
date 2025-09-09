@@ -19,7 +19,8 @@ public class HttpResponse<T> {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_TIME_FORMAT)
     protected LocalDateTime timestamp;
     protected int statusCode;
-    protected HttpStatus status;
+    protected String status;
+    protected boolean success;
     protected String reason;
     protected String message;
     protected String path;

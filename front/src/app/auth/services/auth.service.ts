@@ -1,13 +1,15 @@
-import {HttpClient} from '@angular/common/http';
-import {Observable} from 'rxjs';
-import {map} from 'rxjs/operators';
-import {AuthResponseModel} from '../model/auth-response.model';
-import {Injectable} from '@angular/core';
-import {RegisterRequest} from '../model/registration-request.model';
-import {StorageService} from '../../_shared/services/storage.service';
-import {Router} from '@angular/router';
-import {UserModel} from '../../user/model/user.model';
-import {AuthState, AuthStateService} from '../../_shared/services/auth-state.service';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { AuthResponseModel, LoginResponse } from '../model/auth-response.model';
+import { Injectable } from '@angular/core';
+import { RegisterRequest } from '../model/registration-request.model';
+import { StorageService } from '../../_shared/services/storage.service';
+import { Router } from '@angular/router';
+import { UserModel } from '../../user/model/user.model';
+import { AuthState, AuthStateService } from './auth-state.service';
+import { ApiResponse } from '../../_shared/model/api-response';
+import { log } from 'console';
 
 @Injectable({
   providedIn: 'root',
@@ -30,8 +32,8 @@ export class AuthService {
   ) {
   }
 
-  login(telephone: string, password: string): Observable<any> {
-    return this.http.post<any>(
+  login(telephone: string, password: string): Observable<ApiResponse<LoginResponse>> {
+    return this.http.post<ApiResponse<LoginResponse>>(
       'auth/login',
       {
         password: password,
@@ -40,23 +42,31 @@ export class AuthService {
     );
   }
 
+  getUserInfo(token: string): Observable<UserModel> {
+    return this.http.get<ApiResponse<UserModel>>('auth/user', {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }).pipe(
+      map((response: ApiResponse<UserModel>) => {
+        const user = response.data;
+        this.authStateService.updateAuthState(true, user);
+        return user;
+      })
+    );
+  }
+
   /**
    * Handle successful login response
    */
-  handleLoginSuccess(response: AuthResponseModel): void {
-    console.log('Handling login successful, redirecting to:', response);
+  handleLoginSuccess(response: UserModel): void {
 
-    if (response.token) {
-      this.storageService.saveToken(response.token);
-
-      if (response.telephone) {
-        console.info('Login response user data', response.telephone);
-        this.authStateService.updateAuthState(true, null);
-      }
-
-      this.isLoggedIn = true;
-      this.router.navigate(['/dashboard']).then(() => true);
+    if (response.telephone) {
+      this.authStateService.updateAuthState(true, response);
     }
+
+    this.isLoggedIn = true;
+    this.router.navigate(['/dashboard']).then(() => true);
   }
 
   changePassword(telephone: string, password: string): Observable<any> {

@@ -2,6 +2,7 @@ package com.siewe_rostand.tvcam.common.exceptions;
 
 import com.siewe_rostand.tvcam.shared.Exceptions.EntityAlreadyExistException;
 import com.siewe_rostand.tvcam.shared.Exceptions.OperationNotPermittedException;
+import com.siewe_rostand.tvcam.shared.Exceptions.UnAuthorizeException;
 import com.siewe_rostand.tvcam.shared.HttpResponse;
 import com.siewe_rostand.tvcam.shared.model.ExceptionResponse;
 import jakarta.persistence.EntityNotFoundException;
@@ -52,9 +53,9 @@ public class GlobalExceptionHandler {
                 .status(BAD_REQUEST)
                 .body(
                         HttpResponse.builder()
-                                .timestamp(now())
+                                .timestamp(now()).success(false)
                                 .statusCode(BAD_REQUEST.value())
-                                .status(BAD_REQUEST)
+                                .status(BAD_REQUEST.getReasonPhrase())
                                 .reason(exception.getReason())
                                 .developerMessage(exception.getViolations().toString())
                                 .errorSource(exception.getViolationSource())
@@ -69,11 +70,11 @@ public class GlobalExceptionHandler {
                 .status(BAD_REQUEST)
                 .body(
                         HttpResponse.builder()
-                                .timestamp(now())
+                                .timestamp(now()).success(false)
                                 .statusCode(BAD_REQUEST.value())
-                                .status(BAD_REQUEST)
+                                .status(BAD_REQUEST.getReasonPhrase())
                                 .reason("Validation error")
-                                .developerMessage(exception.getMessage())
+                                .message(exception.getMessage())
                                 .build()
                 );
     }
@@ -100,6 +101,17 @@ public class GlobalExceptionHandler {
                 );
     }
 
+    @ExceptionHandler(UnAuthorizeException.class)
+    public ResponseEntity<HttpResponse<Object>> handleException(UnAuthorizeException exp) {
+        logException(exp);
+        return ResponseEntity.status(UNAUTHORIZED)
+                .body(HttpResponse.builder().timestamp(now())
+                        .success(false).status(UNAUTHORIZED.getReasonPhrase())
+                        .statusCode(UNAUTHORIZED.value())
+                        .message(exp.getMessage()).errorCause(exp.getCause())
+                        .build());
+    }
+
     @ExceptionHandler(DisabledException.class)
     public ResponseEntity<ExceptionResponse> handleException(DisabledException exp) {
         logException(exp);
@@ -122,7 +134,7 @@ public class GlobalExceptionHandler {
                         HttpResponse.builder()
                                 .timestamp(now())
                                 .statusCode(BAD_REQUEST.value())
-                                .status(BAD_REQUEST)
+                                .status(BAD_REQUEST.getReasonPhrase())
                                 .reason("phone number and / or Password is incorrect")
                                 .message(exception.getMessage())
                                 .errorCause(exception.getCause())
@@ -138,7 +150,7 @@ public class GlobalExceptionHandler {
                         .timestamp(now())
                         .reason(exception.getMessage().contains("Duplicate entry") ? "Information already exists" : exception.getMessage())
                         .developerMessage(exception.getMessage())
-                        .status(BAD_REQUEST)
+                        .status(BAD_REQUEST.getReasonPhrase())
                         .statusCode(BAD_REQUEST.value())
                         .build(), BAD_REQUEST);
     }
@@ -151,7 +163,7 @@ public class GlobalExceptionHandler {
                         .timestamp(now())
                         .reason("You Have some Duplicate Entry")
                         .developerMessage(exp.getMessage())
-                        .status(CONFLICT)
+                        .status(CONFLICT.getReasonPhrase())
                         .statusCode(CONFLICT.value())
                         .build(), CONFLICT);
     }
@@ -166,20 +178,21 @@ public class GlobalExceptionHandler {
                                 .timestamp(now())
                                 .reason("This resource has not been found")
                                 .developerMessage(exp.getMessage())
-                                .status(NOT_FOUND)
+                                .status(NOT_FOUND.getReasonPhrase())
                                 .statusCode(NOT_FOUND.value())
                                 .build()
                 );
     }
 
     @ExceptionHandler(OperationNotPermittedException.class)
-    public ResponseEntity<ExceptionResponse> handleException(OperationNotPermittedException exp) {
+    public ResponseEntity<HttpResponse<Object>> handleException(OperationNotPermittedException exp) {
         logException(exp);
         return ResponseEntity
                 .status(BAD_REQUEST)
                 .body(
-                        ExceptionResponse.builder()
-                                .error(exp.getMessage())
+                        HttpResponse.builder().timestamp(now()).success(false)
+                                .status(BAD_REQUEST.getReasonPhrase()).statusCode(BAD_REQUEST.value())
+                                .errorCause(exp.getCause()).message(exp.getMessage())
                                 .build()
                 );
     }
@@ -208,10 +221,10 @@ public class GlobalExceptionHandler {
         logException(exp);
         return new ResponseEntity<>(
                 HttpResponse.builder()
-                        .timestamp(now())
+                        .timestamp(now()).success(false)
                         .reason("Internal error, please contact the admin")
                         .developerMessage(exp.getMessage())
-                        .status(INTERNAL_SERVER_ERROR)
+                        .status(INTERNAL_SERVER_ERROR.getReasonPhrase())
                         .statusCode(INTERNAL_SERVER_ERROR.value())
                         .build(), INTERNAL_SERVER_ERROR);
     }
@@ -226,7 +239,7 @@ public class GlobalExceptionHandler {
                         .timestamp(now())
                         .reason("The requested method is not allowed for this endpoint")
                         .developerMessage(ex.getMessage())
-                        .status(METHOD_NOT_ALLOWED)
+                        .status(METHOD_NOT_ALLOWED.getReasonPhrase())
                         .statusCode(METHOD_NOT_ALLOWED.value())
                         .build(), METHOD_NOT_ALLOWED);
     }
@@ -239,7 +252,7 @@ public class GlobalExceptionHandler {
                         .timestamp(now())
                         .reason("Access denied. You don't have access")
                         .developerMessage(exception.getMessage())
-                        .status(FORBIDDEN)
+                        .status(FORBIDDEN.getReasonPhrase())
                         .statusCode(FORBIDDEN.value())
                         .build(), FORBIDDEN);
     }
@@ -251,10 +264,10 @@ public class GlobalExceptionHandler {
         log.trace(Arrays.toString(exception.getStackTrace()));
         return new ResponseEntity<>(
                 HttpResponse.builder()
-                        .timestamp(now())
+                        .timestamp(now()).success(false)
                         .reason("An internal server error occurred.")
                         .developerMessage(exception.getMessage())
-                        .status(INTERNAL_SERVER_ERROR)
+                        .status(INTERNAL_SERVER_ERROR.getReasonPhrase())
                         .statusCode(INTERNAL_SERVER_ERROR.value())
                         .build(), INTERNAL_SERVER_ERROR);
     }
@@ -265,10 +278,10 @@ public class GlobalExceptionHandler {
         logException(exception);
         return new ResponseEntity<>(
                 HttpResponse.builder()
-                        .timestamp(now())
+                        .timestamp(now()).success(false)
                         .reason(exception.getMessage().contains("Duplicate entry") ? "Information already exists" : exception.reason)
                         .developerMessage(exception.getMessage())
-                        .status(BAD_REQUEST)
+                        .status(BAD_REQUEST.getReasonPhrase())
                         .statusCode(BAD_REQUEST.value())
                         .build(), BAD_REQUEST);
     }
@@ -279,10 +292,10 @@ public class GlobalExceptionHandler {
         logException(exception);
         return new ResponseEntity<>(
                 HttpResponse.builder()
-                        .timestamp(now())
+                        .timestamp(now()).success(false)
                         .reason("This resource has not been found")
                         .developerMessage(exception.getMessage())
-                        .status(NOT_FOUND)
+                        .status(NOT_FOUND.getReasonPhrase())
                         .statusCode(NOT_FOUND.value())
                         .build(), NOT_FOUND);
     }
@@ -293,10 +306,10 @@ public class GlobalExceptionHandler {
         String requestedUrl = ex.getRequestURL();
         return new ResponseEntity<>(
                 HttpResponse.builder()
-                        .timestamp(now())
+                        .timestamp(now()).success(false)
                         .reason("This endpoint" + requestedUrl + " has not been found or is incorrect: Please kindly verify your endpoint")
                         .developerMessage(ex.getMessage())
-                        .status(NOT_FOUND)
+                        .status(NOT_FOUND.getReasonPhrase())
                         .statusCode(NOT_FOUND.value())
                         .build(), NOT_FOUND);
     }

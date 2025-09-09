@@ -9,7 +9,7 @@ import java.util.List;
 
 /**
  * Interface du service Zone
- * 
+ *
  * @author rostand
  * @project tv-cam
  */
@@ -19,7 +19,7 @@ public interface ZoneService {
 
     ZoneResponse updateZone(Long zoneId, ZoneRequest request);
 
-    HttpResponse deleteZone(Long zoneId);
+    HttpResponse<Object> deleteZone(Long zoneId);
 
     ZoneResponse getZoneById(Long zoneId);
 
@@ -29,9 +29,9 @@ public interface ZoneService {
 
     List<ZoneResponse> getZonesByUserId(Long userId);
 
-    HttpResponse assignUserToZone(Long zoneId, Long userId);
+    HttpResponse<Object> assignUserToZone(Long zoneId, Long userId);
 
-    HttpResponse removeUserFromZone(Long zoneId, Long userId);
+    HttpResponse<Object> removeUserFromZone(Long zoneId, Long userId);
 
-    HttpResponse assignCustomerToZone(Long zoneId, Long customerId);
+    HttpResponse<Object> assignCustomerToZone(Long zoneId, Long customerId);
 }

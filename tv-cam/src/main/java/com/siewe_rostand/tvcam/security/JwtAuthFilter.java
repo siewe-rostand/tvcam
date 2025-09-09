@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 
 import static com.siewe_rostand.tvcam.security.JwtUtils.getJwtFromRequest;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
@@ -84,14 +85,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         response.setContentType(APPLICATION_JSON_VALUE);
 
         HttpResponse<Object> errorResponse =
-                HttpResponse.builder()
+                HttpResponse.builder().timestamp(LocalDateTime.now()).success(false)
                         .message(exp.getMessage())
                         .reason(
                                 exp.reason != null
                                         ? exp.reason
                                         : "Check that you set \"Bearer\" in Authorization Header")
                         .errorCause(exp.getCause())
-                        .status(FORBIDDEN)
+                        .status(FORBIDDEN.getReasonPhrase())
                         .statusCode(FORBIDDEN.value())
                         .build();
         String jsonResponse = new ObjectMapper().writeValueAsString(errorResponse);

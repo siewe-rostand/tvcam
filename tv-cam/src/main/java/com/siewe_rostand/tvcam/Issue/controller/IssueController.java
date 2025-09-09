@@ -24,7 +24,7 @@ import static org.springframework.http.HttpStatus.OK;
 
 /**
  * Contrôleur REST pour la gestion des réclamations/incidents
- * 
+ *
  * @author rostand
  * @project tv-cam
  */
@@ -38,7 +38,7 @@ public class IssueController {
 
     @Operation(summary = "Créer une nouvelle réclamation")
     @PostMapping
-    public ResponseEntity<HttpResponse> createIssue(@RequestBody IssueRequest request) {
+    public ResponseEntity<HttpResponse<Object>> createIssue(@RequestBody IssueRequest request) {
         ObjectMapper objectMapper = new ObjectMapper();
         IssueResponse response = issueService.createIssue(request);
         Map<String, Object> data = objectMapper.convertValue(response, new TypeReference<>() {
@@ -46,9 +46,9 @@ public class IssueController {
 
         return ResponseEntity.created(URI.create("/issues/" + response.getIssueId()))
                 .body(HttpResponse.builder()
-                        .timestamp(now())
+                        .timestamp(now()).success(true)
                         .message("Réclamation créée avec succès")
-                        .status(CREATED)
+                        .status(CREATED.getReasonPhrase())
                         .statusCode(CREATED.value())
                         .data(data)
                         .build());
@@ -73,16 +73,16 @@ public class IssueController {
 
     @Operation(summary = "Récupérer une réclamation par ID")
     @GetMapping("/{issueId}")
-    public ResponseEntity<HttpResponse> getIssueById(@PathVariable Long issueId) {
+    public ResponseEntity<HttpResponse<Object>> getIssueById(@PathVariable Long issueId) {
         ObjectMapper objectMapper = new ObjectMapper();
         IssueResponse response = issueService.getIssueById(issueId);
         Map<String, Object> data = objectMapper.convertValue(response, new TypeReference<>() {
         });
 
         return ResponseEntity.ok(HttpResponse.builder()
-                .timestamp(now())
+                .timestamp(now()).success(true)
                 .message("Réclamation récupérée avec succès")
-                .status(OK)
+                .status(OK.getReasonPhrase())
                 .statusCode(OK.value())
                 .data(data)
                 .build());
@@ -90,16 +90,16 @@ public class IssueController {
 
     @Operation(summary = "Récupérer les réclamations d'un client")
     @GetMapping("/customer/{customerId}")
-    public ResponseEntity<HttpResponse> getIssuesByCustomer(@PathVariable Long customerId) {
+    public ResponseEntity<HttpResponse<Object>> getIssuesByCustomer(@PathVariable Long customerId) {
         ObjectMapper objectMapper = new ObjectMapper();
         List<IssueResponse> issues = issueService.getIssuesByCustomer(customerId);
         Map<String, Object> data = objectMapper.convertValue(issues, new TypeReference<>() {
         });
 
         return ResponseEntity.ok(HttpResponse.builder()
-                .timestamp(now())
+                .timestamp(now()).success(true)
                 .message("Réclamations du client récupérées avec succès")
-                .status(OK)
+                .status(OK.getReasonPhrase())
                 .statusCode(OK.value())
                 .data(data)
                 .build());
@@ -108,16 +108,16 @@ public class IssueController {
     @Operation(summary = "Récupérer les réclamations assignées à un utilisateur")
     @GetMapping("/assigned/{userId}")
     @PreAuthorize("hasRole('TECHNICIEN') or hasRole('CHEF_CABLEUR') or hasRole('ADMIN')")
-    public ResponseEntity<HttpResponse> getIssuesByAssignee(@PathVariable Long userId) {
+    public ResponseEntity<HttpResponse<Object>> getIssuesByAssignee(@PathVariable Long userId) {
         ObjectMapper objectMapper = new ObjectMapper();
         List<IssueResponse> issues = issueService.getIssuesByAssignee(userId);
         Map<String, Object> data = objectMapper.convertValue(issues, new TypeReference<>() {
         });
 
         return ResponseEntity.ok(HttpResponse.builder()
-                .timestamp(now())
+                .timestamp(now()).success(true)
                 .message("Réclamations assignées récupérées avec succès")
-                .status(OK)
+                .status(OK.getReasonPhrase())
                 .statusCode(OK.value())
                 .data(data)
                 .build());
@@ -126,16 +126,16 @@ public class IssueController {
     @Operation(summary = "Mettre à jour une réclamation")
     @PutMapping("/{issueId}")
     @PreAuthorize("hasRole('TECHNICIEN') or hasRole('CHEF_CABLEUR') or hasRole('ADMIN')")
-    public ResponseEntity<HttpResponse> updateIssue(@PathVariable Long issueId, @RequestBody IssueRequest request) {
+    public ResponseEntity<HttpResponse<Object>> updateIssue(@PathVariable Long issueId, @RequestBody IssueRequest request) {
         ObjectMapper objectMapper = new ObjectMapper();
         IssueResponse response = issueService.updateIssue(issueId, request);
         Map<String, Object> data = objectMapper.convertValue(response, new TypeReference<>() {
         });
 
         return ResponseEntity.ok(HttpResponse.builder()
-                .timestamp(now())
+                .timestamp(now()).success(true)
                 .message("Réclamation mise à jour avec succès")
-                .status(OK)
+                .status(OK.getReasonPhrase())
                 .statusCode(OK.value())
                 .data(data)
                 .build());
@@ -144,57 +144,56 @@ public class IssueController {
     @Operation(summary = "Assigner une réclamation à un technicien")
     @PutMapping("/{issueId}/assign/{userId}")
     @PreAuthorize("hasRole('CHEF_CABLEUR') or hasRole('ADMIN')")
-    public ResponseEntity<HttpResponse> assignIssue(@PathVariable Long issueId, @PathVariable Long userId) {
-        HttpResponse response = issueService.assignIssue(issueId, userId);
+    public ResponseEntity<HttpResponse<Object>> assignIssue(@PathVariable Long issueId, @PathVariable Long userId) {
+        HttpResponse<Object> response = issueService.assignIssue(issueId, userId);
         return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "Résoudre une réclamation")
     @PutMapping("/{issueId}/resolve")
     @PreAuthorize("hasRole('TECHNICIEN') or hasRole('CHEF_CABLEUR') or hasRole('ADMIN')")
-    public ResponseEntity<HttpResponse> resolveIssue(@PathVariable Long issueId,
-            @RequestBody Map<String, String> resolution) {
-        HttpResponse response = issueService.resolveIssue(issueId, resolution.get("resolution"));
-        return ResponseEntity.ok(response);
+    public ResponseEntity<HttpResponse<Object>> resolveIssue(@PathVariable Long issueId,
+                                                             @RequestBody Map<String, String> resolution) {
+        HttpResponse<Object> response = issueService.resolveIssue(issueId, resolution.get("resolution"));
+        return ResponseEntity.ok().body(response);
     }
 
     @Operation(summary = "Fermer une réclamation")
     @PutMapping("/{issueId}/close")
     @PreAuthorize("hasRole('CHEF_CABLEUR') or hasRole('ADMIN')")
-    public ResponseEntity<HttpResponse> closeIssue(@PathVariable Long issueId) {
-        HttpResponse response = issueService.closeIssue(issueId);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<HttpResponse<Object>> closeIssue(@PathVariable Long issueId) {
+        HttpResponse<Object> response = issueService.closeIssue(issueId);
+        return ResponseEntity.ok().body(response);
     }
 
     @Operation(summary = "Supprimer une réclamation")
     @DeleteMapping("/{issueId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<HttpResponse> deleteIssue(@PathVariable Long issueId) {
-        HttpResponse response = issueService.deleteIssue(issueId);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<HttpResponse<Object>> deleteIssue(@PathVariable Long issueId) {
+        HttpResponse<Object> response = issueService.deleteIssue(issueId);
+        return ResponseEntity.ok().body(response);
     }
 
     @Operation(summary = "Évaluer le service après résolution")
     @PutMapping("/{issueId}/feedback")
-    public ResponseEntity<HttpResponse> provideFeedback(@PathVariable Long issueId,
-            @RequestBody Map<String, Object> feedback) {
+    public ResponseEntity<HttpResponse<Object>> provideFeedback(@PathVariable Long issueId,
+                                                                @RequestBody Map<String, Object> feedback) {
         Integer rating = (Integer) feedback.get("rating");
         String comment = (String) feedback.get("comment");
-        HttpResponse response = issueService.provideFeedback(issueId, rating, comment);
-        return ResponseEntity.ok(response);
+        HttpResponse<Object> response = issueService.provideFeedback(issueId, rating, comment);
+        return ResponseEntity.ok().body(response);
     }
 
     @Operation(summary = "Récupérer les statistiques des réclamations")
     @GetMapping("/statistics")
     @PreAuthorize("hasRole('CHEF_CABLEUR') or hasRole('ADMIN')")
-    public ResponseEntity<HttpResponse> getIssueStatistics() {
-        ObjectMapper objectMapper = new ObjectMapper();
+    public ResponseEntity<HttpResponse<Object>> getIssueStatistics() {
         Map<String, Object> statistics = issueService.getIssueStatistics();
 
         return ResponseEntity.ok(HttpResponse.builder()
-                .timestamp(now())
+                .timestamp(now()).success(true)
                 .message("Statistiques récupérées avec succès")
-                .status(OK)
+                .status(OK.getReasonPhrase())
                 .statusCode(OK.value())
                 .data(statistics)
                 .build());

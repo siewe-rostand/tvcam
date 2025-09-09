@@ -55,9 +55,9 @@ public class CustomerServiceImpl implements CustomerService {
         customers.setRef(ref);
         Customers savedCustomers = customersRepository.save(customers);
         Map<String, Object> response = toResponse(savedCustomers);
-        return HttpResponse.builder().timestamp(now())
+        return HttpResponse.builder().timestamp(now()).success(true)
                 .message("Customer created successfully").data(response)
-                .status(CREATED).statusCode(CREATED.value()).build();
+                .status(CREATED.getReasonPhrase()).statusCode(CREATED.value()).build();
     }
 
     @Override
@@ -72,9 +72,9 @@ public class CustomerServiceImpl implements CustomerService {
         Customers updatedCustomers = customersRepository.save(existingCustomer);
         Map<String, Object> response = toResponse(updatedCustomers);
         return HttpResponse.builder().
-                timestamp(now()).
+                timestamp(now()).success(true).
                 message("Customer updated successfully").data(response).
-                statusCode(OK.value()).status(OK).build();
+                statusCode(OK.value()).status(OK.getReasonPhrase()).build();
     }
 
     @Override
@@ -116,18 +116,18 @@ public class CustomerServiceImpl implements CustomerService {
 
         List<Customers> customers = customersRepository.findByKeyword("%" + keyword + "%");
         List<CustomerResponse> responses = customers.stream().map(mapper::toResponse).toList();
-        return HttpResponse.builder().
-                timestamp(now()).
+        return HttpResponse.builder()
+                .timestamp(now()).success(true).
                 message("Customers gotten successfully with provided query").data(responses).
-                statusCode(OK.value()).status(OK).build();
+                statusCode(OK.value()).status(OK.getReasonPhrase()).build();
     }
 
     @Override
     public HttpResponse<Object> findById(Long id) {
         Customers customers = getById(id);
         Map<String, Object> response = toResponse(customers);
-        return HttpResponse.builder().data(response).status(HttpStatus.OK).statusCode(HttpStatus.OK.value()).
-                message("Customer with id " + id + " gotten successfully!!!").timestamp(now())
+        return HttpResponse.builder().data(response).status(HttpStatus.OK.getReasonPhrase()).statusCode(HttpStatus.OK.value()).
+                message("Customer with id " + id + " gotten successfully!!!").timestamp(now()).success(true)
                 .build();
     }
 

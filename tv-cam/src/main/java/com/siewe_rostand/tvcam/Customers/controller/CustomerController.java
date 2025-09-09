@@ -11,7 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.time.LocalDateTime;
+
+import static java.time.LocalDateTime.now;
 
 @RequestMapping("customers")
 @RestController
@@ -26,13 +27,13 @@ public class CustomerController {
 
     @PostMapping
     public ResponseEntity<HttpResponse<Object>> createCustomer(@RequestBody CustomerRequest customersDto) {
-        log.error("Customer controller -> createCustomer(): {}", customersDto);
+        log.info("Customer controller -> createCustomer(): {}", customersDto);
         return ResponseEntity.created(URI.create("")).body(
                 customerService.save(customersDto)
         );
     }
 
-    @PutMapping
+    @PutMapping("/{id}")
     public ResponseEntity<HttpResponse<Object>> updateCustomer(@RequestBody CustomerRequest request, @PathVariable Long id) {
         log.error("Customer controller -> updateCustomer(): {} with id {}", request, id);
         return ResponseEntity.ok().body(customerService.update(request, id));
@@ -66,8 +67,8 @@ public class CustomerController {
         log.debug("Customer controller:::deleteById() {}", id);
         customerService.delete(id);
         return ResponseEntity.ok().body(
-                HttpResponse.builder().status(HttpStatus.OK).statusCode(HttpStatus.OK.value()).
-                        message("Customer with id " + id + " Deleted successfully!!!").timestamp(LocalDateTime.now())
+                HttpResponse.builder().success(true).status(HttpStatus.OK.getReasonPhrase()).statusCode(HttpStatus.OK.value()).
+                        message("Customer with id " + id + " Deleted successfully!!!").timestamp(now())
                         .build());
     }
 }

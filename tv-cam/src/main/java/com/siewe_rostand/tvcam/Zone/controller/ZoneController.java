@@ -24,7 +24,7 @@ import static org.springframework.http.HttpStatus.OK;
 
 /**
  * Contrôleur REST pour la gestion des zones
- * 
+ *
  * @author rostand
  * @project tv-cam
  */
@@ -39,7 +39,7 @@ public class ZoneController {
     @Operation(summary = "Créer une nouvelle zone")
     @PostMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public ResponseEntity<HttpResponse> createZone(@RequestBody ZoneRequest request) {
+    public ResponseEntity<HttpResponse<Object>> createZone(@RequestBody ZoneRequest request) {
         ObjectMapper objectMapper = new ObjectMapper();
         ZoneResponse response = zoneService.createZone(request);
         Map<String, Object> data = objectMapper.convertValue(response, new TypeReference<>() {
@@ -47,9 +47,9 @@ public class ZoneController {
 
         return ResponseEntity.created(URI.create("/zones/" + response.getZoneId()))
                 .body(HttpResponse.builder()
-                        .timestamp(now())
+                        .timestamp(now()).success(true)
                         .message("Zone créée avec succès")
-                        .status(CREATED)
+                        .status(CREATED.getReasonPhrase())
                         .statusCode(CREATED.value())
                         .data(data)
                         .build());
@@ -70,16 +70,16 @@ public class ZoneController {
 
     @Operation(summary = "Récupérer les zones actives")
     @GetMapping("/active")
-    public ResponseEntity<HttpResponse> getActiveZones() {
+    public ResponseEntity<HttpResponse<Object>> getActiveZones() {
         ObjectMapper objectMapper = new ObjectMapper();
         List<ZoneResponse> zones = zoneService.getActiveZones();
         Map<String, Object> data = objectMapper.convertValue(zones, new TypeReference<>() {
         });
 
         return ResponseEntity.ok(HttpResponse.builder()
-                .timestamp(now())
+                .timestamp(now()).success(true)
                 .message("Zones actives récupérées avec succès")
-                .status(OK)
+                .status(OK.getReasonPhrase())
                 .statusCode(OK.value())
                 .data(data)
                 .build());
@@ -87,16 +87,16 @@ public class ZoneController {
 
     @Operation(summary = "Récupérer une zone par ID")
     @GetMapping("/{zoneId}")
-    public ResponseEntity<HttpResponse> getZoneById(@PathVariable Long zoneId) {
+    public ResponseEntity<HttpResponse<Object>> getZoneById(@PathVariable Long zoneId) {
         ObjectMapper objectMapper = new ObjectMapper();
         ZoneResponse response = zoneService.getZoneById(zoneId);
         Map<String, Object> data = objectMapper.convertValue(response, new TypeReference<>() {
         });
 
         return ResponseEntity.ok(HttpResponse.builder()
-                .timestamp(now())
+                .timestamp(now()).success(true)
                 .message("Zone récupérée avec succès")
-                .status(OK)
+                .status(OK.getReasonPhrase())
                 .statusCode(OK.value())
                 .data(data)
                 .build());
@@ -105,7 +105,7 @@ public class ZoneController {
     @Operation(summary = "Mettre à jour une zone")
     @PutMapping("/{zoneId}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public ResponseEntity<HttpResponse> updateZone(@PathVariable Long zoneId, @RequestBody ZoneRequest request) {
+    public ResponseEntity<HttpResponse<Object>> updateZone(@PathVariable Long zoneId, @RequestBody ZoneRequest request) {
         ObjectMapper objectMapper = new ObjectMapper();
         ZoneResponse response = zoneService.updateZone(zoneId, request);
         Map<String, Object> data = objectMapper.convertValue(response, new TypeReference<>() {
@@ -114,7 +114,7 @@ public class ZoneController {
         return ResponseEntity.ok(HttpResponse.builder()
                 .timestamp(now())
                 .message("Zone mise à jour avec succès")
-                .status(OK)
+                .status(OK.getReasonPhrase())
                 .statusCode(OK.value())
                 .data(data)
                 .build());
@@ -123,47 +123,47 @@ public class ZoneController {
     @Operation(summary = "Supprimer une zone")
     @DeleteMapping("/{zoneId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<HttpResponse> deleteZone(@PathVariable Long zoneId) {
-        HttpResponse response = zoneService.deleteZone(zoneId);
+    public ResponseEntity<HttpResponse<Object>> deleteZone(@PathVariable Long zoneId) {
+        HttpResponse<Object> response = zoneService.deleteZone(zoneId);
         return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "Assigner un utilisateur à une zone")
     @PostMapping("/{zoneId}/users/{userId}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public ResponseEntity<HttpResponse> assignUserToZone(@PathVariable Long zoneId, @PathVariable Long userId) {
-        HttpResponse response = zoneService.assignUserToZone(zoneId, userId);
+    public ResponseEntity<HttpResponse<Object>> assignUserToZone(@PathVariable Long zoneId, @PathVariable Long userId) {
+        HttpResponse<Object> response = zoneService.assignUserToZone(zoneId, userId);
         return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "Retirer un utilisateur d'une zone")
     @DeleteMapping("/{zoneId}/users/{userId}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public ResponseEntity<HttpResponse> removeUserFromZone(@PathVariable Long zoneId, @PathVariable Long userId) {
-        HttpResponse response = zoneService.removeUserFromZone(zoneId, userId);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<HttpResponse<Object>> removeUserFromZone(@PathVariable Long zoneId, @PathVariable Long userId) {
+        HttpResponse<Object> response = zoneService.removeUserFromZone(zoneId, userId);
+        return ResponseEntity.ok().body(response);
     }
 
     @Operation(summary = "Assigner un client à une zone")
     @PostMapping("/{zoneId}/customers/{customerId}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('CHEF_CABLEUR')")
-    public ResponseEntity<HttpResponse> assignCustomerToZone(@PathVariable Long zoneId, @PathVariable Long customerId) {
-        HttpResponse response = zoneService.assignCustomerToZone(zoneId, customerId);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<HttpResponse<Object>> assignCustomerToZone(@PathVariable Long zoneId, @PathVariable Long customerId) {
+        HttpResponse<Object> response = zoneService.assignCustomerToZone(zoneId, customerId);
+        return ResponseEntity.ok().body(response);
     }
 
     @Operation(summary = "Récupérer les zones d'un utilisateur")
     @GetMapping("/user/{userId}")
-    public ResponseEntity<HttpResponse> getUserZones(@PathVariable Long userId) {
+    public ResponseEntity<HttpResponse<Object>> getUserZones(@PathVariable Long userId) {
         ObjectMapper objectMapper = new ObjectMapper();
         List<ZoneResponse> zones = zoneService.getZonesByUserId(userId);
         Map<String, Object> data = objectMapper.convertValue(zones, new TypeReference<>() {
         });
 
         return ResponseEntity.ok(HttpResponse.builder()
-                .timestamp(now())
+                .timestamp(now()).success(true)
                 .message("Zones de l'utilisateur récupérées avec succès")
-                .status(OK)
+                .status(OK.getReasonPhrase())
                 .statusCode(OK.value())
                 .data(data)
                 .build());

@@ -20,7 +20,7 @@ public interface IssueService {
 
     IssueResponse updateIssue(Long issueId, IssueRequest request);
 
-    HttpResponse deleteIssue(Long issueId);
+    HttpResponse<Object> deleteIssue(Long issueId);
 
     IssueResponse getIssueById(Long issueId);
 
@@ -31,13 +31,13 @@ public interface IssueService {
 
     List<IssueResponse> getIssuesByAssignee(Long userId);
 
-    HttpResponse assignIssue(Long issueId, Long userId);
+    HttpResponse<Object> assignIssue(Long issueId, Long userId);
 
-    HttpResponse resolveIssue(Long issueId, String resolution);
+    HttpResponse<Object> resolveIssue(Long issueId, String resolution);
 
-    HttpResponse closeIssue(Long issueId);
+    HttpResponse<Object> closeIssue(Long issueId);
 
-    HttpResponse provideFeedback(Long issueId, Integer rating, String feedback);
+    HttpResponse<Object> provideFeedback(Long issueId, Integer rating, String feedback);
 
     Map<String, Object> getIssueStatistics();
 

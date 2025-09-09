@@ -10,6 +10,10 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { StorageService } from '../../../_shared/services/storage.service';
 import { RippleModule } from "primeng/ripple";
 import { DividerModule } from "primeng/divider";
+import { switchMap } from 'rxjs';
+import { LoginResponse } from '../../model/auth-response.model';
+import { ApiResponse } from '../../../_shared/model/api-response';
+import { UserModel } from '../../../user/model/user.model';
 
 @Component({
   selector: 'app-login',
@@ -80,29 +84,18 @@ export class LoginComponent implements OnInit {
 
     this.authService
       .login(this.loginForm.value.telephone, this.loginForm.value.password)
+      .pipe(
+        switchMap((res: ApiResponse<LoginResponse>) => {
+          if (res.data.accessToken)
+            this.storageService.saveToken(res.data.accessToken);
+          return this.authService.getUserInfo(res.data.accessToken);
+        })
+      )
       .subscribe({
-        next: (res) => {
-          console.log('Login response:', res);
-          let authResponse;
-          if (res.data && res.data.access_token) {
-            authResponse = {
-              token: res.data.access_token,
-              fullname: res.data.user?.firstname + ' ' + res.data.user?.lastname || 'User',
-              telephone: res.data.user?.telephone || this.loginForm.value.telephone,
-              userId: res.data.user?.id || 0
-            };
-          } else if (res.token) {
-            authResponse = res;
-          } else {
-            console.error('Unexpected response structure:', res);
-            this.isLoading = false;
-            this.submitted = false;
-            return;
-          }
-          this.authService.handleLoginSuccess(authResponse);
-          this.isLoading = false;
+        next: (res: UserModel) => {
+          this.authService.handleLoginSuccess(res);
 
-          console.log('Login successful, redirecting to:', this.returnUrl);
+          this.isLoading = false;
         },
         error: (err) => {
           console.log('Login error:', err);

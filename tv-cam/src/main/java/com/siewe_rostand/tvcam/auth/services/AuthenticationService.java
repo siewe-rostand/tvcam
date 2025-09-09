@@ -4,6 +4,7 @@ import com.siewe_rostand.tvcam.auth.dto.AuthenticationRequest;
 import com.siewe_rostand.tvcam.auth.dto.AuthenticationResponse;
 import com.siewe_rostand.tvcam.auth.dto.ForgetPasswordForm;
 import com.siewe_rostand.tvcam.auth.dto.RegisterRequest;
+import com.siewe_rostand.tvcam.shared.Exceptions.UnAuthorizeException;
 import com.siewe_rostand.tvcam.shared.HttpResponse;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -20,5 +21,5 @@ public interface AuthenticationService {
 
     HttpResponse<Object> forgottenPassword(ForgetPasswordForm forgetPasswordForm);
 
-    HttpResponse<Object> getUserInfo(HttpServletRequest request);
+    HttpResponse<Object> getUserInfo(HttpServletRequest request) throws UnAuthorizeException;
 }

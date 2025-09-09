@@ -7,3 +7,8 @@ export interface AuthResponseModel {
   userId: number;
   user?: UserModel
 }
+export interface LoginResponse {
+  accessToken: string;
+  tokenType: string;
+  expiresIn: number;
+}

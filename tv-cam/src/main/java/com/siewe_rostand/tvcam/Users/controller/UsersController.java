@@ -14,7 +14,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 
 import static java.time.LocalDateTime.now;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.OK;
 
 @RestController
 @RequestMapping("/users")
@@ -43,11 +44,11 @@ public class UsersController {
         return ResponseEntity.created(URI.create(""))
                 .body(
                         HttpResponse.builder()
-                                .timestamp(now())
+                                .timestamp(now()).success(true)
                                 .message("User created successfully")
                                 .data(data)
-                                .status(HttpStatus.CREATED)
-                                .statusCode(HttpStatus.CREATED.value())
+                                .status(CREATED.getReasonPhrase())
+                                .statusCode(CREATED.value())
                                 .build());
     }
 
@@ -60,11 +61,11 @@ public class UsersController {
         return ResponseEntity.ok()
                 .body(
                         HttpResponse.builder()
-                                .timestamp(now())
+                                .timestamp(now()).success(true)
                                 .message("User data updated successfully")
                                 .data(data)
-                                .status(HttpStatus.OK)
-                                .statusCode(HttpStatus.OK.value())
+                                .status(OK.getReasonPhrase())
+                                .statusCode(OK.value())
                                 .build());
     }
 
@@ -94,10 +95,10 @@ public class UsersController {
             UsersDto usersDto = userService.getById(id);
             return ResponseEntity.ok()
                     .body(
-                            HttpResponse.builder()
+                            HttpResponse.builder().success(true)
                                     .data(Map.of("user", usersDto))
-                                    .status(HttpStatus.OK)
-                                    .statusCode(HttpStatus.OK.value())
+                                    .status(OK.getReasonPhrase())
+                                    .statusCode(OK.value())
                                     .message("User with id " + id + " gotten successfully!!!")
                                     .timestamp(now())
                                     .build());
@@ -114,11 +115,11 @@ public class UsersController {
         logger.debug("findByUserId data : {}", data);
         return ResponseEntity.ok()
                 .body(
-                        HttpResponse.builder()
+                        HttpResponse.builder().timestamp(now()).success(true)
                                 .message("User gotten successfully")
                                 .timestamp(now())
-                                .status(HttpStatus.OK)
-                                .statusCode(HttpStatus.OK.value())
+                                .status(OK.getReasonPhrase())
+                                .statusCode(OK.value())
                                 .data(Map.of("user", response))
                                 .path(request.getRequestURI())
                                 .build());

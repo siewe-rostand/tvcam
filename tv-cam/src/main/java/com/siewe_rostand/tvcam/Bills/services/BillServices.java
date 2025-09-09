@@ -15,10 +15,16 @@ import java.util.List;
  */
 public interface BillServices {
     BillResponse save(BillRequest request);
+
     Bills update(BillSDto billSDto);
+
     PaginatedResponse findAll(Integer page, Integer size, String sortBy, String direction, String name);
-    HttpResponse findCustomerBills(Long customerId);
-    HttpResponse delete(Long id);
+
+    HttpResponse<Object> findCustomerBills(Long customerId);
+
+    HttpResponse<Object> delete(Long id);
+
     BillResponse generateBills(BillRequest request);
-    List<BillResponse> generateBillsForSelectedCustomers(List<Long> customerIds,Boolean shouldGenerate);
+
+    List<BillResponse> generateBillsForSelectedCustomers(List<Long> customerIds, Boolean shouldGenerate);
 }

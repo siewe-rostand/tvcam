@@ -7,6 +7,7 @@ import com.siewe_rostand.tvcam.auth.dto.AuthenticationResponse;
 import com.siewe_rostand.tvcam.auth.dto.ForgetPasswordForm;
 import com.siewe_rostand.tvcam.auth.dto.RegisterRequest;
 import com.siewe_rostand.tvcam.auth.services.AuthenticationService;
+import com.siewe_rostand.tvcam.shared.Exceptions.UnAuthorizeException;
 import com.siewe_rostand.tvcam.shared.HttpResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -18,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 import static org.springframework.http.HttpStatus.CREATED;
@@ -47,10 +49,9 @@ public class AuthenticationController {
                 .convertValue(response, new TypeReference<>() {
                 });
         return ResponseEntity.ok().body(
-                HttpResponse.builder()
-                        .status(CREATED).statusCode(CREATED.value())
-                        .message("User successfully created")
-                        .data(data)
+                HttpResponse.builder().timestamp(LocalDateTime.now()).success(true)
+                        .status(CREATED.getReasonPhrase()).statusCode(CREATED.value())
+                        .message("User successfully created").data(data)
                         .build()
         );
     }
@@ -80,7 +81,7 @@ public class AuthenticationController {
     }
 
     @GetMapping("/user")
-    public ResponseEntity<HttpResponse<Object>> getUserInfo(HttpServletRequest request) {
+    public ResponseEntity<HttpResponse<Object>> getUserInfo(HttpServletRequest request) throws UnAuthorizeException {
         log.info("get user info {}", request);
         return ResponseEntity.ok().body(service.getUserInfo(request));
     }

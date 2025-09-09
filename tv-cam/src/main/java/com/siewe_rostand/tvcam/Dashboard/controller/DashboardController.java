@@ -31,13 +31,13 @@ public class DashboardController {
     @Operation(summary = "Récupérer les statistiques générales")
     @GetMapping("/stats")
     @PreAuthorize("hasRole('ADMIN') or hasRole('CHEF_CABLEUR') or hasRole('MANAGER')")
-    public ResponseEntity<HttpResponse> getGeneralStatistics() {
+    public ResponseEntity<HttpResponse<Object>> getGeneralStatistics() {
         Map<String, Object> stats = dashboardService.getGeneralStatistics();
 
         return ResponseEntity.ok(HttpResponse.builder()
-                .timestamp(now())
+                .timestamp(now()).success(true)
                 .message("Statistiques récupérées avec succès")
-                .status(OK)
+                .status(OK.getReasonPhrase())
                 .statusCode(OK.value())
                 .data(stats)
                 .build());
@@ -46,13 +46,13 @@ public class DashboardController {
     @Operation(summary = "Récupérer les statistiques par zone")
     @GetMapping("/stats/zones")
     @PreAuthorize("hasRole('ADMIN') or hasRole('CHEF_CABLEUR') or hasRole('MANAGER')")
-    public ResponseEntity<HttpResponse> getZoneStatistics() {
+    public ResponseEntity<HttpResponse<Object>> getZoneStatistics() {
         Map<String, Object> stats = dashboardService.getZoneStatistics();
 
         return ResponseEntity.ok(HttpResponse.builder()
-                .timestamp(now())
+                .timestamp(now()).success(true)
                 .message("Statistiques par zone récupérées avec succès")
-                .status(OK)
+                .status(OK.getReasonPhrase())
                 .statusCode(OK.value())
                 .data(stats)
                 .build());
@@ -61,13 +61,13 @@ public class DashboardController {
     @Operation(summary = "Récupérer les statistiques des paiements")
     @GetMapping("/stats/payments")
     @PreAuthorize("hasRole('ADMIN') or hasRole('RECOUVREUR') or hasRole('MANAGER')")
-    public ResponseEntity<HttpResponse> getPaymentStatistics() {
+    public ResponseEntity<HttpResponse<Object>> getPaymentStatistics() {
         Map<String, Object> stats = dashboardService.getPaymentStatistics();
 
         return ResponseEntity.ok(HttpResponse.builder()
-                .timestamp(now())
+                .timestamp(now()).success(true)
                 .message("Statistiques des paiements récupérées avec succès")
-                .status(OK)
+                .status(OK.getReasonPhrase())
                 .statusCode(OK.value())
                 .data(stats)
                 .build());
@@ -76,13 +76,13 @@ public class DashboardController {
     @Operation(summary = "Récupérer les statistiques des réclamations")
     @GetMapping("/stats/issues")
     @PreAuthorize("hasRole('ADMIN') or hasRole('TECHNICIEN') or hasRole('CHEF_CABLEUR')")
-    public ResponseEntity<HttpResponse> getIssueStatistics() {
+    public ResponseEntity<HttpResponse<Object>> getIssueStatistics() {
         Map<String, Object> stats = dashboardService.getIssueStatistics();
 
         return ResponseEntity.ok(HttpResponse.builder()
-                .timestamp(now())
+                .timestamp(now()).success(true)
                 .message("Statistiques des réclamations récupérées avec succès")
-                .status(OK)
+                .status(OK.getReasonPhrase())
                 .statusCode(OK.value())
                 .data(stats)
                 .build());
@@ -91,13 +91,13 @@ public class DashboardController {
     @Operation(summary = "Récupérer les métriques de performance")
     @GetMapping("/performance")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public ResponseEntity<HttpResponse> getPerformanceMetrics() {
+    public ResponseEntity<HttpResponse<Object>> getPerformanceMetrics() {
         Map<String, Object> metrics = dashboardService.getPerformanceMetrics();
 
         return ResponseEntity.ok(HttpResponse.builder()
-                .timestamp(now())
+                .timestamp(now()).success(true)
                 .message("Métriques de performance récupérées avec succès")
-                .status(OK)
+                .status(OK.getReasonPhrase())
                 .statusCode(OK.value())
                 .data(metrics)
                 .build());
@@ -105,13 +105,13 @@ public class DashboardController {
 
     @Operation(summary = "Récupérer les statistiques pour un utilisateur spécifique")
     @GetMapping("/stats/user/{userId}")
-    public ResponseEntity<HttpResponse> getUserStatistics(@PathVariable Long userId) {
+    public ResponseEntity<HttpResponse<Object>> getUserStatistics(@PathVariable Long userId) {
         Map<String, Object> stats = dashboardService.getUserStatistics(userId);
 
         return ResponseEntity.ok(HttpResponse.builder()
-                .timestamp(now())
+                .timestamp(now()).success(true)
                 .message("Statistiques utilisateur récupérées avec succès")
-                .status(OK)
+                .status(OK.getReasonPhrase())
                 .statusCode(OK.value())
                 .data(stats)
                 .build());
@@ -119,13 +119,13 @@ public class DashboardController {
 
     @Operation(summary = "Récupérer le résumé des activités récentes")
     @GetMapping("/recent-activities")
-    public ResponseEntity<HttpResponse> getRecentActivities(@RequestParam(defaultValue = "10") Integer limit) {
+    public ResponseEntity<HttpResponse<Object>> getRecentActivities(@RequestParam(defaultValue = "10") Integer limit) {
         Map<String, Object> activities = dashboardService.getRecentActivities(limit);
 
         return ResponseEntity.ok(HttpResponse.builder()
-                .timestamp(now())
+                .timestamp(now()).success(true)
                 .message("Activités récentes récupérées avec succès")
-                .status(OK)
+                .status(OK.getReasonPhrase())
                 .statusCode(OK.value())
                 .data(activities)
                 .build());
@@ -133,13 +133,13 @@ public class DashboardController {
 
     @Operation(summary = "Récupérer les alertes et notifications")
     @GetMapping("/alerts")
-    public ResponseEntity<HttpResponse> getAlerts() {
+    public ResponseEntity<HttpResponse<Object>> getAlerts() {
         Map<String, Object> alerts = dashboardService.getAlerts();
 
         return ResponseEntity.ok(HttpResponse.builder()
-                .timestamp(now())
+                .timestamp(now()).success(true)
                 .message("Alertes récupérées avec succès")
-                .status(OK)
+                .status(OK.getReasonPhrase())
                 .statusCode(OK.value())
                 .data(alerts)
                 .build());

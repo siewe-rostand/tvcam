@@ -72,7 +72,7 @@ public class DiscountServiceImpl implements DiscountService {
 
     @Override
     @Transactional
-    public HttpResponse deleteDiscount(Long discountId) {
+    public HttpResponse<Object> deleteDiscount(Long discountId) {
         log.info("Suppression de la remise ID: {}", discountId);
 
         Discount discount = discountRepository.findById(discountId)
@@ -80,9 +80,9 @@ public class DiscountServiceImpl implements DiscountService {
 
         discountRepository.delete(discount);
 
-        return HttpResponse.builder()
+        return HttpResponse.builder().success(true)
                 .message("Remise supprimée avec succès")
-                .status(HttpStatus.OK)
+                .status(HttpStatus.OK.getReasonPhrase())
                 .statusCode(HttpStatus.OK.value())
                 .timestamp(LocalDateTime.now())
                 .build();

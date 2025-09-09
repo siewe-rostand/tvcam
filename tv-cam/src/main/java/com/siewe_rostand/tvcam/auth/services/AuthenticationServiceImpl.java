@@ -15,6 +15,8 @@ import com.siewe_rostand.tvcam.common.exceptions.EmptyPasswordException;
 import com.siewe_rostand.tvcam.common.exceptions.JwtAuthenticationException;
 import com.siewe_rostand.tvcam.security.JwtService;
 import com.siewe_rostand.tvcam.shared.Exceptions.EntityAlreadyExistException;
+import com.siewe_rostand.tvcam.shared.Exceptions.OperationNotPermittedException;
+import com.siewe_rostand.tvcam.shared.Exceptions.UnAuthorizeException;
 import com.siewe_rostand.tvcam.shared.HttpResponse;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -38,7 +40,8 @@ import static com.siewe_rostand.tvcam.Roles.RoleType.ROLE_USER;
 import static com.siewe_rostand.tvcam.security.JwtUtils.getJwtFromRequest;
 import static java.time.LocalDateTime.now;
 import static java.util.Map.of;
-import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.OK;
 
 /**
  * @author rostand
@@ -131,11 +134,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         String jwtToken = jwtService.generateToken(claims, user);
 
         return HttpResponse.builder()
-                .timestamp(now())
+                .timestamp(now()).success(true)
                 .message("login successfully")
-                .status(OK)
+                .status(OK.getReasonPhrase())
                 .statusCode(OK.value())
-                .data(of("user", "Bearer", "access_token", jwtToken))
+                .data(of("tokenType", "Bearer", "accessToken", jwtToken))
                 .build();
     }
 
@@ -150,36 +153,26 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
         usersRepository.changePassword(passwordEncoder.encode(forgetPasswordForm.getNewPassword()));
         return HttpResponse.builder()
-                .timestamp(now())
+                .timestamp(now()).success(true)
                 .message("Password changed successfully")
-                .status(OK)
+                .status(OK.getReasonPhrase())
                 .statusCode(OK.value())
                 .build();
     }
 
     @Override
-    public HttpResponse<Object> getUserInfo(HttpServletRequest request) {
+    public HttpResponse<Object> getUserInfo(HttpServletRequest request) throws UnAuthorizeException {
         String jwt = getJwtFromRequest(request);
 
         String userEmail;
         try {
             userEmail = jwtService.extractUsername(jwt);
         } catch (Exception e) {
-            return HttpResponse.builder()
-                    .timestamp(now())
-                    .message("Invalid or expired access token")
-                    .statusCode(UNAUTHORIZED.value())
-                    .status(UNAUTHORIZED)
-                    .build();
+            throw new UnAuthorizeException("Invalid or expired access token. Checked if access token is present and it is valid");
         }
 
         if (userEmail == null) {
-            return HttpResponse.builder()
-                    .timestamp(now())
-                    .message("An error occurred when trying to parse the token")
-                    .statusCode(INTERNAL_SERVER_ERROR.value())
-                    .status(INTERNAL_SERVER_ERROR)
-                    .build();
+            throw new OperationNotPermittedException("An error occurred when trying to parse the token");
         }
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
@@ -192,18 +185,18 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         Users user = usersRepository.findByTelephone(userEmail);
         if (user == null) {
             return HttpResponse.builder()
-                    .timestamp(now())
+                    .timestamp(now()).success(true)
                     .message("User not found")
                     .statusCode(INTERNAL_SERVER_ERROR.value())
-                    .status(INTERNAL_SERVER_ERROR)
+                    .status(INTERNAL_SERVER_ERROR.getReasonPhrase())
                     .build();
         }
 
         UserResponse userResponse = mapper.toResponse(user);
         return HttpResponse.builder()
-                .timestamp(now())
+                .timestamp(now()).success(true)
                 .message("User info retrieved successfully")
-                .status(OK)
+                .status(OK.getReasonPhrase())
                 .statusCode(OK.value())
                 .data(userResponse)
                 .build();

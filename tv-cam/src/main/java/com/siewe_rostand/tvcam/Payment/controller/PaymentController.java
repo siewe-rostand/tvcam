@@ -31,7 +31,7 @@ public class PaymentController {
     private final PaymentService paymentService;
 
     @PostMapping()
-    public ResponseEntity<HttpResponse> makePayment(@RequestBody PaymentRequest request) {
+    public ResponseEntity<HttpResponse<Object>> makePayment(@RequestBody PaymentRequest request) {
         ObjectMapper objectMapper = new ObjectMapper();
         PaymentResponse response = paymentService.save(request);
         Map<String, Object> data = objectMapper
@@ -40,7 +40,7 @@ public class PaymentController {
         return ResponseEntity.created(URI.create("make_payment")).body(
                 HttpResponse.builder()
                         .timestamp(now()).message("payment made successfully")
-                        .status(CREATED).statusCode(CREATED.value()).data(data)
+                        .status(CREATED.getReasonPhrase()).statusCode(CREATED.value()).data(data)
                         .build()
         );
     }
@@ -56,20 +56,20 @@ public class PaymentController {
     }
 
     @GetMapping("/{customerId}")
-    public ResponseEntity<HttpResponse> findPaymentByCustomerId(@PathVariable Long customerId) {
+    public ResponseEntity<HttpResponse<Object>> findPaymentByCustomerId(@PathVariable Long customerId) {
         List<PaymentResponse> response = paymentService.findPaymentByCustomerId(customerId);
         return ResponseEntity.ok().body(
                 HttpResponse.builder().timestamp(now()).message("Customer's payment gotten successfully").content(response)
-                        .statusCode(OK.value()).status(OK).build()
+                        .statusCode(OK.value()).status(OK.getReasonPhrase()).success(true).build()
         );
     }
 
     @GetMapping("/all")
-    public ResponseEntity<HttpResponse> findByBillsMonth(@RequestParam("month") String month) {
+    public ResponseEntity<HttpResponse<Object>> findByBillsMonth(@RequestParam("month") String month) {
         List<PaymentResponse> response = paymentService.findByBills_Month(month);
         return ResponseEntity.ok().body(
                 HttpResponse.builder().timestamp(now()).message("Payment for the month of " + month + " gotten successfully")
-                        .statusCode(OK.value()).status(OK).content(response).build()
+                        .statusCode(OK.value()).status(OK.getReasonPhrase()).data(response).success(true).build()
         );
     }
 }

@@ -20,7 +20,7 @@ public interface DiscountService {
 
     DiscountResponse updateDiscount(Long discountId, DiscountRequest request);
 
-    HttpResponse deleteDiscount(Long discountId);
+    HttpResponse<Object> deleteDiscount(Long discountId);
 
     DiscountResponse getDiscountById(Long discountId);
 
