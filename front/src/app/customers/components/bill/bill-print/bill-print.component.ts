@@ -2,6 +2,7 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from "@angular/common";
 import { BillModel } from "../../../model/bill.model";
 import { BillService } from "../../../service/bill.service";
+import { ZoneManagementService } from "../../../service/zone-management.service";
 import { BillUtils } from "../../../../_shared/utils/bill.utils";
 
 @Component({
@@ -12,10 +13,14 @@ import { BillUtils } from "../../../../_shared/utils/bill.utils";
   styleUrl: './bill-print.component.css'
 })
 export class BillPrintComponent implements OnInit {
-  constructor(private billService: BillService) {
+  constructor(
+    private billService: BillService,
+    private zoneManagementService: ZoneManagementService
+  ) {
   }
 
   bills: BillModel[] = [];
+  enrichedBills: BillModel[] = [];
   @ViewChild('printSection') printSection!: ElementRef;
 
   print() {
@@ -23,8 +28,20 @@ export class BillPrintComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.billService.selectedBills.subscribe(bills => this.bills = bills);
+    this.billService.selectedBills.subscribe(bills => {
+      this.bills = bills;
+      this.enrichBillsWithZoneInfo();
+    });
     console.log('Bills to print:', this.bills);
+  }
+
+  private enrichBillsWithZoneInfo(): void {
+    this.enrichedBills = [];
+    this.bills.forEach(bill => {
+      this.zoneManagementService.enrichBillWithZoneInfo(bill).subscribe(enrichedBill => {
+        this.enrichedBills.push(enrichedBill);
+      });
+    });
   }
 
   /**

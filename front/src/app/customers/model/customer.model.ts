@@ -10,4 +10,14 @@ export interface CustomerModel {
   isActive?: boolean;
   isSuspended?: boolean;
   lastBillGenerationDate?: string;
+  
+  // Informations de zone
+  zoneId?: number;
+  zoneName?: string;
+  zoneAddress?: string;
+  zoneCode?: string;
+  
+  // Informations de paiement
+  paymentFrequency?: string;
+  ref?: string;
 }

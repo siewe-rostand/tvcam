@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, forkJoin, map } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 import { BillService } from './bill.service';
 import { PaymentService } from './payment.service';
 import { BillModel } from '../model/bill.model';
@@ -17,7 +18,8 @@ export class BillManagementService {
 
     constructor(
         private billService: BillService,
-        private paymentService: PaymentService
+        private paymentService: PaymentService,
+        private http: HttpClient
     ) { }
 
     /**
@@ -223,5 +225,12 @@ export class BillManagementService {
                 });
             })
         );
+    }
+
+    /**
+     * Charge la liste des clients
+     */
+    getCustomers(): Observable<any> {
+        return this.http.get<any>('customers');
     }
 }

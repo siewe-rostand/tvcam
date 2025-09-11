@@ -27,4 +27,19 @@ public interface BillServices {
     BillResponse generateBills(BillRequest request);
 
     List<BillResponse> generateBillsForSelectedCustomers(List<Long> customerIds, Boolean shouldGenerate);
+    
+    /**
+     * Récupère les factures pour impression
+     */
+    List<BillResponse> getBillsForPrint(List<Long> billIds);
+    
+    /**
+     * Vérifie l'existence de factures pour un mois donné
+     */
+    boolean checkExistingBillsForMonth(List<Long> customerIds, String month, String year);
+    
+    /**
+     * Supprime plusieurs factures en lot
+     */
+    int deleteBillsBatch(List<Long> billIds);
 }

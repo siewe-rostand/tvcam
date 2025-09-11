@@ -24,6 +24,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { BillManagementService } from '../../service/bill-management.service';
 import { BillService } from '../../service/bill.service';
 import { NotificationService } from '../../../_shared/services/notification.service';
+import { MonthlyBillGenerationService } from '../../service/monthly-bill-generation.service';
 
 // Models
 import { BillModel } from '../../model/bill.model';
@@ -31,6 +32,7 @@ import { BillModel } from '../../model/bill.model';
 // Components
 import { NavbarComponent } from '../../../_shared/components/navbar/navbar.component';
 import { BillTemplatePreviewComponent } from './bill-template-preview/bill-template-preview.component';
+import { MonthlyGenerationConfigComponent } from './monthly-generation-config/monthly-generation-config.component';
 
 interface Customer {
   id: number;
@@ -71,7 +73,8 @@ interface BillGenerationRequest {
     InputNumberModule,
     ConfirmDialogModule,
     NavbarComponent,
-    BillTemplatePreviewComponent
+    BillTemplatePreviewComponent,
+    MonthlyGenerationConfigComponent
   ],
   providers: [MessageService, ConfirmationService],
   template: `
@@ -115,6 +118,9 @@ interface BillGenerationRequest {
             </p-card>
           </div>
         </div>
+
+        <!-- Configuration de la génération automatique -->
+        <app-monthly-generation-config></app-monthly-generation-config>
 
         <!-- Formulaire de génération -->
         <p-card header="Paramètres de Génération" styleClass="mb-4">
@@ -370,6 +376,7 @@ export class EnhancedBillGenerationComponent implements OnInit {
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
     private notificationService: NotificationService,
+    private monthlyGenerationService: MonthlyBillGenerationService,
     private router: Router
   ) {
     this.initializeYears();
@@ -408,15 +415,27 @@ export class EnhancedBillGenerationComponent implements OnInit {
 
   loadCustomers(): void {
     this.loading = true;
-    // Simuler le chargement des clients - à remplacer par un vrai service
-    setTimeout(() => {
-      this.customers = [
-        { id: 1, name: 'Client 1', address: 'Adresse 1', telephone: '123456789', status: 'ACTIVE' },
-        { id: 2, name: 'Client 2', address: 'Adresse 2', telephone: '987654321', status: 'ACTIVE' },
-        // Ajouter plus de clients...
-      ];
-      this.loading = false;
-    }, 1000);
+    // Charger les vrais clients depuis le service
+    this.billManagementService.getCustomers().subscribe({
+      next: (customers) => {
+        this.customers = customers.map((customer: any) => ({
+          id: customer.id,
+          name: customer.name,
+          address: customer.address,
+          telephone: customer.telephone,
+          lastBillDate: customer.lastBillGenerationDate,
+          status: customer.isActive ? 'ACTIVE' : 'INACTIVE',
+          zoneName: customer.zone?.name,
+          zoneId: customer.zone?.id
+        }));
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des clients:', error);
+        this.loading = false;
+        this.notificationService.showError('Erreur lors du chargement des clients');
+      }
+    });
   }
 
   selectAllCustomers(): void {

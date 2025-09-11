@@ -15,4 +15,15 @@ export interface BillModel {
   status?: string;
   remainingBalance?: number;
   paidAmount?: number;
+  
+  // Informations supplémentaires pour la facture
+  zoneName?: string;
+  zoneAddress?: string;
+  responsibleName?: string;
+  responsiblePhone?: string;
+  collectorName?: string;
+  collectorPhone?: string;
+  companyPhone?: string;
+  companyAddress?: string;
+  billReference?: string;
 }

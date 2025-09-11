@@ -7,40 +7,37 @@
 
 <div class="print-container">
   <div
-    *ngFor="let bill of bills; let i = index"
+    *ngFor="let bill of enrichedBills; let i = index"
     class="bill-container"
     [class.page-break]="(i + 1) % 2 === 0"
   >
     <!-- En-tête avec logo de référence -->
     <div class="bill-header">
-      <div class="company-info">
-        <h2 class="company-name">TV CAM</h2>
-        <h3 class="bill-title">FACTURE / BILL</h3>
+      <div class="company-logo">
+        <div class="antenna-icon">📡</div>
+        <div class="company-name">TV CAM</div>
       </div>
-    </div>
-
-    <!-- Informations de période -->
-    <div class="period-info">
-      <p class="billing-period">
+      <div class="bill-title">FACTURE / BILL</div>
+      <div class="billing-period">
         Mois de {{ getMonthLabel(bill.month) }} {{ bill.year }}
-      </p>
+      </div>
     </div>
 
     <!-- Informations de contact et destinataire -->
     <div class="contact-info">
       <div class="company-details">
-        <p><strong>Makèpe Missoke</strong></p>
-        <p>Tél: 6 74 38 17 44 / 6 96 39 53 30</p>
-        <p>Responsable de zone: M. Jackson</p>
-        <p>Recouvreur: M. Anderson</p>
-        <p>6 75 16 86 97</p>
+        <p><strong>{{ bill.zoneName || 'Makèpe Missoke' }}</strong></p>
+        <p>Tél: {{ bill.companyPhone || '6 74 38 17 44 / 6 96 39 53 30' }}</p>
+        <p>Responsable de zone: {{ bill.responsibleName || 'M. Jackson' }}</p>
+        <p>Recouvreur: {{ bill.collectorName || 'M. Anderson' }}</p>
+        <p>{{ bill.collectorPhone || '6 75 16 86 97' }}</p>
       </div>
 
       <div class="customer-details">
         <p>
           Destinataire: M/Mme. <strong>{{ bill.customerName }}</strong>
         </p>
-        <p>Zone: ______________________</p>
+        <p>Zone: {{ bill.zoneName || '______________________' }}</p>
         <p>Date de dépôt le : {{ getDepositDate(bill) }}</p>
         <p>
           Date limite de paiement: Le

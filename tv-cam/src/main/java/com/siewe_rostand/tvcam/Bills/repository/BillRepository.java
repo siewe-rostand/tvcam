@@ -54,4 +54,9 @@ public interface BillRepository extends JpaRepository<Bills, Long> {
         // Keep existing full entity queries for when complete data is needed
         @Query("SELECT b FROM Bills b JOIN FETCH b.customers WHERE b.currentPeriodBill = true")
         List<Bills> findCurrentPeriodBillsWithCustomers();
+
+        /**
+         * Trouve les factures par client, mois et année
+         */
+        List<Bills> findByCustomersAndMonthAndYear(Customers customers, String month, String year);
 }

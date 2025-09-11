@@ -1,0 +1,16 @@
+meta {
+  name: check bill generation
+  type: http
+  seq: 5
+}
+
+get {
+  url: http://localhost:8085/api/v1/bills/check-generation-today?month=$&year=${year}
+  body: none
+  auth: none
+}
+
+params:query {
+  month: $
+  year: ${year}
+}

@@ -7,105 +7,139 @@
   padding: 15px;
   background: #f8f9fa;
   border-radius: 8px;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .print-button {
   background: #007bff;
   color: white;
   border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
+  padding: 12px 24px;
+  border-radius: 6px;
   cursor: pointer;
   font-size: 16px;
   display: flex;
   align-items: center;
   gap: 8px;
+  font-weight: 500;
+  transition: background-color 0.2s;
 }
 
 .print-button:hover {
   background: #0056b3;
 }
 
-.bill-count {
+.bill-count, .page-count {
   font-weight: bold;
   color: #333;
+  padding: 8px 12px;
+  background: white;
+  border-radius: 4px;
+  border: 1px solid #dee2e6;
+}
+
+.page-count {
+  background: #e3f2fd;
+  color: #1976d2;
 }
 
 .print-container {
   display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
+  flex-direction: column;
+  gap: 0;
 }
 
-/* Bill container - Enhanced format based on bill.jpeg */
-.bill-container {
+/* Page container - chaque page A4 */
+.page-container {
   width: 100%;
-  max-width: 400px;
-  margin: 0 auto 20px;
-  padding: 15px;
+  min-height: 297mm; /* Hauteur A4 */
+  display: flex;
+  flex-direction: row;
+  gap: 10mm;
+  padding: 10mm;
+  box-sizing: border-box;
+  background: white;
+  margin-bottom: 0;
+}
+
+/* Bill container - chaque facture prend la moitié de la page */
+.bill-container {
+  width: 50%;
+  max-width: 90mm;
+  padding: 8mm;
   border: 2px solid #000;
   font-family: "Arial", sans-serif;
-  font-size: 12px;
-  line-height: 1.4;
+  font-size: 10px;
+  line-height: 1.3;
   background: white;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.bill-left {
+  margin-right: 5mm;
+}
+
+.bill-right {
+  margin-left: 5mm;
 }
 
 /* Header styling - Based on bill.jpeg reference */
 .bill-header {
   text-align: center;
-  margin-bottom: 15px;
+  margin-bottom: 12px;
 }
 
 .company-logo {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: 6px;
+  margin-bottom: 6px;
 }
 
 .antenna-icon {
-  font-size: 16px;
-  margin-right: 5px;
+  font-size: 14px;
+  margin-right: 4px;
 }
 
 .company-name {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: bold;
   margin: 0;
-  padding: 8px 12px;
+  padding: 6px 10px;
   border: 2px solid #000;
   background: #f0f0f0;
   display: inline-block;
 }
 
 .bill-title {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: bold;
-  margin: 8px 0;
+  margin: 6px 0;
   text-decoration: underline;
 }
 
 .billing-period {
-  font-size: 13px;
+  font-size: 11px;
   font-weight: bold;
-  margin: 5px 0;
+  margin: 4px 0;
 }
 
 /* Contact and customer info */
 .contact-info {
-  margin-bottom: 15px;
+  margin-bottom: 12px;
 }
 
 .company-details,
 .customer-details {
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .contact-info p {
-  margin: 3px 0;
-  font-size: 11px;
+  margin: 2px 0;
+  font-size: 9px;
 }
 
 .customer-details strong {
@@ -116,14 +150,14 @@
 .bill-table {
   width: 100%;
   border-collapse: collapse;
-  margin: 15px 0;
-  font-size: 11px;
+  margin: 12px 0;
+  font-size: 9px;
 }
 
 .bill-table th,
 .bill-table td {
   border: 1px solid #000;
-  padding: 6px 8px;
+  padding: 4px 6px;
   text-align: left;
 }
 
@@ -142,48 +176,48 @@
 }
 
 .total-amount {
-  font-size: 12px;
+  font-size: 10px;
   color: #000;
 }
 
 .observation {
   font-style: italic;
-  min-height: 20px;
+  min-height: 15px;
 }
 
 /* Notes section */
 .notes {
-  font-size: 10px;
-  margin-top: 15px;
+  font-size: 8px;
+  margin-top: 12px;
 }
 
 .payment-info {
-  margin-bottom: 10px;
-  line-height: 1.3;
+  margin-bottom: 8px;
+  line-height: 1.2;
 }
 
 .important-notes {
-  margin-bottom: 15px;
+  margin-bottom: 12px;
 }
 
 .important-notes p {
-  margin: 5px 0;
+  margin: 4px 0;
   font-weight: bold;
 }
 
 .important-notes ol {
-  margin: 5px 0;
-  padding-left: 20px;
+  margin: 4px 0;
+  padding-left: 16px;
 }
 
 .important-notes li {
-  margin-bottom: 3px;
-  line-height: 1.3;
+  margin-bottom: 2px;
+  line-height: 1.2;
 }
 
 .signature-section {
   text-align: right;
-  margin-top: 15px;
+  margin-top: 12px;
 }
 
 .signature {
@@ -194,11 +228,11 @@
 /* Bill reference */
 .bill-reference {
   text-align: center;
-  margin-top: 10px;
-  font-size: 10px;
+  margin-top: 8px;
+  font-size: 8px;
   color: #666;
   border-top: 1px solid #ccc;
-  padding-top: 5px;
+  padding-top: 4px;
 }
 
 /* Print styles */
@@ -211,7 +245,7 @@
   /* Page setup */
   @page {
     size: A4;
-    margin: 10mm;
+    margin: 0;
   }
 
   body {
@@ -221,74 +255,87 @@
 
   /* Container layout for printing */
   .print-container {
+    display: block;
+  }
+
+  /* Page container for print */
+  .page-container {
+    width: 210mm; /* Largeur A4 */
+    height: 297mm; /* Hauteur A4 */
     display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    gap: 10px;
-    width: 100%;
+    flex-direction: row;
+    gap: 5mm;
+    padding: 10mm;
+    page-break-after: always;
+    margin: 0;
+    box-shadow: none;
   }
 
   /* Two bills per page */
   .bill-container {
-    width: 48%;
+    width: 50%;
     max-width: none;
     margin: 0;
-    padding: 8px;
+    padding: 6mm;
     page-break-inside: avoid;
     box-shadow: none;
-    font-size: 10px;
+    font-size: 9px;
+    border: 2px solid #000;
   }
 
-  /* Page break after every two bills */
-  .bill-container:nth-child(2n) {
-    page-break-after: always;
+  .bill-left {
+    margin-right: 2.5mm;
+  }
+
+  .bill-right {
+    margin-left: 2.5mm;
   }
 
   /* Adjust font sizes for print */
   .company-name {
-    font-size: 14px;
-    padding: 5px;
+    font-size: 12px;
+    padding: 4px 8px;
   }
 
   .bill-title {
-    font-size: 12px;
+    font-size: 10px;
   }
 
   .billing-period {
-    font-size: 11px;
+    font-size: 9px;
   }
 
   .contact-info p {
-    font-size: 9px;
-    margin: 2px 0;
+    font-size: 8px;
+    margin: 1px 0;
   }
 
   .bill-table {
-    font-size: 9px;
-    margin: 8px 0;
+    font-size: 8px;
+    margin: 6px 0;
   }
 
   .bill-table th,
   .bill-table td {
-    padding: 3px 5px;
+    padding: 2px 4px;
   }
 
   .total-amount {
-    font-size: 10px;
+    font-size: 9px;
   }
 
   .notes {
-    font-size: 8px;
+    font-size: 7px;
   }
 
   .important-notes li {
-    margin-bottom: 2px;
+    margin-bottom: 1px;
   }
 
   .bill-reference {
-    font-size: 8px;
-    margin-top: 5px;
-    padding-top: 3px;
+    font-size: 7px;
+    margin-top: 4px;
+    padding-top: 2px;
   }
 
   /* Force black text for print */
@@ -305,6 +352,11 @@
   .bill-table td {
     border-color: #000 !important;
   }
+
+  /* Remove page break after last page */
+  .page-container:last-child {
+    page-break-after: avoid;
+  }
 }
 
 /* Mobile responsive */
@@ -313,8 +365,27 @@
     flex-direction: column;
   }
 
+  .page-container {
+    flex-direction: column;
+    min-height: auto;
+  }
+
   .bill-container {
     width: 100%;
     max-width: 100%;
+    margin: 0 0 20px 0;
+  }
+
+  .bill-left,
+  .bill-right {
+    margin: 0 0 20px 0;
+  }
+}
+
+/* Large screens - preview mode */
+@media screen and (min-width: 1200px) {
+  .print-container {
+    max-width: 210mm;
+    margin: 0 auto;
   }
 }
