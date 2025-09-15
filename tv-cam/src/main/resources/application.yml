@@ -31,7 +31,7 @@ spring:
           region.factory_class: org.hibernate.cache.jcache.JCacheRegionFactory
     open-in-view: false
     database-platform: ${DB_PLATFORM}
-    generate-ddl: true
+    generate-ddl: false
 
   sql:
     init:
@@ -50,6 +50,7 @@ spring:
 
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.xml
+    enabled: true
   #    change-log: classpath:db/changelog/db.changelog-master.xml
   # Serve static content from /static folder
   web:

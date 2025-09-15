@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, forkJoin, map } from 'rxjs';
+import { BehaviorSubject, Observable, forkJoin, map, catchError, of } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { BillService } from './bill.service';
 import { PaymentService } from './payment.service';
@@ -83,6 +83,29 @@ export class BillManagementService {
         this.loadingSubject.next(true);
 
         return this.billService.generateBills(customerIds, shouldGenerate).pipe(
+            map(response => {
+                this.loadingSubject.next(false);
+                // Recharger les factures après génération
+                this.loadBills().subscribe();
+                return response;
+            })
+        );
+    }
+
+    /**
+     * Génère des factures avec vérification de doublons
+     * @param customerIds Liste des IDs clients
+     * @param shouldGenerate Forcer la génération
+     * @param forceUpdate Forcer la mise à jour des factures existantes
+     */
+    generateBillsWithDuplicateCheck(
+        customerIds: number[],
+        shouldGenerate: boolean = false,
+        forceUpdate?: boolean
+    ): Observable<any> {
+        this.loadingSubject.next(true);
+
+        return this.billService.generateBillsWithDuplicateCheck(customerIds, shouldGenerate, forceUpdate).pipe(
             map(response => {
                 this.loadingSubject.next(false);
                 // Recharger les factures après génération
@@ -231,6 +254,22 @@ export class BillManagementService {
      * Charge la liste des clients
      */
     getCustomers(): Observable<any> {
-        return this.http.get<any>('customers');
+        return this.http.get<any>('customers').pipe(
+            map(response => {
+                // Handle different response structures from the API
+                if (response && response.data && Array.isArray(response.data)) {
+                    return response.data;
+                } else if (Array.isArray(response)) {
+                    return response;
+                } else {
+                    console.warn('Unexpected customers response structure:', response);
+                    return [];
+                }
+            }),
+            catchError(error => {
+                console.error('Error fetching customers:', error);
+                return of([]);
+            })
+        );
     }
 }

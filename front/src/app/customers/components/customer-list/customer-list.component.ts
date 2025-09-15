@@ -1,21 +1,21 @@
-import {Component, OnInit} from '@angular/core';
-import {CustomerService} from '../../service/customer.service';
-import {ToastModule} from 'primeng/toast';
-import {ConfirmationService, MessageService} from 'primeng/api';
-import {NavbarComponent} from '../../../_shared/components/navbar/navbar.component';
-import {FormsModule} from '@angular/forms';
-import {RippleModule} from 'primeng/ripple';
-import {TableModule} from 'primeng/table';
-import {DialogModule} from 'primeng/dialog';
-import {ButtonModule} from 'primeng/button';
-import {ToolbarModule} from 'primeng/toolbar';
-import {InputTextModule} from 'primeng/inputtext';
-import {InputNumberModule} from 'primeng/inputnumber';
-import {CommonModule} from '@angular/common';
-import {CustomerModel} from '../../model/customer.model';
-import {ConfirmDialogModule} from 'primeng/confirmdialog';
-import {BillService} from "../../service/bill.service";
-import {Router} from "@angular/router";
+import { Component, OnInit } from '@angular/core';
+import { CustomerService } from '../../service/customer.service';
+import { ToastModule } from 'primeng/toast';
+import { ConfirmationService, MessageService } from 'primeng/api';
+import { NavbarComponent } from '../../../_shared/components/navbar/navbar.component';
+import { FormsModule } from '@angular/forms';
+import { RippleModule } from 'primeng/ripple';
+import { TableModule } from 'primeng/table';
+import { DialogModule } from 'primeng/dialog';
+import { ButtonModule } from 'primeng/button';
+import { ToolbarModule } from 'primeng/toolbar';
+import { InputTextModule } from 'primeng/inputtext';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { CommonModule } from '@angular/common';
+import { CustomerModel } from '../../model/customer.model';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { BillService } from "../../service/bill.service";
+import { Router } from "@angular/router";
 
 @Component({
   selector: 'app-customer-list',
@@ -88,13 +88,14 @@ export class CustomerListComponent implements OnInit {
       acceptLabel: 'OUI',
       rejectLabel: 'NON',
       accept: () => {
-        const shouldGenerate = this.selectedCustomers.some(item => item.lastBillGenerationDate != null);
-        console.log(shouldGenerate)
-        if (shouldGenerate) {
-          this.showConfirmGenerateBill();
-        } else {
-          this.generateBills();
-        }
+        // const shouldGenerate = this.selectedCustomers.some(item => item.lastBillGenerationDate != null);
+        // console.log(shouldGenerate)
+        // if (shouldGenerate) {
+        //   this.showConfirmGenerateBill();
+        // } else {
+
+        // }
+        this.generateBills();
       },
     });
   }
@@ -103,20 +104,20 @@ export class CustomerListComponent implements OnInit {
     const customerIds = this.selectedCustomers.map(customer => customer.id);
     if (customerIds.length > 0) {
       this.billService.generateBills(customerIds, true).subscribe({
-          next: (bills) => {
-            this.generatedBills = bills;
-            this.messageService.add({severity: 'success', summary: 'Success', detail: 'factures générées avec succès'});
-          },
-          error: (error) => {
-            console.log(error)
-            this.messageService.add({
-              severity: 'error',
-              summary: 'Error',
-              detail: 'une erreur interne s\'est produite. Si le problème persiste, veuillez contacter l\'administrateur',
-              life: 5000
-            });
-          }
+        next: (bills) => {
+          this.generatedBills = bills;
+          this.messageService.add({ severity: 'success', summary: 'Success', detail: 'factures générées avec succès' });
+        },
+        error: (error) => {
+          console.log(error)
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'une erreur interne s\'est produite. Si le problème persiste, veuillez contacter l\'administrateur',
+            life: 5000
+          });
         }
+      }
       );
     }
   }
@@ -178,7 +179,7 @@ export class CustomerListComponent implements OnInit {
   }
 
   openEdit(customer: CustomerModel) {
-    this.customer = {...customer};
+    this.customer = { ...customer };
     this.updateCustomerDialog = true;
     console.log(customer);
   }

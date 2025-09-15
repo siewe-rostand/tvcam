@@ -12,11 +12,10 @@ import { ToolbarModule } from 'primeng/toolbar';
 import { TagModule } from 'primeng/tag';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
+import { BillPrintService } from '../../../service/bill-print.service';
+import { BillManagementService } from '../../../service/bill-management.service';
+import { BillModel } from '../../../model/bill.model';
 
-// Services
-import { BillPrintService } from '../../service/bill-print.service';
-import { BillManagementService } from '../../service/bill-management.service';
-import { BillModel } from '../../model/bill.model';
 
 @Component({
   selector: 'app-bill-selection',
@@ -110,9 +109,8 @@ import { BillModel } from '../../model/bill.model';
           <tr>
             <th style="width: 3rem">
               <p-checkbox 
-                [checked]="isAllSelected()" 
-                [indeterminate]="isPartiallySelected()"
-                (onChange)="toggleAllBills($event)">
+                [ngModel]="isAllSelected()"
+                (onChange)="toggleAllBills($event.checked)">
               </p-checkbox>
             </th>
             <th>Client</th>
@@ -125,10 +123,10 @@ import { BillModel } from '../../model/bill.model';
         </ng-template>
         
         <ng-template pTemplate="body" let-bill>
-          <tr [class.selected-row]="isBillSelected(bill.id)">
+          <tr [class.selected-row]="bill.id !== undefined && isBillSelected(bill.id)">
             <td>
               <p-checkbox 
-                [checked]="isBillSelected(bill.id)"
+                [(ngModel)]="bill.selected"
                 (onChange)="toggleBillSelection(bill)">
               </p-checkbox>
             </td>
@@ -246,7 +244,7 @@ export class BillSelectionComponent implements OnInit, OnDestroy {
     private billPrintService: BillPrintService,
     private billManagementService: BillManagementService,
     private messageService: MessageService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadBills();
@@ -312,9 +310,9 @@ export class BillSelectionComponent implements OnInit, OnDestroy {
   }
 
   toggleBillSelection(bill: BillModel): void {
-    if (this.isBillSelected(bill.id)) {
-      this.billPrintService.removeBillFromSelection(bill.id!);
-    } else {
+    if (bill.id !== undefined && this.isBillSelected(bill.id)) {
+      this.billPrintService.removeBillFromSelection(bill.id);
+    } else if (bill.id !== undefined) {
       this.billPrintService.addBillToSelection(bill);
     }
   }
@@ -389,7 +387,7 @@ export class BillSelectionComponent implements OnInit, OnDestroy {
   selectCurrentMonthBills(): void {
     const currentMonth = new Date().toLocaleString('fr-FR', { month: 'long' });
     const currentYear = new Date().getFullYear().toString();
-    const currentMonthBills = this.bills.filter(bill => 
+    const currentMonthBills = this.bills.filter(bill =>
       bill.month === currentMonth.toLowerCase() && bill.year === currentYear
     );
     this.billPrintService.setSelectedBills(currentMonthBills);
@@ -452,8 +450,10 @@ export class BillSelectionComponent implements OnInit, OnDestroy {
     return statusLabels[status || ''] || status || 'Inconnu';
   }
 
-  getStatusSeverity(status?: string): string {
-    const statusSeverity: { [key: string]: string } = {
+  getStatusSeverity(
+    status?: string
+  ): 'success' | 'info' | 'warning' | 'danger' | 'secondary' | 'contrast' | undefined {
+    const statusSeverity: { [key: string]: 'success' | 'info' | 'warning' | 'danger' | 'secondary' | 'contrast' } = {
       'PAID': 'success',
       'UNPAID': 'warning',
       'PARTIALLY_PAID': 'info',

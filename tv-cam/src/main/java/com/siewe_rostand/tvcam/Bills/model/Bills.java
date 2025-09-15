@@ -9,10 +9,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 @Entity
@@ -22,21 +20,22 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @Setter
 @SuperBuilder
+@ToString
 public class Bills extends BaseEntity {
   @JsonIgnore
   @OneToMany(cascade = CascadeType.ALL, mappedBy = "bills", fetch = FetchType.LAZY, orphanRemoval = true)
   List<Payments> payments;
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Basic(optional = false)
+  @SequenceGenerator(name = "bills_seq", sequenceName = "bills_id_seq", allocationSize = 1)
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "bills_seq")
   @Column(name = "id")
   private Long billId;
 
   @NotNull(message = "need to specify the month of the bill")
-  private String month;
+  private Integer month;
 
   @NotNull(message = "Year is required")
-  private String year;
+  private Integer year;
 
   @Column(name = "deposit_date")
   private String depositDate;

@@ -65,7 +65,7 @@ public class PaymentController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<HttpResponse<Object>> findByBillsMonth(@RequestParam("month") String month) {
+    public ResponseEntity<HttpResponse<Object>> findByBillsMonth(@RequestParam("month") Integer month) {
         List<PaymentResponse> response = paymentService.findByBills_Month(month);
         return ResponseEntity.ok().body(
                 HttpResponse.builder().timestamp(now()).message("Payment for the month of " + month + " gotten successfully")

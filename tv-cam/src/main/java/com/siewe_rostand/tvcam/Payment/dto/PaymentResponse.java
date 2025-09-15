@@ -23,7 +23,7 @@ public class PaymentResponse {
     private String paymentReference;
     private String customerName;
     private Long customerId;
-    private String month;
+    private Integer month;
     private BigDecimal totalPaid;
     private BigDecimal remainingBalance;
     private String user;

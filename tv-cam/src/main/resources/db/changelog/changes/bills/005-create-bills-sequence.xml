@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
+
+    <changeSet id="create-bills-sequence" author="siewe-rostand">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <sequenceExists sequenceName="bills_id_seq"/>
+            </not>
+        </preConditions>
+        
+        <createSequence sequenceName="bills_id_seq" 
+                       startValue="1" 
+                       incrementBy="1" 
+                       minValue="1"
+                       maxValue="9223372036854775807"
+                       cycle="false"/>
+        
+        <!-- Synchronize the sequence with existing data -->
+        <sql>
+            SELECT setval('bills_id_seq', COALESCE((SELECT MAX(id) FROM bills), 0) + 1, false);
+        </sql>
+        
+        <rollback>
+            <dropSequence sequenceName="bills_id_seq"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

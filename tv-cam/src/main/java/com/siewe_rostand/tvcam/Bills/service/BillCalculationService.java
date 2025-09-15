@@ -1,17 +1,23 @@
 package com.siewe_rostand.tvcam.Bills.service;
 
 import com.siewe_rostand.tvcam.Bills.model.Bills;
+import com.siewe_rostand.tvcam.Bills.repository.BillRepository;
 import com.siewe_rostand.tvcam.Customers.model.Customers;
 import com.siewe_rostand.tvcam.Discount.model.Discount;
 import com.siewe_rostand.tvcam.Discount.repository.DiscountRepository;
 import com.siewe_rostand.tvcam.Payment.model.enumeration.PaymentFrequency;
+import com.siewe_rostand.tvcam.Payment.model.enumeration.PaymentStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.List;
 import java.util.Optional;
+
+import static com.siewe_rostand.tvcam.shared.utils.CommonUtils.DEFAULT_MONTHLY_AMOUNT;
 
 /**
  * Service pour calculer les montants de facturation avec rabais
@@ -25,8 +31,8 @@ import java.util.Optional;
 public class BillCalculationService {
 
     private final DiscountRepository discountRepository;
+    private final BillRepository billRepository;
 
-    private static final BigDecimal DEFAULT_MONTHLY_AMOUNT = new BigDecimal("2000");
 
     /**
      * Calcule le montant total à payer pour un client selon sa fréquence de
@@ -34,10 +40,9 @@ public class BillCalculationService {
      */
     public BigDecimal calculateTotalAmount(Customers customer, int numberOfMonths) {
         PaymentFrequency frequency = customer.getPaymentFrequency();
-        BigDecimal monthlyAmount = DEFAULT_MONTHLY_AMOUNT;
 
         // Calcul du montant brut (nombre de mois × montant mensuel)
-        BigDecimal grossAmount = monthlyAmount.multiply(BigDecimal.valueOf(numberOfMonths));
+        BigDecimal grossAmount = DEFAULT_MONTHLY_AMOUNT.multiply(BigDecimal.valueOf(numberOfMonths));
 
         // Application du rabais selon la fréquence
         BigDecimal finalAmount = applyDiscount(grossAmount, frequency);
@@ -124,16 +129,15 @@ public class BillCalculationService {
      */
     public BigDecimal calculateBillAmount(Customers customer, BigDecimal debt) {
         PaymentFrequency frequency = customer.getPaymentFrequency();
-        BigDecimal monthlyAmount = DEFAULT_MONTHLY_AMOUNT;
 
         // Pour les paiements mensuels
         if (frequency == PaymentFrequency.MONTHLY) {
-            return monthlyAmount.add(debt != null ? debt : BigDecimal.ZERO);
+            return DEFAULT_MONTHLY_AMOUNT.add(debt != null ? debt : BigDecimal.ZERO);
         }
 
         // Pour les autres fréquences, calculer selon la période
         int months = getMonthsForFrequency(frequency);
-        BigDecimal totalAmount = calculateAmountWithDiscount(months, frequency);
+        BigDecimal totalAmount = DEFAULT_MONTHLY_AMOUNT.multiply(BigDecimal.valueOf(months));
 
         return totalAmount.add(debt != null ? debt : BigDecimal.ZERO);
     }
@@ -142,18 +146,28 @@ public class BillCalculationService {
      * Retourne le nombre de mois selon la fréquence
      */
     private int getMonthsForFrequency(PaymentFrequency frequency) {
-        switch (frequency) {
-            case QUARTERLY:
-                return 3;
-            case SEMI_ANNUALLY:
-                return 6;
-            case ANNUALLY:
-                return 12;
-            case MONTHLY:
-            default:
-                return 1;
-        }
+        return switch (frequency) {
+            case QUARTERLY -> 3;
+            case SEMI_ANNUALLY -> 6;
+            case ANNUALLY -> 12;
+            default -> 1;
+        };
     }
+
+    @Transactional(readOnly = true)
+    public BigDecimal getUnpaidAmount(Customers customer) {
+        List<Bills> unpaidBills = billRepository.findAllByCustomersAndPaymentStatus(customer, PaymentStatus.UNPAID);
+        return unpaidBills.stream()
+                .map(Bills::getPaidAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+    @Transactional(readOnly = true)
+    public BigDecimal calculateBillAmount(Customers customer) {
+        // Utiliser BillCalculationService pour les calculs avec rabais
+        BigDecimal debt = getUnpaidAmount(customer);
+        return calculateBillAmount(customer, debt);
+    }
+
 
     /**
      * Génère un résumé de facturation avec les détails du rabais

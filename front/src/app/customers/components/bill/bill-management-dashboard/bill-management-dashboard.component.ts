@@ -7,10 +7,11 @@ import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 
 // Components
-import { NavbarComponent } from '../../../_shared/components/navbar/navbar.component';
 import { EnhancedBillGenerationComponent } from '../enhanced-bill-generation.component';
 import { MonthlyGenerationStatsComponent } from '../monthly-generation-stats/monthly-generation-stats.component';
 import { MonthlyGenerationConfigComponent } from '../monthly-generation-config/monthly-generation-config.component';
+import { NavbarComponent } from '../../../../_shared/components/navbar/navbar.component';
+
 
 @Component({
   selector: 'app-bill-management-dashboard',

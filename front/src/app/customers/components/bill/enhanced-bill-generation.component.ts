@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Subject, takeUntil } from 'rxjs';
 
 // PrimeNG Components
 import { ButtonModule } from 'primeng/button';
@@ -23,6 +24,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 // Services
 import { BillManagementService } from '../../service/bill-management.service';
 import { BillService } from '../../service/bill.service';
+import { BillDuplicateCheckService } from '../../service/bill-duplicate-check.service';
 import { NotificationService } from '../../../_shared/services/notification.service';
 import { MonthlyBillGenerationService } from '../../service/monthly-bill-generation.service';
 
@@ -33,6 +35,7 @@ import { BillModel } from '../../model/bill.model';
 import { NavbarComponent } from '../../../_shared/components/navbar/navbar.component';
 import { BillTemplatePreviewComponent } from './bill-template-preview/bill-template-preview.component';
 import { MonthlyGenerationConfigComponent } from './monthly-generation-config/monthly-generation-config.component';
+import { BillGenerationResultsComponent } from './bill-generation-results/bill-generation-results.component';
 
 interface Customer {
   id: number;
@@ -74,9 +77,10 @@ interface BillGenerationRequest {
     ConfirmDialogModule,
     NavbarComponent,
     BillTemplatePreviewComponent,
-    MonthlyGenerationConfigComponent
+    MonthlyGenerationConfigComponent,
+    BillGenerationResultsComponent
   ],
-  providers: [MessageService, ConfirmationService],
+  providers: [MessageService, ConfirmationService, BillDuplicateCheckService],
   template: `
     <app-navbar></app-navbar>
     
@@ -282,63 +286,31 @@ interface BillGenerationRequest {
         </p-progressBar>
       </p-card>
 
-      <!-- Résultats -->
-      <p-card 
-        *ngIf="generationResults.length > 0" 
-        header="Résultats de la Génération" 
-        styleClass="mt-4">
-        
-        <div class="mb-3">
-          <p class="text-lg">
-            <strong>{{ generationResults.length }}</strong> facture(s) générée(s) avec succès
-          </p>
-        </div>
-
-        <p-table [value]="generationResults" [rows]="5" [paginator]="true">
-          <ng-template pTemplate="header">
-            <tr>
-              <th>Client</th>
-              <th>Mois</th>
-              <th>Année</th>
-              <th>Montant</th>
-              <th>Statut</th>
-            </tr>
-          </ng-template>
-          
-          <ng-template pTemplate="body" let-result>
-            <tr>
-              <td>{{ result.customerName }}</td>
-              <td>{{ result.month }}</td>
-              <td>{{ result.year }}</td>
-              <td>{{ result.netToPay | currency:'XAF':'symbol':'1.0-0' }}</td>
-              <td>
-                <span class="p-badge p-badge-success">Générée</span>
-              </td>
-            </tr>
-          </ng-template>
-        </p-table>
-
-        <div class="mt-3">
-          <p-button 
-            label="Retour aux Factures" 
-            icon="pi pi-arrow-left" 
-            (onClick)="goBackToBills()"
-            severity="secondary">
-          </p-button>
-        </div>
-      </p-card>
+      <!-- Résultats avec nouveau composant -->
+      <app-bill-generation-results
+        [results]="generationResults"
+        [actionType]="generationActionType"
+        (continue)="goBackToBills()"
+        (viewAll)="goBackToBills()"
+        (print)="onPrintResults($event)"
+        (printSingle)="onPrintSingleBill($event)"
+        (viewBill)="onViewBillDetails($event)">
+      </app-bill-generation-results>
     </div>
 
     <p-toast></p-toast>
     <p-confirmDialog></p-confirmDialog>
   `
 })
-export class EnhancedBillGenerationComponent implements OnInit {
+export class EnhancedBillGenerationComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
+
   customers: Customer[] = [];
   selectedCustomers: Customer[] = [];
   loading = false;
   generationProgress = 0;
   generationResults: BillModel[] = [];
+  generationActionType: 'generated' | 'updated' = 'generated';
 
   billRequest: BillGenerationRequest = {
     customerIds: [],
@@ -373,6 +345,7 @@ export class EnhancedBillGenerationComponent implements OnInit {
   constructor(
     private billManagementService: BillManagementService,
     private billService: BillService,
+    private billDuplicateCheckService: BillDuplicateCheckService,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
     private notificationService: NotificationService,
@@ -386,6 +359,11 @@ export class EnhancedBillGenerationComponent implements OnInit {
   ngOnInit(): void {
     this.loadStatistics();
     this.loadCustomers();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   private initializeYears(): void {
@@ -403,39 +381,56 @@ export class EnhancedBillGenerationComponent implements OnInit {
   }
 
   loadStatistics(): void {
-    this.billManagementService.getBillsStatistics().subscribe({
-      next: (stats) => {
-        this.statistics = stats;
-      },
-      error: (error) => {
-        console.error('Erreur lors du chargement des statistiques:', error);
-      }
-    });
+    this.billManagementService.getBillsStatistics()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (stats) => {
+          this.statistics = stats;
+        },
+        error: (error) => {
+          console.error('Erreur lors du chargement des statistiques:', error);
+        }
+      });
   }
 
   loadCustomers(): void {
     this.loading = true;
     // Charger les vrais clients depuis le service
-    this.billManagementService.getCustomers().subscribe({
-      next: (customers) => {
-        this.customers = customers.map((customer: any) => ({
-          id: customer.id,
-          name: customer.name,
-          address: customer.address,
-          telephone: customer.telephone,
-          lastBillDate: customer.lastBillGenerationDate,
-          status: customer.isActive ? 'ACTIVE' : 'INACTIVE',
-          zoneName: customer.zone?.name,
-          zoneId: customer.zone?.id
-        }));
-        this.loading = false;
-      },
-      error: (error) => {
-        console.error('Erreur lors du chargement des clients:', error);
-        this.loading = false;
-        this.notificationService.showError('Erreur lors du chargement des clients');
-      }
-    });
+    this.billManagementService.getCustomers()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          console.log('Response from getCustomers:', response); // Debug log
+
+          // Handle different response structures
+          let customerArray = response;
+          if (response && response.data && Array.isArray(response.data)) {
+            customerArray = response.data;
+          } else if (response && Array.isArray(response)) {
+            customerArray = response;
+          } else {
+            console.error('Unexpected response structure:', response);
+            customerArray = [];
+          }
+
+          this.customers = customerArray.map((customer: any) => ({
+            id: customer.customerId || customer.id,
+            name: customer.name,
+            address: customer.address,
+            telephone: customer.telephone,
+            lastBillDate: customer.lastBillGenerationDate,
+            status: customer.isActive ? 'ACTIVE' : 'INACTIVE',
+            zoneName: customer.zone?.name,
+            zoneId: customer.zone?.id
+          }));
+          this.loading = false;
+        },
+        error: (error) => {
+          console.error('Erreur lors du chargement des clients:', error);
+          this.loading = false;
+          this.notificationService.showError('Erreur lors du chargement des clients');
+        }
+      });
   }
 
   selectAllCustomers(): void {
@@ -457,51 +452,90 @@ export class EnhancedBillGenerationComponent implements OnInit {
       return;
     }
 
-    // Vérifier d'abord s'il y a des factures existantes pour ce mois
-    this.loading = true;
-    this.billManagementService.checkExistingBillsForMonth(
-      this.selectedCustomers.map(c => c.id),
-      this.billRequest.month!,
-      this.billRequest.year!
-    ).subscribe({
-      next: (response) => {
-        this.loading = false;
+    const monthLabel = this.getMonthLabel(this.billRequest.month!);
 
-        if (response.hasExistingBills && !this.billRequest.shouldGenerate) {
-          // Des factures existent déjà pour ce mois
-          const monthLabel = this.getMonthLabel(this.billRequest.month!);
-          this.notificationService.showBillAlreadyGenerated(monthLabel, this.billRequest.year!);
-
-          this.confirmationService.confirm({
-            message: `Des factures ont déjà été générées pour ${monthLabel} ${this.billRequest.year} pour certains clients sélectionnés.\n\nCliquez sur "Oui" pour régénérer les factures (cela remplacera les factures existantes) ou sur "Non" pour annuler.`,
-            header: 'Factures déjà générées ce mois',
-            icon: 'pi pi-exclamation-triangle',
-            acceptLabel: 'Oui, régénérer',
-            rejectLabel: 'Non, annuler',
-            accept: () => {
-              this.billRequest.shouldGenerate = true;
-              this.performBillGeneration();
-            }
-          });
-        } else {
-          // Pas de factures existantes ou génération forcée
-          const monthLabel = this.getMonthLabel(this.billRequest.month!);
-          this.confirmationService.confirm({
-            message: `Êtes-vous sûr de vouloir générer les factures pour ${this.selectedCustomers.length} client(s) pour ${monthLabel} ${this.billRequest.year} ?`,
-            header: 'Confirmation de génération',
-            icon: 'pi pi-exclamation-triangle',
-            accept: () => {
-              this.performBillGeneration();
-            }
-          });
-        }
-      },
-      error: (error) => {
-        this.loading = false;
-        console.error('Erreur lors de la vérification:', error);
-        this.notificationService.showError('Erreur lors de la vérification des factures existantes');
+    // Show initial confirmation
+    this.confirmationService.confirm({
+      message: `Êtes-vous sûr de vouloir générer les factures pour ${this.selectedCustomers.length} client(s) pour ${monthLabel} ${this.billRequest.year} ?`,
+      header: 'Confirmation de génération',
+      icon: 'pi pi-question-circle',
+      acceptLabel: 'Oui, générer',
+      rejectLabel: 'Annuler',
+      accept: () => {
+        this.performBillGenerationWithDuplicateCheck();
       }
     });
+  }
+
+  private performBillGenerationWithDuplicateCheck(): void {
+    this.loading = true;
+    this.generationProgress = 0;
+    this.billRequest.customerIds = this.selectedCustomers.map(c => c.id);
+
+    // Show progress indicator
+    const progressInterval = setInterval(() => {
+      if (this.generationProgress < 90) {
+        this.generationProgress += 10;
+      }
+    }, 300);
+
+    this.billDuplicateCheckService.handleBillGeneration(
+      this.billRequest.customerIds,
+      this.billRequest.shouldGenerate
+    )
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (result) => {
+          this.loading = false;
+          this.generationProgress = 100;
+          clearInterval(progressInterval);
+
+          if (result.success && (result.action === 'generated' || result.action === 'updated')) {
+            // Success - extract bills from response data
+            if (result.data && result.data.generatedBills) {
+              this.generationResults = result.data.generatedBills;
+            } else if (result.data && Array.isArray(result.data)) {
+              this.generationResults = result.data;
+            }
+
+            // Set action type for UI display
+            this.generationActionType = result.action;
+
+            // Show success message
+            this.billDuplicateCheckService.showSuccessMessage(result);
+
+            // Reset selection
+            this.selectedCustomers = [];
+
+            // Reload statistics
+            this.loadStatistics();
+          } else if (result.action === 'cancelled') {
+            // User cancelled - show info message
+            this.billDuplicateCheckService.showSuccessMessage(result);
+            this.generationProgress = 0;
+          } else {
+            // Error case
+            this.billDuplicateCheckService.showErrorMessage(result.message);
+            this.generationProgress = 0;
+          }
+        },
+        error: (error) => {
+          this.loading = false;
+          this.generationProgress = 0;
+          clearInterval(progressInterval);
+
+          console.error('Erreur lors de la génération:', error);
+
+          let errorMessage = 'Erreur lors de la génération des factures';
+          if (error.error && error.error.message) {
+            errorMessage = error.error.message;
+          } else if (error.message) {
+            errorMessage = error.message;
+          }
+
+          this.billDuplicateCheckService.showErrorMessage(errorMessage);
+        }
+      });
   }
 
   private getMonthLabel(monthValue: string): string {
@@ -509,71 +543,46 @@ export class EnhancedBillGenerationComponent implements OnInit {
     return month ? month.label : monthValue;
   }
 
-  private performBillGeneration(): void {
-    this.generateBills();
-  }
-
   generateBills(): void {
-    if (this.selectedCustomers.length === 0) {
-      this.notificationService.showWarning('Veuillez sélectionner au moins un client');
-      return;
-    }
-
-    this.loading = true;
-    this.generationProgress = 0;
-    this.billRequest.customerIds = this.selectedCustomers.map(c => c.id);
-
-    // Afficher le message de progression
-    this.notificationService.showBillGenerationInProgress(this.selectedCustomers.length);
-
-    // Simuler la progression
-    const progressInterval = setInterval(() => {
-      this.generationProgress += 10;
-      if (this.generationProgress >= 100) {
-        clearInterval(progressInterval);
-      }
-    }, 200);
-
-    this.billManagementService.generateBillsForCustomers(
-      this.billRequest.customerIds,
-      this.billRequest.shouldGenerate
-    ).subscribe({
-      next: (results) => {
-        this.loading = false;
-        this.generationProgress = 100;
-        this.generationResults = Array.isArray(results) ? results : [results];
-
-        const monthLabel = this.getMonthLabel(this.billRequest.month!);
-        this.notificationService.showBillGenerationSuccess(
-          this.generationResults.length,
-          monthLabel,
-          this.billRequest.year!
-        );
-
-        // Réinitialiser la sélection
-        this.selectedCustomers = [];
-      },
-      error: (error) => {
-        this.loading = false;
-        this.generationProgress = 0;
-        clearInterval(progressInterval);
-
-        console.error('Erreur lors de la génération:', error);
-
-        // Afficher un message d'erreur approprié selon le type d'erreur
-        let errorMessage = 'Erreur lors de la génération des factures';
-        if (error.error && error.error.message) {
-          errorMessage = error.error.message;
-        } else if (error.message) {
-          errorMessage = error.message;
-        }
-
-        this.notificationService.showBillGenerationError(errorMessage);
-      }
-    });
+    // This method is now handled by performBillGenerationWithDuplicateCheck
+    // Keep for backward compatibility if needed
+    this.performBillGenerationWithDuplicateCheck();
   }
 
   goBackToBills(): void {
     this.router.navigate(['/receipts']);
+  }
+
+  onPrintResults(bills: BillModel[]): void {
+    // Navigate to print view with selected bills
+    console.log('Printing bills:', bills);
+    // TODO: Implement print functionality
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Impression',
+      detail: `Préparation de l'impression de ${bills.length} facture(s)...`
+    });
+  }
+
+  onPrintSingleBill(bill: BillModel): void {
+    // Print single bill
+    console.log('Printing single bill:', bill);
+    // TODO: Implement single bill print
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Impression',
+      detail: `Impression de la facture de ${bill.customerName}...`
+    });
+  }
+
+  onViewBillDetails(bill: BillModel): void {
+    // Navigate to bill details view
+    console.log('Viewing bill details:', bill);
+    // TODO: Implement navigation to bill details
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Détails',
+      detail: `Affichage des détails de la facture de ${bill.customerName}`
+    });
   }
 }

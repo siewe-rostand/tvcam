@@ -15,5 +15,5 @@ public interface PaymentRepository extends JpaRepository<Payments,Long> {
 
     List<Payments> findByBills_CustomersCustomerId(Long customerId);
     List<Payments> findByPaymentDate(String paymentDate);
-    List<Payments> findByBills_Month(String month);
+    List<Payments> findByBills_Month(Integer month);
 }

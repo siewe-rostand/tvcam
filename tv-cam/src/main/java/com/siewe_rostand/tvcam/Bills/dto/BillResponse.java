@@ -20,8 +20,8 @@ public class BillResponse {
     private Long id;
     private BigDecimal paidAmount;
     private BigDecimal monthlyPayment;
-    private String year;
-    private String month;
+    private Integer year;
+    private Integer month;
     private String depositDate;
     private String deadLine;
     private BigDecimal debt;

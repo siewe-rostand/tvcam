@@ -3,16 +3,14 @@ package com.siewe_rostand.tvcam.Bills.services;
 import com.siewe_rostand.tvcam.Bills.dto.BillMapper;
 import com.siewe_rostand.tvcam.Bills.dto.BillRequest;
 import com.siewe_rostand.tvcam.Bills.dto.BillResponse;
-import com.siewe_rostand.tvcam.Bills.dto.BillSDto;
 import com.siewe_rostand.tvcam.Bills.model.Bills;
 import com.siewe_rostand.tvcam.Bills.repository.BillRepository;
 import com.siewe_rostand.tvcam.Bills.service.BillCalculationService;
 import com.siewe_rostand.tvcam.Customers.model.Customers;
 import com.siewe_rostand.tvcam.Customers.repository.CustomersRepository;
 import com.siewe_rostand.tvcam.Payment.model.enumeration.PaymentFrequency;
-import com.siewe_rostand.tvcam.Payment.model.enumeration.PaymentStatus;
 import com.siewe_rostand.tvcam.common.constraints.validator.ObjectsValidator;
-import com.siewe_rostand.tvcam.common.exceptions.ApiException;
+import com.siewe_rostand.tvcam.shared.Exceptions.OperationNotPermittedException;
 import com.siewe_rostand.tvcam.shared.HttpResponse;
 import com.siewe_rostand.tvcam.shared.PaginatedResponse;
 import jakarta.persistence.EntityNotFoundException;
@@ -31,7 +29,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.siewe_rostand.tvcam.shared.utils.CommonUtils.FORMATTER;
+import static com.siewe_rostand.tvcam.shared.utils.CommonUtils.DATE_FORMAT;
+import static com.siewe_rostand.tvcam.shared.utils.CommonUtils.DEFAULT_MONTHLY_AMOUNT;
 import static java.time.LocalDateTime.now;
 import static org.springframework.http.HttpStatus.OK;
 
@@ -59,18 +58,8 @@ public class BillServicesImpl implements BillServices {
         this.customersRepository = customersRepository;
     }
 
-    @Transactional
     @Override
-    public BillResponse save(BillRequest request) {
-        validator.validate(request);
-        // customerService.checkIfCustomerExistsOrThrow(request.getCustomerId());
-        Bills bills = billMapper.toBills(request);
-        Bills savedBills = billRepository.save(bills);
-        return billMapper.toResponse(savedBills);
-    }
-
-    @Override
-    public Bills update(BillSDto billSDto) {
+    public Bills update(BillRequest request) {
         return null;
     }
 
@@ -136,46 +125,21 @@ public class BillServicesImpl implements BillServices {
 
     @Transactional
     @Override
-    public BillResponse generateBills(BillRequest request) {
-        LocalDateTime today = now();
-        BillResponse response = new BillResponse();
-        List<Customers> customers = customersRepository.findAll();
-        for (Customers c : customers) {
-            try {
-                if (shouldGenerateBill(c, today)) {
-                    // Use provided request or create dynamic one if request is empty/null
-                    BillRequest billRequest = (request != null && hasValidData(request))
-                            ? request
-                            : createBillRequestFromCustomer(c, today);
-                    response = generateBillForCustomer(c, today, billRequest);
-                }
-            } catch (Exception e) {
-                log.error("Error generating bill for customer {}{}", c.getCustomerId(), e.getMessage());
-            }
-        }
-
-        return response;
-    }
-
-    @Transactional
-    @Override
     public List<BillResponse> generateBillsForSelectedCustomers(List<Long> customerIds, Boolean shouldGenerate) {
         log.debug("bill request: {}", customerIds);
+        if (customerIds.isEmpty()) {
+            throw new OperationNotPermittedException("Aucun client sélectionné pour la génération de factures");
+        }
         List<Customers> customers = customersRepository.findAllById(customerIds);
 
         List<BillResponse> generatedBills = new ArrayList<>();
         LocalDateTime today = now();
 
         for (Customers c : customers) {
-            try {
-                if (shouldGenerateBill(c, today) || shouldGenerate) {
-                    BillRequest dynamicRequest = createBillRequestFromCustomer(c, today);
-                    BillResponse response = generateBillForCustomer(c, today, dynamicRequest);
-                    generatedBills.add(response);
-                }
-            } catch (Exception e) {
-                log.trace("Error generating bill for customer {}", e.getMessage());
-                throw new ApiException("Error generating bill for customer\n" + c.getCustomerId() + " " + e);
+            if (shouldGenerateBill(c, today) || shouldGenerate) {
+                BillRequest dynamicRequest = createBillRequestFromCustomer(c, today);
+                BillResponse response = generateBillForCustomer(c, today, dynamicRequest);
+                generatedBills.add(response);
             }
         }
         return generatedBills;
@@ -183,86 +147,43 @@ public class BillServicesImpl implements BillServices {
 
     @Transactional
     public BillResponse generateBillForCustomer(Customers customer, LocalDateTime billingDate, BillRequest request) {
+        log.info("bill request: {}", request.toString());
         validator.validate(request);
 
-        BigDecimal netToPay = calculateBillAmount(customer);
-        BigDecimal debt = getUnpaidAmount(customer);
-        LocalDateTime dueDate = billingDate.plusDays(10);
-        String deadLine = FORMATTER.format(dueDate);
-
-        Bills newBill = Bills.builder()
-                .customers(customer)
-                .monthlyPayment(
-                        request.getMonthlyPayment() == null ? BigDecimal.valueOf(2000) : request.getMonthlyPayment())
-                .deadline((request.getDeadline() == null || request.getDeadline().isEmpty()) ? deadLine
-                        : request.getDeadline())
-                .paymentStatus(PaymentStatus.UNPAID)
-                .debt(debt)
-                .observation(request.getObservation())
-                .month((request.getMonth() == null || request.getMonth().isEmpty())
-                        ? billingDate.getMonth().name().toLowerCase()
-                        : request.getMonth())
-                .year((request.getYear() == null || request.getYear().isEmpty()) ? String.valueOf(billingDate.getYear())
-                        : request.getYear())
-                .depositDate(
-                        request.getDepositDate() != null ? request.getDepositDate() : FORMATTER.format(billingDate))
-                .penalties(request.getPenalties())
-                .currentPeriodBill(true)
-                .paidAmount(request.getPaidAmount() == null ? BigDecimal.ZERO : request.getPaidAmount())
-                .netToPay(netToPay)
-                .build();
-
-        Bills savedBill = billRepository.save(newBill);
+        Bills savedBill = createOrUpdateBill(customer, request, billingDate);
+        System.out.println("savedBill =************** " + savedBill);
         customer.setLastBillGenerationDate(billingDate);
         customersRepository.save(customer);
         return billMapper.toResponse(savedBill);
     }
 
+    /**
+     * Détermine si une nouvelle facture doit être générée pour un client.
+     *
+     * @param customer L'objet Customer contenant les informations sur le client.
+     * @param today    La date et l'heure actuelles.
+     * @return Vrai si une facture doit être générée, sinon faux.
+     */
     private boolean shouldGenerateBill(Customers customer, LocalDateTime today) {
-
-        // Check if the last bill generation date is null or if the current date is the
-        // first of the month
-        boolean shouldGenerate = customer.getLastBillGenerationDate() == null ||
-                today.getDayOfMonth() == 1;
-
-        if (shouldGenerate) {
+        // Si le client n'a jamais été facturé, une facture doit être générée.
+        if (customer.getLastBillGenerationDate() == null) {
             return true;
         }
 
+        // Calcule le nombre de mois écoulés depuis la dernière facture.
         long monthsSinceLastBill = ChronoUnit.MONTHS.between(customer.getLastBillGenerationDate(), today);
 
-        // Handle null payment frequency by using default (MONTHLY)
+        // Récupère la fréquence de paiement du client.
         PaymentFrequency frequency = customer.getPaymentFrequency();
-        if (frequency == null) {
-            log.warn("Customer {} has null payment frequency, using default MONTHLY", customer.getCustomerId());
-            frequency = PaymentFrequency.DEFAULT;
 
-            // Update the customer with the default frequency to prevent future issues
-            customer.setPaymentFrequency(frequency);
-            customersRepository.save(customer);
-        }
-
+        // Utilise une expression 'switch' pour vérifier si une nouvelle facture est due
+        // en fonction de la fréquence de paiement et du nombre de mois écoulés.
         return switch (frequency) {
             case MONTHLY -> monthsSinceLastBill >= 1;
             case QUARTERLY -> monthsSinceLastBill >= 3;
             case SEMI_ANNUALLY -> monthsSinceLastBill >= 6;
             case ANNUALLY -> monthsSinceLastBill >= 12;
         };
-    }
-
-    @Transactional(readOnly = true)
-    public BigDecimal calculateBillAmount(Customers customer) {
-        // Utiliser BillCalculationService pour les calculs avec rabais
-        BigDecimal debt = getUnpaidAmount(customer);
-        return billCalculationService.calculateBillAmount(customer, debt);
-    }
-
-    @Transactional(readOnly = true)
-    public BigDecimal getUnpaidAmount(Customers customer) {
-        List<Bills> unpaidBills = billRepository.findAllByCustomersAndPaymentStatus(customer, PaymentStatus.UNPAID);
-        return unpaidBills.stream()
-                .map(Bills::getPaidAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     @Override
@@ -289,8 +210,8 @@ public class BillServicesImpl implements BillServices {
 
     @Override
     @Transactional(readOnly = true)
-    public boolean checkExistingBillsForMonth(List<Long> customerIds, String month, String year) {
-        log.info("Vérification de l'existence de factures pour {} clients, mois: {}, année: {}",
+    public boolean checkExistingBillsForMonth(List<Long> customerIds, Integer month, Integer year) {
+        log.info("Vérification de l''existence de factures pour {} clients, mois: {}, année: {}",
                 customerIds.size(), month, year);
 
         if (customerIds.isEmpty()) {
@@ -337,35 +258,52 @@ public class BillServicesImpl implements BillServices {
     /**
      * Creates a BillRequest dynamically based on customer data and current billing
      * period
+     *
+     * @param customer    : customer whose bill request has to be generated
+     * @param billingDate : the date the bill is generated
+     * @return BillRequest
      */
     private BillRequest createBillRequestFromCustomer(Customers customer, LocalDateTime billingDate) {
         LocalDateTime dueDate = billingDate.plusDays(10);
-        String deadLine = FORMATTER.format(dueDate);
+        String deadLine = DATE_FORMAT.format(dueDate);
 
         return BillRequest.builder()
-                .monthlyPayment(BigDecimal.valueOf(2000)) // Default monthly payment
+                .monthlyPayment(DEFAULT_MONTHLY_AMOUNT)
                 .deadline(deadLine)
-                .month(billingDate.getMonth().name().toLowerCase())
-                .year(String.valueOf(billingDate.getYear()))
-                .depositDate(FORMATTER.format(billingDate))
+                .month(billingDate.getMonth().getValue())
+                .year(billingDate.getYear())
+                .depositDate(DATE_FORMAT.format(billingDate))
                 .paidAmount(BigDecimal.ZERO)
-                .penalties(0) // Using Integer as per BillRequest definition
-                .observation("Bill generated automatically for " + customer.getName())
+                .penalties(0)
+                .observation("Vous serez suspendu si vous n'avez pas payé après la date limite de paiement.")
                 .customerId(customer.getCustomerId())
+                .debt(BigDecimal.ZERO)
                 .build();
     }
 
     /**
-     * Checks if a BillRequest has valid/meaningful data
+     * helper method to group the creation and the editing of a customer bill
+     *
+     * @param customer     : customer whose bill has to be created or updated
+     * @param request      : the bill request for each customer
+     * @param billingDate: the date when the bill is created or updated
+     * @return the created or updated bill
      */
-    private boolean hasValidData(BillRequest request) {
-        return request.getMonthlyPayment() != null ||
-                (request.getMonth() != null && !request.getMonth().isEmpty()) ||
-                (request.getYear() != null && !request.getYear().isEmpty()) ||
-                (request.getDeadline() != null && !request.getDeadline().isEmpty()) ||
-                request.getPaidAmount() != null ||
-                request.getPenalties() != null ||
-                (request.getObservation() != null && !request.getObservation().isEmpty()) ||
-                request.getCustomerId() != null;
+    private Bills createOrUpdateBill(Customers customer, BillRequest request, LocalDateTime billingDate) {
+        BigDecimal netToPay = billCalculationService.calculateBillAmount(customer);
+        BigDecimal debt = billCalculationService.getUnpaidAmount(customer);
+
+        int month = request.getMonth() != null ? request.getMonth() : billingDate.getMonth().getValue();
+        int year = request.getYear() != null ? request.getYear() : billingDate.getYear();
+
+        Bills existingBill = billRepository.findBillsByCustomersAndMonthAndYear(customer, month, year);
+
+        if (existingBill != null) {
+            billMapper.updateExistingBill(existingBill, request, netToPay, debt, billingDate);
+            return billRepository.save(existingBill);
+        } else {
+            Bills newBill = billMapper.createNewBill(customer, request, netToPay, debt, billingDate, month, year);
+            return billRepository.save(newBill);
+        }
     }
 }

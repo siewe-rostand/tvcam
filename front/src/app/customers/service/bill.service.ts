@@ -3,6 +3,21 @@ import { HttpClient } from "@angular/common/http";
 import { BehaviorSubject, catchError, Observable, throwError } from "rxjs";
 import { BillModel } from "../model/bill.model";
 
+interface BillGenerationResult {
+  generatedBills: BillModel[];
+  existingBills: ExistingBillInfo[];
+  hasExistingBills: boolean;
+  message: string;
+  success: boolean;
+}
+
+interface ExistingBillInfo {
+  customerId: number;
+  customerName: string;
+  billId: number;
+  month: string;
+  year: string;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -26,6 +41,28 @@ export class BillService {
 
   generateBills(customerIds: (number | undefined)[], shouldGenerate: boolean): Observable<any> {
     return this.http.post(`bills/generate?shouldGenerate=${shouldGenerate}`, customerIds)
+      .pipe(catchError(this.handleError));
+  }
+
+  /**
+   * Generates bills with duplicate check functionality
+   * @param customerIds Array of customer IDs
+   * @param shouldGenerate Force generation even if not the right time
+   * @param forceUpdate Force update of existing bills (optional)
+   * @returns Observable<BillGenerationResult>
+   */
+  generateBillsWithDuplicateCheck(
+    customerIds: number[],
+    shouldGenerate: boolean,
+    forceUpdate?: boolean
+  ): Observable<BillGenerationResult> {
+    const requestBody = {
+      customerIds,
+      shouldGenerate,
+      forceUpdate: forceUpdate || null
+    };
+
+    return this.http.post<BillGenerationResult>(`bills/generate-with-duplicate-check`, requestBody)
       .pipe(catchError(this.handleError));
   }
 

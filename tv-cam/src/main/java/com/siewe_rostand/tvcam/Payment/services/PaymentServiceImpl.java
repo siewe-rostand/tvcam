@@ -166,7 +166,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public List<PaymentResponse> findByBills_Month(String month) {
+    public List<PaymentResponse> findByBills_Month(Integer month) {
         List<Payments> payments = paymentRepository.findByBills_Month(month);
         List<PaymentResponse> paymentResponses = new ArrayList<>();
         for (Payments payment : payments) {
