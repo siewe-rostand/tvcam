@@ -1,4 +1,8 @@
-<p-toast [breakpoints]="{ '920px': { width: '100%', right: '0', left: '0' } }" position="bottom-right" key="br"/>
+<p-toast
+  [breakpoints]="{ '920px': { width: '100%', right: '0', left: '0' } }"
+  position="bottom-right"
+  key="br"
+/>
 
 <p-table
   #dt
@@ -12,61 +16,71 @@
   (selectionChange)="onSelectionChange($event)"
   [rowHover]="true"
   dataKey="id"
-
 >
   <ng-template pTemplate="caption">
     <div class="flex align-items-center justify-content-between">
-      <h5 class="m-1 text-xl text-primary">liste des clients</h5>
-      <span class="p-input-icon-left">
+      <h5 class="m-1 text-xl text-primary">liste des factures</h5>
+      <div class="flex align-items-center gap-2">
+        <p-button
+          *ngIf="selectedBills.length > 0"
+          icon="pi pi-print"
+          label="Aperçu & Impression ({{ selectedBills.length }})"
+          [outlined]="true"
+          severity="info"
+          size="small"
+          (onClick)="openPrintPreview()"
+        />
+        <span class="p-input-icon-left">
           <i class="pi pi-search"></i>
-          <input pInputText type="text" placeholder="Search..."/>
+          <input pInputText type="text" placeholder="Search..." />
         </span>
+      </div>
     </div>
   </ng-template>
   <ng-template pTemplate="header">
     <tr>
       <th style="width: 4rem">
-        <p-tableHeaderCheckbox/>
+        <p-tableHeaderCheckbox />
       </th>
       <th pSortableColumn="name">
         Client
-        <p-sortIcon field="Client"/>
+        <p-sortIcon field="Client" />
       </th>
       <th pSortableColumn="telephone">
         Mois
-        <p-sortIcon field="Mois"/>
+        <p-sortIcon field="Mois" />
       </th>
       <th pSortableColumn="address">
         Année
-        <p-sortIcon field="Annee"/>
+        <p-sortIcon field="Annee" />
       </th>
       <th pSortableColumn="active">
         Total à payer
-        <p-sortIcon field="netToPay"/>
+        <p-sortIcon field="netToPay" />
       </th>
       <th pSortableColumn="active">
         Montant payé
-        <p-sortIcon field="Montant"/>
+        <p-sortIcon field="Montant" />
       </th>
       <th pSortableColumn="active">
         Reste à payer
-        <p-sortIcon field="Montant"/>
+        <p-sortIcon field="Montant" />
       </th>
       <th pSortableColumn="active">
         Impayé
-        <p-sortIcon field="impayé"/>
+        <p-sortIcon field="impayé" />
       </th>
       <th pSortableColumn="active">
         Date dépôt
-        <p-sortIcon field="depositDate"/>
+        <p-sortIcon field="depositDate" />
       </th>
       <th pSortableColumn="active">
         Date Limite
-        <p-sortIcon field="limitDate"/>
+        <p-sortIcon field="limitDate" />
       </th>
       <th pSortableColumn="active">
         Statut
-        <p-sortIcon field="status"/>
+        <p-sortIcon field="status" />
       </th>
       <th></th>
     </tr>
@@ -75,7 +89,7 @@
   <ng-template pTemplate="body" let-bill>
     <tr>
       <td>
-        <p-tableCheckbox [value]="bill"/>
+        <p-tableCheckbox [value]="bill" />
       </td>
       <td>
         {{ bill.customerName }}
@@ -136,10 +150,11 @@
   styleClass="p-fluid"
 >
   <ng-template pTemplate="content">
-
     <div class="flex align-items-center justify-content-between mb-3">
       <div>Facture De:</div>
-      <div class="font-bold md:font-semibold mr-2">{{ bill.month }} - {{ bill.year }}</div>
+      <div class="font-bold md:font-semibold mr-2">
+        {{ bill.month }} - {{ bill.year }}
+      </div>
     </div>
 
     <p-divider layout="horizontal" styleClass="dotted"></p-divider>
@@ -151,7 +166,9 @@
 
     <div class="flex align-items-center justify-content-between mb-2">
       <div>Mensualité:</div>
-      <div class="font-bold md:font-semibold mr-2">{{ bill.monthlyPayment }}</div>
+      <div class="font-bold md:font-semibold mr-2">
+        {{ bill.monthlyPayment }}
+      </div>
     </div>
 
     <div class="flex align-items-center justify-content-between mb-2">
@@ -166,7 +183,9 @@
 
     <div class="flex align-items-center justify-content-between mb-2">
       <div>Reste a payer:</div>
-      <div class="font-bold md:font-semibold mr-2">{{ bill.remainingBalance }}</div>
+      <div class="font-bold md:font-semibold mr-2">
+        {{ bill.remainingBalance }}
+      </div>
     </div>
 
     <div class="flex align-items-center justify-content-between mb-2">
@@ -204,7 +223,8 @@
       [checkmark]="true"
       optionLabel="name"
       [showClear]="true"
-      placeholder="Choisir method de paiement" />
+      placeholder="Choisir method de paiement"
+    />
   </ng-template>
 
   <ng-template pTemplate="footer">
@@ -223,4 +243,4 @@
   </ng-template>
 </p-dialog>
 
-<p-confirmDialog/>
+<p-confirmDialog />

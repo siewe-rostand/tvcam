@@ -7,7 +7,9 @@ import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
-import '../../features/settings/presentation/pages/settings_page.dart';
+import '../../features/payments/presentation/pages/payment_history_page.dart';
+import '../../features/notifications/presentation/pages/notifications_page.dart';
+import '../../features/issues/presentation/pages/complaints_page.dart';
 import '../../shared/widgets/offline_banner.dart';
 
 part 'app_router.g.dart';
@@ -29,7 +31,7 @@ GoRouter router(RouterRef ref) {
         name: 'register',
         builder: (context, state) => const RegisterPage(),
       ),
-      
+
       // Route principale avec navigation par onglets
       ShellRoute(
         builder: (context, state, child) {
@@ -42,21 +44,31 @@ GoRouter router(RouterRef ref) {
             builder: (context, state) => const HomePage(),
             routes: [
               GoRoute(
+                path: 'payments',
+                name: 'payments',
+                builder: (context, state) => const PaymentHistoryPage(),
+              ),
+              GoRoute(
+                path: 'complaints',
+                name: 'complaints',
+                builder: (context, state) => const ComplaintsPage(),
+              ),
+              GoRoute(
+                path: 'notifications',
+                name: 'notifications',
+                builder: (context, state) => const NotificationsPage(),
+              ),
+              GoRoute(
                 path: 'profile',
                 name: 'profile',
                 builder: (context, state) => const ProfilePage(),
-              ),
-              GoRoute(
-                path: 'settings',
-                name: 'settings',
-                builder: (context, state) => const SettingsPage(),
               ),
             ],
           ),
         ],
       ),
     ],
-    
+
     // Redirection basée sur l'état d'authentification
     redirect: (context, state) {
       // TODO: Implémenter la logique d'authentification
@@ -64,18 +76,18 @@ GoRouter router(RouterRef ref) {
       final isLoggedIn = false; // À remplacer par la logique d'auth
       final isLoginRoute = state.matchedLocation == '/login';
       final isRegisterRoute = state.matchedLocation == '/register';
-      
+
       if (!isLoggedIn && !isLoginRoute && !isRegisterRoute) {
         return '/login';
       }
-      
+
       if (isLoggedIn && (isLoginRoute || isRegisterRoute)) {
         return '/';
       }
-      
+
       return null;
     },
-    
+
     // Gestion des erreurs
     errorBuilder: (context, state) => Scaffold(
       body: Center(
@@ -111,7 +123,7 @@ GoRouter router(RouterRef ref) {
 
 class ScaffoldWithNavigation extends ConsumerWidget {
   final Widget child;
-  
+
   const ScaffoldWithNavigation({
     super.key,
     required this.child,
@@ -124,7 +136,7 @@ class ScaffoldWithNavigation extends ConsumerWidget {
         children: [
           // Bannière offline
           const OfflineBanner(),
-          
+
           // Contenu principal
           Expanded(child: child),
         ],
@@ -137,14 +149,14 @@ class ScaffoldWithNavigation extends ConsumerWidget {
             label: 'Accueil',
           ),
           NavigationDestination(
+            icon: Icon(Icons.receipt_outlined),
+            selectedIcon: Icon(Icons.receipt),
+            label: 'Paiements',
+          ),
+          NavigationDestination(
             icon: Icon(Icons.person_outline),
             selectedIcon: Icon(Icons.person),
             label: 'Profil',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.settings_outlined),
-            selectedIcon: Icon(Icons.settings),
-            label: 'Paramètres',
           ),
         ],
         onDestinationSelected: (index) {
@@ -153,10 +165,10 @@ class ScaffoldWithNavigation extends ConsumerWidget {
               context.go('/');
               break;
             case 1:
-              context.go('/profile');
+              context.go('/payments');
               break;
             case 2:
-              context.go('/settings');
+              context.go('/profile');
               break;
           }
         },
@@ -164,11 +176,11 @@ class ScaffoldWithNavigation extends ConsumerWidget {
       ),
     );
   }
-  
+
   int _getSelectedIndex(BuildContext context) {
     final location = GoRouterState.of(context).matchedLocation;
-    if (location.startsWith('/profile')) return 1;
-    if (location.startsWith('/settings')) return 2;
+    if (location.startsWith('/payments')) return 1;
+    if (location.startsWith('/profile')) return 2;
     return 0;
   }
 }

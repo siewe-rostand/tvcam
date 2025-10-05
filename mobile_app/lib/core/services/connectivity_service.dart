@@ -8,30 +8,28 @@ part 'connectivity_service.g.dart';
 @riverpod
 class ConnectivityService extends _$ConnectivityService {
   late StreamSubscription<ConnectivityResult> _subscription;
-  
+
   @override
   Future<bool> build() async {
     // Vérifier l'état initial de la connectivité
     final connectivityResult = await Connectivity().checkConnectivity();
     final isConnected = _isConnected(connectivityResult);
-    
+
     // Écouter les changements de connectivité
     _subscription = Connectivity().onConnectivityChanged.listen((result) {
       final connected = _isConnected(result);
       state = AsyncValue.data(connected);
     });
-    
+
     return isConnected;
   }
-  
+
   bool _isConnected(ConnectivityResult result) {
     return result != ConnectivityResult.none;
   }
-  
-  @override
+
   void dispose() {
     _subscription.cancel();
-    super.dispose();
   }
 }
 

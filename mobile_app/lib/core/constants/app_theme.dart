@@ -11,15 +11,15 @@ class AppTheme {
         primary: AppColors.primary,
         secondary: AppColors.secondary,
         surface: AppColors.surface,
-        background: AppColors.background,
+        surface: AppColors.background,
         error: AppColors.error,
         onPrimary: Colors.white,
         onSecondary: Colors.white,
         onSurface: AppColors.textPrimary,
-        onBackground: AppColors.textPrimary,
+        onSurface: AppColors.textPrimary,
         onError: Colors.white,
       ),
-      
+
       // Typographie
       textTheme: GoogleFonts.poppinsTextTheme().copyWith(
         displayLarge: GoogleFonts.poppins(
@@ -98,7 +98,7 @@ class AppTheme {
           color: AppColors.textTertiary,
         ),
       ),
-      
+
       // Composants
       appBarTheme: AppBarTheme(
         backgroundColor: AppColors.surface,
@@ -115,8 +115,8 @@ class AppTheme {
           size: 24,
         ),
       ),
-      
-      cardTheme: CardTheme(
+
+      cardTheme: CardThemeData(
         color: AppColors.card,
         elevation: 2,
         shadowColor: AppColors.shadow,
@@ -125,7 +125,7 @@ class AppTheme {
         ),
         margin: const EdgeInsets.all(8),
       ),
-      
+
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
@@ -141,7 +141,7 @@ class AppTheme {
           ),
         ),
       ),
-      
+
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.primary,
@@ -156,7 +156,7 @@ class AppTheme {
           ),
         ),
       ),
-      
+
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: AppColors.primary,
@@ -170,7 +170,7 @@ class AppTheme {
           ),
         ),
       ),
-      
+
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.surface,
@@ -190,13 +190,14 @@ class AppTheme {
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.error),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         hintStyle: GoogleFonts.poppins(
           color: AppColors.textTertiary,
           fontSize: 14,
         ),
       ),
-      
+
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: AppColors.surface,
         selectedItemColor: AppColors.primary,
@@ -204,7 +205,7 @@ class AppTheme {
         type: BottomNavigationBarType.fixed,
         elevation: 8,
       ),
-      
+
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
@@ -215,16 +216,16 @@ class AppTheme {
       ),
     );
   }
-  
+
   static ThemeData get darkTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
       colorScheme: const ColorScheme.dark(
-        primary: AppColors.primaryLight,
-        secondary: AppColors.secondaryLight,
-        surface: Color(0xFF1F2937),
-        background: Color(0xFF111827),
+        primary: AppColors.primary,
+        secondary: AppColors.secondary,
+        surface: AppColors.surface,
+        surface: AppColors.background,
         error: AppColors.error,
         onPrimary: Colors.white,
         onSecondary: Colors.white,
@@ -232,7 +233,7 @@ class AppTheme {
         onBackground: Colors.white,
         onError: Colors.white,
       ),
-      
+
       // Typographie (même que light mais avec couleurs adaptées)
       textTheme: GoogleFonts.poppinsTextTheme().copyWith(
         displayLarge: GoogleFonts.poppins(
@@ -311,10 +312,10 @@ class AppTheme {
           color: AppColors.textTertiary,
         ),
       ),
-      
+
       // Composants adaptés au thème sombre
       appBarTheme: AppBarTheme(
-        backgroundColor: const Color(0xFF1F2937),
+        backgroundColor: AppColors.background,
         foregroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
@@ -328,9 +329,9 @@ class AppTheme {
           size: 24,
         ),
       ),
-      
-      cardTheme: CardTheme(
-        color: const Color(0xFF1F2937),
+
+      cardTheme: CardThemeData(
+        color: AppColors.card,
         elevation: 2,
         shadowColor: AppColors.shadow,
         shape: RoundedRectangleBorder(
@@ -338,10 +339,10 @@ class AppTheme {
         ),
         margin: const EdgeInsets.all(8),
       ),
-      
+
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: const Color(0xFF374151),
+        fillColor: AppColors.card,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.border),
@@ -352,22 +353,23 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.primaryLight, width: 2),
+          borderSide: const BorderSide(color: AppColors.primary, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.error),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         hintStyle: GoogleFonts.poppins(
           color: AppColors.textTertiary,
           fontSize: 14,
         ),
       ),
-      
+
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor: Color(0xFF1F2937),
-        selectedItemColor: AppColors.primaryLight,
+        backgroundColor: AppColors.background,
+        selectedItemColor: AppColors.primary,
         unselectedItemColor: AppColors.textTertiary,
         type: BottomNavigationBarType.fixed,
         elevation: 8,

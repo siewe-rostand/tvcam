@@ -8,6 +8,7 @@ import { PaymentComponent } from "./customers/components/payment/payment.compone
 import { CustomerDetailComponent } from "./customers/components/customer-detail/customer-detail.component";
 import { ForgottenPasswordComponent } from "./auth/components/forgotten-password/forgotten-password.component";
 import { BillPrintComponent } from "./customers/components/bill/bill-print/bill-print.component";
+import { BillPrintPreviewComponent } from "./customers/components/bill/bill-print-preview/bill-print-preview.component";
 import { HomeComponent } from "./home/home.component";
 import { AuthGuardService } from "./auth/services/auth-guard.service";
 import { EnhancedDashboardComponent } from "./dashboard/enhanced-dashboard.component";
@@ -60,6 +61,12 @@ export const routes: Routes = [
   {
     path: 'receipts/generate/legacy',
     component: BillPrintComponent,
+    canActivate: [AuthGuardService],
+  },
+
+  {
+    path: 'receipts/print-preview',
+    component: BillPrintPreviewComponent,
     canActivate: [AuthGuardService],
   },
 

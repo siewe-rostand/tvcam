@@ -71,14 +71,25 @@ server:
   port: ${CONTAINER_PORT:8080}
   servlet:
     context-path: /api/v1
+#logging:
+#  level:
+#    org.hibernate.SQL: DEBUG
+#    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+#    info: INFO
+#    org:
+#      springframework:
+#        security: WARN
 logging:
   level:
-    org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
-    info: INFO
     org:
       springframework:
-        security: WARN
+        security:
+          config:
+            annotation:
+              authentication:
+                configuration:
+                  InitializeUserDetailsBeanManagerConfigurer=ERROR:
 
 
 

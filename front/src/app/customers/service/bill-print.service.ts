@@ -35,7 +35,7 @@ export class BillPrintService {
   private printDataSubject = new BehaviorSubject<PrintResponse | null>(null);
   public printData$ = this.printDataSubject.asObservable();
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   /**
    * Sélectionne des factures pour l'impression
@@ -83,7 +83,7 @@ export class BillPrintService {
           printFormat: response.data.printFormat || '2_per_page',
           printDate: response.data.printDate || new Date().toISOString()
         };
-        
+
         this.printDataSubject.next(printData);
         return printData;
       }),
@@ -96,22 +96,40 @@ export class BillPrintService {
 
   /**
    * Organise les factures en pages de 2 factures chacune
+   * Optimisé pour l'aperçu d'impression A4
    */
   organizeBillsInPages(bills: BillModel[]): BillModel[][] {
     const pages: BillModel[][] = [];
-    
+
     for (let i = 0; i < bills.length; i += 2) {
       const page: BillModel[] = [];
       page.push(bills[i]);
-      
+
+      // Ajouter la deuxième facture s'il y en a une
       if (i + 1 < bills.length) {
         page.push(bills[i + 1]);
       }
-      
+
       pages.push(page);
     }
-    
+
     return pages;
+  }
+
+  /**
+   * Prépare les données pour l'aperçu d'impression
+   */
+  prepareForPreview(bills: BillModel[]): {
+    pages: BillModel[][];
+    totalPages: number;
+    totalBills: number;
+  } {
+    const pages = this.organizeBillsInPages(bills);
+    return {
+      pages,
+      totalPages: pages.length,
+      totalBills: bills.length
+    };
   }
 
   /**
@@ -148,9 +166,9 @@ export class BillPrintService {
    */
   generateBillsForCustomers(customerIds: number[], shouldGenerate: boolean = false): Observable<any> {
     return this.http.post(`bills/generate?shouldGenerate=${shouldGenerate}`, customerIds).pipe(
-      map(response => {
+      map((response: any) => {
         // Mettre à jour les factures sélectionnées si la génération est réussie
-        if (response.data && response.data.bills) {
+        if (response?.data?.bills) {
           this.setSelectedBills(response.data.bills);
         }
         return response;
@@ -198,7 +216,7 @@ export class BillPrintService {
    */
   formatForPrint(bills: BillModel[]): PrintResponse {
     const pages = this.organizeBillsInPages(bills);
-    
+
     return {
       bills,
       pages,

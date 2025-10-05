@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_colors.dart';
 import '../widgets/auth_text_field.dart';
 import '../widgets/social_login_button.dart';
 
@@ -17,7 +17,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
-  
+
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -32,7 +32,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
       duration: const Duration(milliseconds: 800),
       vsync: this,
     );
-    
+
     _fadeAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
@@ -40,7 +40,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
       parent: _animationController,
       curve: Curves.easeInOut,
     ));
-    
+
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 0.3),
       end: Offset.zero,
@@ -48,7 +48,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
       parent: _animationController,
       curve: Curves.easeOutCubic,
     ));
-    
+
     _animationController.forward();
   }
 
@@ -80,37 +80,37 @@ class _LoginPageState extends ConsumerState<LoginPage>
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       const SizedBox(height: 40),
-                      
+
                       // Logo et titre
                       _buildHeader(),
-                      
+
                       const SizedBox(height: 48),
-                      
+
                       // Formulaire de connexion
                       _buildLoginForm(),
-                      
+
                       const SizedBox(height: 24),
-                      
+
                       // Bouton de connexion
                       _buildLoginButton(),
-                      
+
                       const SizedBox(height: 24),
-                      
+
                       // Options supplémentaires
                       _buildAdditionalOptions(),
-                      
+
                       const SizedBox(height: 32),
-                      
+
                       // Séparateur
                       _buildDivider(),
-                      
+
                       const SizedBox(height: 24),
-                      
+
                       // Connexion sociale
                       _buildSocialLogin(),
-                      
+
                       const SizedBox(height: 24),
-                      
+
                       // Lien d'inscription
                       _buildSignUpLink(),
                     ],
@@ -144,16 +144,16 @@ class _LoginPageState extends ConsumerState<LoginPage>
         Text(
           'Bienvenue sur TVCam',
           style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
         ),
         const SizedBox(height: 8),
         Text(
           'Connectez-vous pour continuer',
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-            color: Colors.white.withOpacity(0.9),
-          ),
+                color: Colors.white.withOpacity(0.9),
+              ),
         ),
       ],
     );
@@ -228,9 +228,9 @@ class _LoginPageState extends ConsumerState<LoginPage>
             : Text(
                 'Se connecter',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.w600,
-                ),
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
               ),
       ),
     );
@@ -254,8 +254,8 @@ class _LoginPageState extends ConsumerState<LoginPage>
             Text(
               'Se souvenir de moi',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.white,
-              ),
+                    color: Colors.white,
+                  ),
             ),
           ],
         ),
@@ -267,9 +267,9 @@ class _LoginPageState extends ConsumerState<LoginPage>
           child: Text(
             'Mot de passe oublié ?',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.white,
-              decoration: TextDecoration.underline,
-            ),
+                  color: Colors.white,
+                  decoration: TextDecoration.underline,
+                ),
           ),
         ),
       ],
@@ -290,8 +290,8 @@ class _LoginPageState extends ConsumerState<LoginPage>
           child: Text(
             'ou',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.white.withOpacity(0.7),
-            ),
+                  color: Colors.white.withOpacity(0.7),
+                ),
           ),
         ),
         Expanded(
@@ -333,18 +333,18 @@ class _LoginPageState extends ConsumerState<LoginPage>
         Text(
           'Vous n\'avez pas de compte ? ',
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: Colors.white.withOpacity(0.8),
-          ),
+                color: Colors.white.withOpacity(0.8),
+              ),
         ),
         TextButton(
           onPressed: () => context.go('/register'),
           child: Text(
             'S\'inscrire',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w600,
-              decoration: TextDecoration.underline,
-            ),
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                  decoration: TextDecoration.underline,
+                ),
           ),
         ),
       ],
@@ -361,9 +361,9 @@ class _LoginPageState extends ConsumerState<LoginPage>
     try {
       // Simuler un délai de connexion
       await Future.delayed(const Duration(seconds: 2));
-      
+
       // TODO: Implémenter la logique de connexion
-      
+
       // Rediriger vers la page d'accueil
       if (mounted) {
         context.go('/');

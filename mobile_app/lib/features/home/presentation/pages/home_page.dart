@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/constants/app_colors.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/services/auth_service.dart';
 import '../widgets/feature_card.dart';
 import '../widgets/quick_action_button.dart';
 import '../widgets/recent_activity_card.dart';
@@ -25,7 +27,7 @@ class _HomePageState extends ConsumerState<HomePage>
       duration: const Duration(milliseconds: 1000),
       vsync: this,
     );
-    
+
     _fadeAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
@@ -33,7 +35,7 @@ class _HomePageState extends ConsumerState<HomePage>
       parent: _animationController,
       curve: Curves.easeInOut,
     ));
-    
+
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 0.3),
       end: Offset.zero,
@@ -41,7 +43,7 @@ class _HomePageState extends ConsumerState<HomePage>
       parent: _animationController,
       curve: Curves.easeOutCubic,
     ));
-    
+
     _animationController.forward();
   }
 
@@ -53,6 +55,8 @@ class _HomePageState extends ConsumerState<HomePage>
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authServiceProvider);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -63,8 +67,8 @@ class _HomePageState extends ConsumerState<HomePage>
             child: CustomScrollView(
               slivers: [
                 // En-tête personnalisé
-                _buildSliverAppBar(),
-                
+                _buildSliverAppBar(authState),
+
                 // Contenu principal
                 SliverToBoxAdapter(
                   child: Padding(
@@ -72,24 +76,19 @@ class _HomePageState extends ConsumerState<HomePage>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Section de bienvenue
-                        _buildWelcomeSection(),
-                        
-                        const SizedBox(height: 32),
-                        
                         // Actions rapides
                         _buildQuickActions(),
-                        
+
                         const SizedBox(height: 32),
-                        
+
                         // Fonctionnalités principales
                         _buildMainFeatures(),
-                        
+
                         const SizedBox(height: 32),
-                        
-                        // Activité récente
-                        _buildRecentActivity(),
-                        
+
+                        // Accès rapide aux sections
+                        _buildQuickAccess(),
+
                         const SizedBox(height: 32),
                       ],
                     ),
@@ -103,17 +102,21 @@ class _HomePageState extends ConsumerState<HomePage>
     );
   }
 
-  Widget _buildSliverAppBar() {
+  Widget _buildSliverAppBar(AsyncValue<AuthState> authState) {
     return SliverAppBar(
       expandedHeight: 120,
       floating: false,
       pinned: true,
-      backgroundColor: AppColors.surface,
+      backgroundColor: Colors.transparent,
       elevation: 0,
       flexibleSpace: FlexibleSpaceBar(
         background: Container(
           decoration: const BoxDecoration(
-            gradient: AppColors.primaryGradient,
+            gradient: LinearGradient(
+              colors: [AppColors.background, AppColors.surface],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
           ),
           child: SafeArea(
             child: Padding(
@@ -136,24 +139,26 @@ class _HomePageState extends ConsumerState<HomePage>
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          'Bonjour !',
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                          ),
+                          authState.value?.user?.fullName ?? 'Bonjour !',
+                          style:
+                              Theme.of(context).textTheme.titleLarge?.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                         ),
                         Text(
-                          'Bienvenue sur TVCam',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Colors.white.withOpacity(0.9),
-                          ),
+                          'Bienvenue sur TV Connect',
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: Colors.white.withOpacity(0.9),
+                                  ),
                         ),
                       ],
                     ),
                   ),
                   IconButton(
                     onPressed: () {
-                      // TODO: Ouvrir les notifications
+                      context.go('/notifications');
                     },
                     icon: const Icon(
                       Icons.notifications_outlined,
@@ -170,64 +175,6 @@ class _HomePageState extends ConsumerState<HomePage>
     );
   }
 
-  Widget _buildWelcomeSection() {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadow,
-            offset: const Offset(0, 4),
-            blurRadius: 12,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  Icons.camera_alt,
-                  color: AppColors.primary,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Prêt à capturer ?',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      'Commencez à utiliser TVCam pour vos projets vidéo',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildQuickActions() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -235,28 +182,29 @@ class _HomePageState extends ConsumerState<HomePage>
         Text(
           'Actions rapides',
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
         ),
         const SizedBox(height: 16),
         Row(
           children: [
             Expanded(
               child: QuickActionButton(
-                icon: Icons.camera_alt,
-                label: 'Nouvelle vidéo',
+                icon: Icons.payment,
+                label: 'Paiement',
                 onTap: () {
-                  // TODO: Ouvrir la caméra
+                  context.go('/payments');
                 },
               ),
             ),
             const SizedBox(width: 16),
             Expanded(
               child: QuickActionButton(
-                icon: Icons.upload_file,
-                label: 'Importer',
+                icon: Icons.report_problem,
+                label: 'Réclamation',
                 onTap: () {
-                  // TODO: Importer des fichiers
+                  context.go('/complaints');
                 },
               ),
             ),
@@ -267,20 +215,20 @@ class _HomePageState extends ConsumerState<HomePage>
           children: [
             Expanded(
               child: QuickActionButton(
-                icon: Icons.edit,
-                label: 'Éditer',
+                icon: Icons.notifications,
+                label: 'Notifications',
                 onTap: () {
-                  // TODO: Ouvrir l'éditeur
+                  context.go('/notifications');
                 },
               ),
             ),
             const SizedBox(width: 16),
             Expanded(
               child: QuickActionButton(
-                icon: Icons.share,
-                label: 'Partager',
+                icon: Icons.person,
+                label: 'Profil',
                 onTap: () {
-                  // TODO: Partager des projets
+                  context.go('/profile');
                 },
               ),
             ),
@@ -295,10 +243,11 @@ class _HomePageState extends ConsumerState<HomePage>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Fonctionnalités',
+          'Services disponibles',
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
         ),
         const SizedBox(height: 16),
         GridView.count(
@@ -310,39 +259,39 @@ class _HomePageState extends ConsumerState<HomePage>
           childAspectRatio: 1.2,
           children: [
             FeatureCard(
-              icon: Icons.camera_alt,
-              title: 'Enregistrement',
-              description: 'Capturez des vidéos de haute qualité',
+              icon: Icons.receipt,
+              title: 'Factures',
+              description: 'Consultez vos factures',
               color: AppColors.primary,
               onTap: () {
-                // TODO: Ouvrir l'enregistrement
+                context.go('/payments');
               },
             ),
             FeatureCard(
-              icon: Icons.edit,
-              title: 'Édition',
-              description: 'Modifiez et améliorez vos vidéos',
+              icon: Icons.payment,
+              title: 'Paiements',
+              description: 'Effectuez vos paiements',
               color: AppColors.secondary,
               onTap: () {
-                // TODO: Ouvrir l'éditeur
+                context.go('/payments');
               },
             ),
             FeatureCard(
-              icon: Icons.cloud_upload,
-              title: 'Synchronisation',
-              description: 'Sauvegardez et partagez vos projets',
+              icon: Icons.report_problem,
+              title: 'Support',
+              description: 'Signalez un problème',
               color: AppColors.accent,
               onTap: () {
-                // TODO: Ouvrir la synchronisation
+                context.go('/complaints');
               },
             ),
             FeatureCard(
-              icon: Icons.settings,
-              title: 'Paramètres',
-              description: 'Personnalisez votre expérience',
+              icon: Icons.notifications,
+              title: 'Alertes',
+              description: 'Recevez des notifications',
               color: AppColors.info,
               onTap: () {
-                // TODO: Ouvrir les paramètres
+                context.go('/notifications');
               },
             ),
           ],
@@ -351,47 +300,37 @@ class _HomePageState extends ConsumerState<HomePage>
     );
   }
 
-  Widget _buildRecentActivity() {
+  Widget _buildQuickAccess() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Activité récente',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+        Text(
+          'Accès rapide',
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
+                color: Colors.white,
               ),
-            ),
-            TextButton(
-              onPressed: () {
-                // TODO: Voir toute l'activité
-              },
-              child: const Text('Voir tout'),
-            ),
-          ],
         ),
         const SizedBox(height: 16),
         const RecentActivityCard(
-          title: 'Projet "Vacances d\'été"',
-          subtitle: 'Modifié il y a 2 heures',
-          icon: Icons.edit,
-          color: AppColors.secondary,
-        ),
-        const SizedBox(height: 12),
-        const RecentActivityCard(
-          title: 'Nouvelle vidéo importée',
-          subtitle: 'Il y a 1 jour',
-          icon: Icons.upload_file,
+          title: 'Historique des paiements',
+          subtitle: 'Consultez vos paiements récents',
+          icon: Icons.history,
           color: AppColors.primary,
         ),
         const SizedBox(height: 12),
         const RecentActivityCard(
-          title: 'Projet partagé avec Jean',
-          subtitle: 'Il y a 2 jours',
-          icon: Icons.share,
+          title: 'Réclamations',
+          subtitle: 'Signalez un problème',
+          icon: Icons.report_problem,
           color: AppColors.accent,
+        ),
+        const SizedBox(height: 12),
+        const RecentActivityCard(
+          title: 'Notifications',
+          subtitle: 'Dernières alertes',
+          icon: Icons.notifications,
+          color: AppColors.info,
         ),
       ],
     );

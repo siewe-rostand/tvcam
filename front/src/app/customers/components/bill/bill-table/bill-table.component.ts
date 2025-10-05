@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Button } from "primeng/button";
 import { InputTextModule } from "primeng/inputtext";
 import { ConfirmationService, MessageService } from "primeng/api";
@@ -16,11 +17,14 @@ import { PaymentService } from "../../../service/payment.service";
 import { ToastModule } from "primeng/toast";
 import { ConfirmDialogModule } from "primeng/confirmdialog";
 import { BillService } from "../../../service/bill.service";
+import { BillPrintService } from "../../../service/bill-print.service";
+import { Router } from "@angular/router";
 
 @Component({
   selector: 'app-bill-table',
   standalone: true,
   imports: [
+    CommonModule,
     Button,
     InputTextModule,
     TableModule,
@@ -30,7 +34,6 @@ import { BillService } from "../../../service/bill.service";
     DividerModule,
     DropdownModule,
     FormsModule,
-    NgIf,
     ToastModule,
     ConfirmDialogModule
   ],
@@ -56,7 +59,8 @@ export class BillTableComponent {
 
 
   constructor(private paymentService: PaymentService, private billService: BillService,
-    private messageService: MessageService, private confirmationService: ConfirmationService,) {
+    private messageService: MessageService, private confirmationService: ConfirmationService,
+    private billPrintService: BillPrintService, private router: Router) {
   }
   onSelectionChange(event: BillModel) {
     this.selectedBillsChange.emit(this.selectedBills);
@@ -180,5 +184,33 @@ export class BillTableComponent {
   private refreshBills() {
     // Émettre un événement pour indiquer qu'il faut rafraîchir les données
     window.location.reload(); // Solution temporaire, peut être améliorée avec des services
+  }
+
+  /**
+   * Ouvre l'aperçu d'impression pour les factures sélectionnées
+   */
+  openPrintPreview() {
+    if (this.selectedBills.length === 0) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Aucune sélection',
+        detail: 'Veuillez sélectionner au moins une facture pour l\'impression',
+        life: 3000,
+      });
+      return;
+    }
+
+    // Enregistrer les factures sélectionnées dans le service
+    this.billPrintService.setSelectedBills(this.selectedBills);
+
+    // Naviguer vers la page d'aperçu d'impression
+    this.router.navigate(['/receipts/print-preview']);
+
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Aperçu d\'impression',
+      detail: `${this.selectedBills.length} facture(s) sélectionnée(s) pour l'impression`,
+      life: 3000,
+    });
   }
 }

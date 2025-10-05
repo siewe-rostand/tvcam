@@ -1,0 +1,360 @@
+<!-- Barre de contrôles -->
+<div class="print-controls no-print" *ngIf="!loading">
+  <div class="control-header">
+    <h2 class="title">
+      <i class="pi pi-print"></i>
+      Aperçu d'impression - {{ selectedBills.length }} facture(s)
+    </h2>
+    <p class="subtitle">
+      {{ totalPages }} page(s) • Format A4 • 2 factures par page
+    </p>
+  </div>
+
+  <div class="control-actions">
+    <div class="navigation-controls" *ngIf="hasMultiplePages">
+      <p-button
+        icon="pi pi-chevron-left"
+        [disabled]="!canGoPrevious"
+        (onClick)="previousPage()"
+        size="small"
+        [outlined]="true"
+      >
+      </p-button>
+
+      <span class="page-indicator">
+        Page {{ currentPageNumber }} sur {{ totalPages }}
+      </span>
+
+      <p-button
+        icon="pi pi-chevron-right"
+        [disabled]="!canGoNext"
+        (onClick)="nextPage()"
+        size="small"
+        [outlined]="true"
+      >
+      </p-button>
+    </div>
+
+    <div class="action-buttons">
+      <p-button
+        label="Retour"
+        icon="pi pi-arrow-left"
+        severity="secondary"
+        [outlined]="true"
+        size="small"
+        (onClick)="goBackToBills()"
+      >
+      </p-button>
+
+      <p-button
+        label="Vider sélection"
+        icon="pi pi-times"
+        severity="danger"
+        [outlined]="true"
+        size="small"
+        (onClick)="clearSelection()"
+      >
+      </p-button>
+
+      <p-button
+        label="Imprimer cette page"
+        icon="pi pi-print"
+        severity="info"
+        size="small"
+        (onClick)="printCurrentPage()"
+        *ngIf="hasMultiplePages"
+      >
+      </p-button>
+
+      <p-button
+        label="Imprimer tout ({{ selectedBills.length }})"
+        icon="pi pi-print"
+        severity="success"
+        size="small"
+        (onClick)="printAll()"
+      >
+      </p-button>
+    </div>
+  </div>
+
+  <p-divider></p-divider>
+</div>
+
+<!-- Zone d'aperçu de la page courante -->
+<div class="print-preview-container" *ngIf="!loading">
+  <div
+    class="print-page"
+    [class.page-visible]="i === currentPageIndex"
+    *ngFor="let page of pages; let i = index"
+  >
+    <div class="page-header no-print">
+      <span class="page-number">Page {{ i + 1 }}</span>
+    </div>
+
+    <!-- Contenu de la page avec 2 factures côte à côte -->
+    <div class="bill-page-content">
+      <!-- Facture de gauche -->
+      <div class="bill-container bill-left" *ngIf="page[0]">
+        <div class="bill-content">
+          <!-- En-tête avec informations de l'entreprise -->
+          <div class="bill-header">
+            <div class="company-info">
+              <div class="company-logo">
+                <div class="antenna-icon">📡</div>
+                <h2 class="company-name">TV CAM</h2>
+              </div>
+              <div class="bill-title">FACTURE / BILL</div>
+            </div>
+            <div class="billing-period">
+              <strong
+                >{{ getMonthLabel(page[0].month) }} {{ page[0].year }}</strong
+              >
+            </div>
+          </div>
+
+          <!-- Informations de contact -->
+          <div class="contact-section">
+            <div class="company-details">
+              <p>
+                <strong>{{ page[0].zoneName || "Makèpe Missoke" }}</strong>
+              </p>
+              <p>
+                Tél:
+                {{ page[0].companyPhone || "6 74 38 17 44 / 6 96 39 53 30" }}
+              </p>
+              <p>Responsable: {{ page[0].responsibleName || "M. Jackson" }}</p>
+            </div>
+
+            <div class="customer-details">
+              <p>
+                <strong>{{ page[0].customerName }}</strong>
+              </p>
+              <p>{{ page[0].zoneAddress || "Zone de service" }}</p>
+              <p>ID Client: {{ page[0].customerId || "N/A" }}</p>
+            </div>
+          </div>
+
+          <!-- Détails de la facture -->
+          <div class="bill-details">
+            <div class="bill-info-row">
+              <span>N° Facture:</span>
+              <span
+                ><strong>{{ getBillReference(page[0]) }}</strong></span
+              >
+            </div>
+            <div class="bill-info-row">
+              <span>Date d'émission:</span>
+              <span>{{ getDepositDate(page[0]) }}</span>
+            </div>
+            <div class="bill-info-row">
+              <span>Date limite:</span>
+              <span>{{ formatDate(page[0].deadLine) }}</span>
+            </div>
+          </div>
+
+          <!-- Tableau des services -->
+          <div class="services-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Service</th>
+                  <th>Montant</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Abonnement TV</td>
+                  <td>{{ formatAmount(page[0].monthlyPayment) }}</td>
+                </tr>
+                <tr *ngIf="page[0].debt && page[0].debt > 0">
+                  <td>Arriérés</td>
+                  <td>{{ formatAmount(page[0].debt) }}</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr class="total-row">
+                  <td><strong>TOTAL À PAYER</strong></td>
+                  <td>
+                    <strong>{{ formatAmount(page[0].netToPay) }}</strong>
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+
+          <!-- Informations de paiement -->
+          <div
+            class="payment-info"
+            *ngIf="page[0].paidAmount && page[0].paidAmount > 0"
+          >
+            <div class="bill-info-row">
+              <span>Montant payé:</span>
+              <span class="paid-amount">{{
+                formatAmount(page[0].paidAmount)
+              }}</span>
+            </div>
+            <div class="bill-info-row">
+              <span>Reste à payer:</span>
+              <span class="remaining-amount">{{
+                formatAmount(page[0].remainingBalance)
+              }}</span>
+            </div>
+          </div>
+
+          <!-- Pied de page -->
+          <div class="bill-footer">
+            <p class="payment-notice">
+              <strong
+                >Merci de régler cette facture avant le
+                {{ formatDate(page[0].deadLine) }}</strong
+              >
+            </p>
+            <p class="contact-footer">
+              Pour toute réclamation, contactez-nous au :
+              {{ page[0].companyPhone || "6 74 38 17 44" }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Facture de droite -->
+      <div class="bill-container bill-right" *ngIf="page[1]">
+        <div class="bill-content">
+          <!-- En-tête avec informations de l'entreprise -->
+          <div class="bill-header">
+            <div class="company-info">
+              <div class="company-logo">
+                <div class="antenna-icon">📡</div>
+                <h2 class="company-name">TV CAM</h2>
+              </div>
+              <div class="bill-title">FACTURE / BILL</div>
+            </div>
+            <div class="billing-period">
+              <strong
+                >{{ getMonthLabel(page[1].month) }} {{ page[1].year }}</strong
+              >
+            </div>
+          </div>
+
+          <!-- Informations de contact -->
+          <div class="contact-section">
+            <div class="company-details">
+              <p>
+                <strong>{{ page[1].zoneName || "Makèpe Missoke" }}</strong>
+              </p>
+              <p>
+                Tél:
+                {{ page[1].companyPhone || "6 74 38 17 44 / 6 96 39 53 30" }}
+              </p>
+              <p>Responsable: {{ page[1].responsibleName || "M. Jackson" }}</p>
+            </div>
+
+            <div class="customer-details">
+              <p>
+                <strong>{{ page[1].customerName }}</strong>
+              </p>
+              <p>{{ page[1].zoneAddress || "Zone de service" }}</p>
+              <p>ID Client: {{ page[1].customerId || "N/A" }}</p>
+            </div>
+          </div>
+
+          <!-- Détails de la facture -->
+          <div class="bill-details">
+            <div class="bill-info-row">
+              <span>N° Facture:</span>
+              <span
+                ><strong>{{ getBillReference(page[1]) }}</strong></span
+              >
+            </div>
+            <div class="bill-info-row">
+              <span>Date d'émission:</span>
+              <span>{{ getDepositDate(page[1]) }}</span>
+            </div>
+            <div class="bill-info-row">
+              <span>Date limite:</span>
+              <span>{{ formatDate(page[1].deadLine) }}</span>
+            </div>
+          </div>
+
+          <!-- Tableau des services -->
+          <div class="services-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Service</th>
+                  <th>Montant</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Abonnement TV</td>
+                  <td>{{ formatAmount(page[1].monthlyPayment) }}</td>
+                </tr>
+                <tr *ngIf="page[1].debt && page[1].debt > 0">
+                  <td>Arriérés</td>
+                  <td>{{ formatAmount(page[1].debt) }}</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr class="total-row">
+                  <td><strong>TOTAL À PAYER</strong></td>
+                  <td>
+                    <strong>{{ formatAmount(page[1].netToPay) }}</strong>
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+
+          <!-- Informations de paiement -->
+          <div
+            class="payment-info"
+            *ngIf="page[1].paidAmount && page[1].paidAmount > 0"
+          >
+            <div class="bill-info-row">
+              <span>Montant payé:</span>
+              <span class="paid-amount">{{
+                formatAmount(page[1].paidAmount)
+              }}</span>
+            </div>
+            <div class="bill-info-row">
+              <span>Reste à payer:</span>
+              <span class="remaining-amount">{{
+                formatAmount(page[1].remainingBalance)
+              }}</span>
+            </div>
+          </div>
+
+          <!-- Pied de page -->
+          <div class="bill-footer">
+            <p class="payment-notice">
+              <strong
+                >Merci de régler cette facture avant le
+                {{ formatDate(page[1].deadLine) }}</strong
+              >
+            </p>
+            <p class="contact-footer">
+              Pour toute réclamation, contactez-nous au :
+              {{ page[1].companyPhone || "6 74 38 17 44" }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- État de chargement -->
+<div class="loading-state" *ngIf="loading">
+  <div class="loading-content">
+    <i
+      class="pi pi-spin pi-spinner"
+      style="font-size: 2rem; color: var(--primary-color)"
+    ></i>
+    <p>Préparation de l'aperçu d'impression...</p>
+  </div>
+</div>
+
+<!-- Messages et confirmations -->
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>

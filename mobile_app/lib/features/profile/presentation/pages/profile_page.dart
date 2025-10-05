@@ -1,447 +1,218 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/constants/app_colors.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../core/services/auth_service.dart';
 
-class ProfilePage extends ConsumerStatefulWidget {
+class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
 
   @override
-  ConsumerState<ProfilePage> createState() => _ProfilePageState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authState = ref.watch(authServiceProvider);
 
-class _ProfilePageState extends ConsumerState<ProfilePage> {
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      body: CustomScrollView(
-        slivers: [
-          // En-tête du profil
-          _buildSliverAppBar(),
-          
-          // Contenu du profil
-          SliverToBoxAdapter(
+      backgroundColor: Theme.of(context).colorScheme.background,
+      appBar: AppBar(
+        title: const Text(
+          'Profil',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+      ),
+      body: authState.when(
+        data: (state) {
+          if (!state.isAuthenticated || state.user == null) {
+            return const Center(
+              child: Text(
+                'Non authentifié',
+                style: TextStyle(color: Colors.white),
+              ),
+            );
+          }
+
+          final user = state.user!;
+          return _buildProfileContent(context, ref, user);
+        },
+        loading: () => const Center(
+          child: CircularProgressIndicator(color: Colors.white),
+        ),
+        error: (error, stack) => Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.error_outline,
+                size: 64,
+                color: Colors.red,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Erreur de chargement',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      color: Colors.white,
+                    ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                error.toString(),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Colors.grey,
+                    ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProfileContent(BuildContext context, WidgetRef ref, user) {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Informations utilisateur
+          Card(
             child: Padding(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Informations personnelles
-                  _buildPersonalInfo(),
-                  
-                  const SizedBox(height: 32),
-                  
-                  // Statistiques
-                  _buildStatistics(),
-                  
-                  const SizedBox(height: 32),
-                  
-                  // Actions du profil
-                  _buildProfileActions(),
-                  
-                  const SizedBox(height: 32),
-                  
-                  // Paramètres du compte
-                  _buildAccountSettings(),
-                  
-                  const SizedBox(height: 32),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSliverAppBar() {
-    return SliverAppBar(
-      expandedHeight: 200,
-      floating: false,
-      pinned: true,
-      backgroundColor: AppColors.surface,
-      elevation: 0,
-      flexibleSpace: FlexibleSpaceBar(
-        background: Container(
-          decoration: const BoxDecoration(
-            gradient: AppColors.primaryGradient,
-          ),
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Photo de profil
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundColor: Colors.white.withOpacity(0.2),
-                    child: const Icon(
-                      Icons.person,
-                      color: Colors.white,
-                      size: 50,
-                    ),
+                  Text(
+                    'Nom',
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                          color: Colors.grey[600],
+                          fontWeight: FontWeight.w500,
+                        ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    user.fullName,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: Colors.black,
+                          fontWeight: FontWeight.w600,
+                        ),
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Jean Dupont',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    'Téléphone',
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                          color: Colors.grey[600],
+                          fontWeight: FontWeight.w500,
+                        ),
                   ),
+                  const SizedBox(height: 4),
                   Text(
-                    'jean.dupont@email.com',
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Colors.white.withOpacity(0.9),
-                    ),
+                    user.displayPhone,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: Colors.black,
+                          fontWeight: FontWeight.w600,
+                        ),
                   ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Adresse',
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                          color: Colors.grey[600],
+                          fontWeight: FontWeight.w500,
+                        ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    user.address ?? 'Non renseignée',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: Colors.black,
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                  if (user.email != null) ...[
+                    const SizedBox(height: 16),
+                    Text(
+                      'Email',
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                            color: Colors.grey[600],
+                            fontWeight: FontWeight.w500,
+                          ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      user.email!,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color: Colors.black,
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                  ],
                 ],
               ),
             ),
           ),
-        ),
-      ),
-    );
-  }
 
-  Widget _buildPersonalInfo() {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadow,
-            offset: const Offset(0, 4),
-            blurRadius: 12,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Informations personnelles',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 20),
-          _buildInfoRow('Nom complet', 'Jean Dupont', Icons.person),
-          const SizedBox(height: 16),
-          _buildInfoRow('E-mail', 'jean.dupont@email.com', Icons.email),
-          const SizedBox(height: 16),
-          _buildInfoRow('Téléphone', '+33 6 12 34 56 78', Icons.phone),
-          const SizedBox(height: 16),
-          _buildInfoRow('Localisation', 'Paris, France', Icons.location_on),
-        ],
-      ),
-    );
-  }
+          const Spacer(),
 
-  Widget _buildInfoRow(String label, String value, IconData icon) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: AppColors.primary.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(
-            icon,
-            color: AppColors.primary,
-            size: 20,
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSecondary,
+          // Bouton de déconnexion
+          SizedBox(
+            height: 56,
+            child: ElevatedButton(
+              onPressed: () => _showLogoutDialog(context, ref),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 0,
+              ),
+              child: const Text(
+                'Déconnexion',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-              Text(
-                value,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: AppColors.textPrimary,
-                  fontWeight: FontWeight.w500,
-                ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showLogoutDialog(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Déconnexion'),
+          content: const Text('Êtes-vous sûr de vouloir vous déconnecter ?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Annuler'),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await ref.read(authServiceProvider.notifier).logout();
+                if (context.mounted) {
+                  context.go('/login');
+                }
+              },
+              child: const Text(
+                'Déconnexion',
+                style: TextStyle(color: Colors.red),
               ),
-            ],
-          ),
-        ),
-        IconButton(
-          onPressed: () {
-            // TODO: Éditer l'information
-          },
-          icon: Icon(
-            Icons.edit_outlined,
-            color: AppColors.textTertiary,
-            size: 20,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStatistics() {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadow,
-            offset: const Offset(0, 4),
-            blurRadius: 12,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Statistiques',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
             ),
-          ),
-          const SizedBox(height: 20),
-          Row(
-            children: [
-              Expanded(
-                child: _buildStatCard(
-                  'Projets',
-                  '12',
-                  Icons.folder,
-                  AppColors.primary,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildStatCard(
-                  'Vidéos',
-                  '48',
-                  Icons.video_library,
-                  AppColors.secondary,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildStatCard(
-                  'Heures',
-                  '156',
-                  Icons.timer,
-                  AppColors.accent,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatCard(String label, String value, IconData icon, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: color.withOpacity(0.2),
-          width: 1,
-        ),
-      ),
-      child: Column(
-        children: [
-          Icon(
-            icon,
-            color: color,
-            size: 24,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              color: color,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: color.withOpacity(0.8),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildProfileActions() {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadow,
-            offset: const Offset(0, 4),
-            blurRadius: 12,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Actions',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 20),
-          _buildActionTile(
-            'Modifier le profil',
-            'Mettre à jour vos informations personnelles',
-            Icons.edit,
-            AppColors.primary,
-            () {
-              // TODO: Ouvrir l'édition du profil
-            },
-          ),
-          const SizedBox(height: 16),
-          _buildActionTile(
-            'Changer la photo',
-            'Modifier votre photo de profil',
-            Icons.camera_alt,
-            AppColors.secondary,
-            () {
-              // TODO: Changer la photo
-            },
-          ),
-          const SizedBox(height: 16),
-          _buildActionTile(
-            'Partager le profil',
-            'Partager votre profil avec d\'autres',
-            Icons.share,
-            AppColors.accent,
-            () {
-              // TODO: Partager le profil
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildActionTile(
-    String title,
-    String subtitle,
-    IconData icon,
-    Color color,
-    VoidCallback onTap,
-  ) {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Icon(
-          icon,
-          color: color,
-          size: 20,
-        ),
-      ),
-      title: Text(
-        title,
-        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-      subtitle: Text(
-        subtitle,
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: AppColors.textSecondary,
-        ),
-      ),
-      trailing: Icon(
-        Icons.chevron_right,
-        color: AppColors.textTertiary,
-        size: 20,
-      ),
-      onTap: onTap,
-    );
-  }
-
-  Widget _buildAccountSettings() {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadow,
-            offset: const Offset(0, 4),
-            blurRadius: 12,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Compte',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 20),
-          _buildActionTile(
-            'Sécurité',
-            'Gérer la sécurité de votre compte',
-            Icons.security,
-            AppColors.info,
-            () {
-              // TODO: Ouvrir les paramètres de sécurité
-            },
-          ),
-          const SizedBox(height: 16),
-          _buildActionTile(
-            'Notifications',
-            'Configurer vos notifications',
-            Icons.notifications,
-            AppColors.warning,
-            () {
-              // TODO: Ouvrir les paramètres de notifications
-            },
-          ),
-          const SizedBox(height: 16),
-          _buildActionTile(
-            'Se déconnecter',
-            'Fermer votre session',
-            Icons.logout,
-            AppColors.error,
-            () {
-              // TODO: Déconnexion
-            },
-          ),
-        ],
-      ),
+          ],
+        );
+      },
     );
   }
 }

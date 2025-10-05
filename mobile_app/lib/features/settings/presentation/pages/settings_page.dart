@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_colors.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
@@ -43,9 +43,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 _buildQualitySetting(),
               ],
             ),
-            
+
             const SizedBox(height: 32),
-            
+
             // Section Notifications
             _buildSection(
               'Notifications',
@@ -56,9 +56,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 _buildNotificationTypes(),
               ],
             ),
-            
+
             const SizedBox(height: 32),
-            
+
             // Section Synchronisation
             _buildSection(
               'Synchronisation',
@@ -71,9 +71,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 _buildStorageInfo(),
               ],
             ),
-            
+
             const SizedBox(height: 32),
-            
+
             // Section Sécurité
             _buildSection(
               'Sécurité',
@@ -82,9 +82,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 _buildSecurityOptions(),
               ],
             ),
-            
+
             const SizedBox(height: 32),
-            
+
             // Section À propos
             _buildSection(
               'À propos',
@@ -93,9 +93,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 _buildAboutInfo(),
               ],
             ),
-            
+
             const SizedBox(height: 32),
-            
+
             // Bouton de réinitialisation
             _buildResetButton(),
           ],
@@ -139,8 +139,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               Text(
                 title,
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
             ],
           ),
@@ -203,7 +203,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
   Widget _buildNotificationTypes() {
     if (!_notificationsEnabled) return const SizedBox.shrink();
-    
+
     return Column(
       children: [
         _buildSwitchTile(
@@ -296,14 +296,14 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 Text(
                   'Stockage',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
                 Text(
                   '2.4 GB utilisés sur 8 GB',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+                        color: AppColors.textSecondary,
+                      ),
                 ),
               ],
             ),
@@ -386,7 +386,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     );
   }
 
-  Widget _buildSettingTile(String title, String subtitle, IconData icon, String value, VoidCallback onTap) {
+  Widget _buildSettingTile(String title, String subtitle, IconData icon,
+      String value, VoidCallback onTap) {
     return ListTile(
       contentPadding: EdgeInsets.zero,
       leading: Container(
@@ -404,14 +405,14 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       title: Text(
         title,
         style: Theme.of(context).textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.w600,
-        ),
+              fontWeight: FontWeight.w600,
+            ),
       ),
       subtitle: Text(
         subtitle,
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: AppColors.textSecondary,
-        ),
+              color: AppColors.textSecondary,
+            ),
       ),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
@@ -419,8 +420,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           Text(
             value,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.textSecondary,
-            ),
+                  color: AppColors.textSecondary,
+                ),
           ),
           const SizedBox(width: 8),
           Icon(
@@ -434,7 +435,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     );
   }
 
-  Widget _buildSwitchTile(String title, String subtitle, IconData icon, bool value, ValueChanged<bool> onChanged) {
+  Widget _buildSwitchTile(String title, String subtitle, IconData icon,
+      bool value, ValueChanged<bool> onChanged) {
     return ListTile(
       contentPadding: EdgeInsets.zero,
       leading: Container(
@@ -452,14 +454,14 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       title: Text(
         title,
         style: Theme.of(context).textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.w600,
-        ),
+              fontWeight: FontWeight.w600,
+            ),
       ),
       subtitle: Text(
         subtitle,
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: AppColors.textSecondary,
-        ),
+              color: AppColors.textSecondary,
+            ),
       ),
       trailing: Switch(
         value: value,
@@ -469,7 +471,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     );
   }
 
-  Widget _buildActionTile(String title, String subtitle, IconData icon, Color color, VoidCallback onTap) {
+  Widget _buildActionTile(String title, String subtitle, IconData icon,
+      Color color, VoidCallback onTap) {
     return ListTile(
       contentPadding: EdgeInsets.zero,
       leading: Container(
@@ -487,14 +490,14 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       title: Text(
         title,
         style: Theme.of(context).textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.w600,
-        ),
+              fontWeight: FontWeight.w600,
+            ),
       ),
       subtitle: Text(
         subtitle,
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: AppColors.textSecondary,
-        ),
+              color: AppColors.textSecondary,
+            ),
       ),
       trailing: Icon(
         Icons.chevron_right,
@@ -512,15 +515,15 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         Text(
           label,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: AppColors.textSecondary,
-          ),
+                color: AppColors.textSecondary,
+              ),
         ),
         Text(
           value,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: AppColors.textPrimary,
-            fontWeight: FontWeight.w500,
-          ),
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.w500,
+              ),
         ),
       ],
     );
@@ -542,8 +545,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         child: Text(
           'Réinitialiser les paramètres',
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
+                fontWeight: FontWeight.w600,
+              ),
         ),
       ),
     );
