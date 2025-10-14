@@ -1,14 +1,4 @@
 class AppNotification {
-  final int? notificationId;
-  final String? title;
-  final String? message;
-  final String? type;
-  final bool? isRead;
-  final String? data;
-  final int? userId;
-  final String? createdAt;
-  final String? updatedAt;
-
   AppNotification({
     this.notificationId,
     this.title,
@@ -23,17 +13,26 @@ class AppNotification {
 
   factory AppNotification.fromJson(Map<String, dynamic> json) {
     return AppNotification(
-      notificationId: json['notificationId'],
-      title: json['title'],
-      message: json['message'],
-      type: json['type'],
-      isRead: json['isRead'],
-      data: json['data'],
-      userId: json['userId'],
-      createdAt: json['createdAt'],
-      updatedAt: json['updatedAt'],
+      notificationId: (json['notificationId'] as num?)?.toInt(),
+      title: json['title'] as String,
+      message: json['message'] as String,
+      type: json['type'] as String,
+      isRead: json['isRead'] as bool,
+      data: json['data'] as String,
+      userId: (json['userId'] as num?)?.toInt(),
+      createdAt: json['createdAt'] as String,
+      updatedAt: json['updatedAt'] as String,
     );
   }
+  final int? notificationId;
+  final String? title;
+  final String? message;
+  final String? type;
+  final bool? isRead;
+  final String? data;
+  final int? userId;
+  final String? createdAt;
+  final String? updatedAt;
 
   Map<String, dynamic> toJson() {
     return {

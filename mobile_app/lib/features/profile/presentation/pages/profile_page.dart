@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:tvcam_mobile/core/models/user.dart';
+
 import '../../../../core/services/auth_service.dart';
 
 class ProfilePage extends ConsumerWidget {
@@ -73,7 +75,7 @@ class ProfilePage extends ConsumerWidget {
     );
   }
 
-  Widget _buildProfileContent(BuildContext context, WidgetRef ref, user) {
+  Widget _buildProfileContent(BuildContext context, WidgetRef ref, User user) {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(

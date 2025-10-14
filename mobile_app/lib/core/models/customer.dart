@@ -1,18 +1,4 @@
 class Customer {
-  final int? customerId;
-  final String? name;
-  final String? address;
-  final String? ref;
-  final String? telephone;
-  final bool? hasDebt;
-  final bool? hasPaid;
-  final bool? isActive;
-  final bool? isSuspended;
-  final PaymentFrequency? paymentFrequency;
-  final Zone? zone;
-  final String? lastBillGenerationDate;
-  final String? createdAt;
-  final String? updatedAt;
 
   Customer({
     this.customerId,
@@ -33,24 +19,40 @@ class Customer {
 
   factory Customer.fromJson(Map<String, dynamic> json) {
     return Customer(
-      customerId: json['customerId'],
-      name: json['name'],
-      address: json['address'],
-      ref: json['ref'],
-      telephone: json['telephone'],
-      hasDebt: json['hasDebt'],
-      hasPaid: json['hasPaid'],
-      isActive: json['isActive'],
-      isSuspended: json['isSuspended'],
+      customerId: (json['customerId'] as num?)?.toInt(),
+      name: json['name'] as String,
+      address: json['address'] as String,
+      ref: json['ref'] as String,
+      telephone: json['telephone'] as String,
+      hasDebt: json['hasDebt'] as bool,
+      hasPaid: json['hasPaid'] as bool,
+      isActive: json['isActive'] as bool,
+      isSuspended: json['isSuspended'] as bool,
       paymentFrequency: json['paymentFrequency'] != null
-          ? PaymentFrequency.fromString(json['paymentFrequency'])
+          ? PaymentFrequency.fromString(json['paymentFrequency'] as String)
           : null,
-      zone: json['zone'] != null ? Zone.fromJson(json['zone']) : null,
-      lastBillGenerationDate: json['lastBillGenerationDate'],
-      createdAt: json['createdAt'],
-      updatedAt: json['updatedAt'],
+      zone: json['zone'] != null
+          ? Zone.fromJson(json['zone'] as Map<String, dynamic>)
+          : null,
+      lastBillGenerationDate: json['lastBillGenerationDate'] as String,
+      createdAt: json['createdAt'] as String,
+      updatedAt: json['updatedAt'] as String,
     );
   }
+  final int? customerId;
+  final String? name;
+  final String? address;
+  final String? ref;
+  final String? telephone;
+  final bool? hasDebt;
+  final bool? hasPaid;
+  final bool? isActive;
+  final bool? isSuspended;
+  final PaymentFrequency? paymentFrequency;
+  final Zone? zone;
+  final String? lastBillGenerationDate;
+  final String? createdAt;
+  final String? updatedAt;
 
   Map<String, dynamic> toJson() {
     return {
@@ -108,10 +110,6 @@ class Customer {
 }
 
 class Zone {
-  final int? zoneId;
-  final String? name;
-  final String? description;
-  final bool? isActive;
 
   Zone({
     this.zoneId,
@@ -122,12 +120,16 @@ class Zone {
 
   factory Zone.fromJson(Map<String, dynamic> json) {
     return Zone(
-      zoneId: json['zoneId'],
-      name: json['name'],
-      description: json['description'],
-      isActive: json['isActive'],
+      zoneId: (json['zoneId'] as num?)?.toInt(),
+      name: json['name'] as String,
+      description: json['description'] as String,
+      isActive: json['isActive'] as bool,
     );
   }
+  final int? zoneId;
+  final String? name;
+  final String? description;
+  final bool? isActive;
 
   Map<String, dynamic> toJson() {
     return {

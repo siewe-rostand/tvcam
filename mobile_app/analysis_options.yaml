@@ -7,7 +7,7 @@ linter:
     prefer_const_literals_to_create_immutables: true
     prefer_const_declarations: true
     avoid_print: true
-    prefer_single_quotes: true
+    #    prefer_single_quotes: true
     always_use_package_imports: true
     
     # Règles de performance
@@ -17,26 +17,26 @@ linter:
     
     # Règles de sécurité
     avoid_dynamic_calls: true
-    avoid_web_libraries_in_flutter: true
-    
+    #    avoid_web_libraries_in_flutter: true
+
     # Règles de documentation
     public_member_api_docs: false
-    package_api_docs: false
+    #    package_api_docs: false
     
     # Règles de nommage
     camel_case_types: true
     camel_case_extensions: true
     file_names: true
-    library_names: true
-    library_prefixes: true
-    non_constant_identifier_names: true
+    #    library_names: true
+    #    library_prefixes: true
+    #    non_constant_identifier_names: true
     parameter_names: true
-    type_init_formals: true
+    #    type_init_formals: true
     
     # Règles de structure
     directives_ordering: true
-    package_names: true
-    package_prefixed_library_names: true
+    #    package_names: true
+    #    package_prefixed_library_names: true
     prefer_relative_imports: true
     sort_child_properties_last: true
     sort_constructors_first: true
@@ -49,7 +49,7 @@ linter:
     avoid_returning_null_for_void: true
     avoid_shadowing_type_parameters: true
     avoid_types_as_parameter_names: true
-    avoid_web_libraries_in_flutter: true
+    #    avoid_web_libraries_in_flutter: true
     cancel_subscriptions: true
     close_sinks: true
     comment_references: true

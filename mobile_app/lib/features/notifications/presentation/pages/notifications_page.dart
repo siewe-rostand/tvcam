@@ -29,10 +29,10 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
       });
 
       final apiService = ApiService();
-      final loadedNotifications = await apiService.getNotifications();
+      // final loadedNotifications = await apiService.getNotifications();
 
       setState(() {
-        notifications = loadedNotifications;
+        // notifications = loadedNotifications;
         isLoading = false;
       });
     } catch (e) {

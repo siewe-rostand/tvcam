@@ -1,26 +1,24 @@
-import 'package:get_it/get_it.dart';
-import 'package:injectable/injectable.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
+import 'package:get_it/get_it.dart';
+import 'package:injectable/injectable.dart';
 
-import '../services/connectivity_service.dart';
 import '../services/storage_service.dart';
-
-part 'injection.config.dart';
+import 'injection.config.dart';
 
 final getIt = GetIt.instance;
 
 @InjectableInit()
 Future<void> configureDependencies() async {
-  await getIt.init();
-  
+  getIt.init();
+
   // Services externes
-  getIt.registerLazySingleton<Connectivity>(() => Connectivity());
-  getIt.registerLazySingleton<Dio>(() => Dio());
-  
+  getIt.registerLazySingleton<Connectivity>(Connectivity.new);
+  getIt.registerLazySingleton<Dio>(Dio.new);
+
   // Services de l'application
-  getIt.registerLazySingleton<StorageService>(() => StorageService());
-  
+  getIt.registerLazySingleton<StorageService>(StorageService.new);
+
   // Configuration de Dio
   final dio = getIt<Dio>();
   dio.options.connectTimeout = const Duration(seconds: 30);
@@ -72,8 +70,8 @@ Future<void> _storeOfflineRequest(RequestOptions options) async {
   final storageService = getIt<StorageService>();
   final offlineRequests = storageService.getData<List<Map<String, dynamic>>>(
     'offline_requests',
-    (json) => List<Map<String, dynamic>>.from(json['requests'] ?? []),
-  ) ?? [];
+        (json) => List<Map<String, dynamic>>.from(json['requests'] as List),
+      ) ?? [];
   
   offlineRequests.add({
     'method': options.method,
@@ -93,18 +91,18 @@ Future<void> processOfflineRequests() async {
   
   final offlineRequests = storageService.getData<List<Map<String, dynamic>>>(
     'offline_requests',
-    (json) => List<Map<String, dynamic>>.from(json['requests'] ?? []),
-  ) ?? [];
+        (json) => List<Map<String, dynamic>>.from(json['requests'] as List),
+      ) ?? [];
   
   if (offlineRequests.isNotEmpty) {
     for (final request in offlineRequests) {
       try {
         await dio.request(
-          request['url'],
+          request['url'] as String,
           data: request['data'],
           options: Options(
-            method: request['method'],
-            headers: Map<String, dynamic>.from(request['headers'] ?? {}),
+            method: request['method'] as String,
+            headers: Map<String, dynamic>.from(request['headers'] as Map),
           ),
         );
       } catch (e) {

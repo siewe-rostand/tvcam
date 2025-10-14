@@ -1,6 +1,7 @@
 package com.siewe_rostand.tvcam.Issue.model;
 
 import com.siewe_rostand.tvcam.Customers.model.Customers;
+import com.siewe_rostand.tvcam.Issue.dto.IssueTypeConverter;
 import com.siewe_rostand.tvcam.Issue.model.enumeration.IssueStatus;
 import com.siewe_rostand.tvcam.Issue.model.enumeration.IssueType;
 import com.siewe_rostand.tvcam.Issue.model.enumeration.Priority;
@@ -45,8 +46,8 @@ public class Issue extends BaseEntity {
     private String description;
 
     @NotNull(message = "Le type d'incident est obligatoire")
-    @Enumerated(EnumType.STRING)
-    @Column(name = "issue_type", nullable = false)
+    @Convert(converter = IssueTypeConverter.class)
+    @Column(name = "issue_description")
     private IssueType issueType;
 
     @Enumerated(EnumType.STRING)

@@ -2,11 +2,6 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 
 class RecentActivityCard extends StatefulWidget {
-  final String title;
-  final String subtitle;
-  final IconData icon;
-  final Color color;
-  final VoidCallback? onTap;
 
   const RecentActivityCard({
     super.key,
@@ -16,6 +11,11 @@ class RecentActivityCard extends StatefulWidget {
     required this.color,
     this.onTap,
   });
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final Color color;
+  final VoidCallback? onTap;
 
   @override
   State<RecentActivityCard> createState() => _RecentActivityCardState();
@@ -76,8 +76,8 @@ class _RecentActivityCardState extends State<RecentActivityCard>
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.shadow.withOpacity(0.05),
-                    offset: const Offset(0, _elevationAnimation.value),
+                    color: AppColors.shadow.withValues(alpha:0.05),
+                    offset: Offset(0, _elevationAnimation.value),
                     blurRadius: 4,
                   ),
                 ],
@@ -100,7 +100,7 @@ class _RecentActivityCardState extends State<RecentActivityCard>
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: widget.color.withOpacity(0.1),
+                            color: widget.color.withValues(alpha:0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Icon(
@@ -142,7 +142,7 @@ class _RecentActivityCardState extends State<RecentActivityCard>
                         // Indicateur d'action
                         if (widget.onTap != null) ...[
                           const SizedBox(width: 8),
-                          Icon(
+                          const Icon(
                             Icons.chevron_right,
                             color: AppColors.textTertiary,
                             size: 20,

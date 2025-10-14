@@ -1,15 +1,4 @@
 class User {
-  final int? userId;
-  final String? username;
-  final String? email;
-  final String? firstName;
-  final String? lastName;
-  final String? phone;
-  final String? address;
-  final bool? isActive;
-  final String? role;
-  final String? createdAt;
-  final String? updatedAt;
 
   User({
     this.userId,
@@ -24,22 +13,32 @@ class User {
     this.createdAt,
     this.updatedAt,
   });
-
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      userId: json['userId'],
-      username: json['username'],
-      email: json['email'],
-      firstName: json['firstName'],
-      lastName: json['lastName'],
-      phone: json['phone'],
-      address: json['address'],
-      isActive: json['isActive'],
-      role: json['role'],
-      createdAt: json['createdAt'],
-      updatedAt: json['updatedAt'],
+      userId: (json['userId'] as num?)?.toInt(),
+      username: json['username'] as String,
+      email: json['email'] as String,
+      firstName: json['firstName'] as String,
+      lastName: json['lastName'] as String,
+      phone: json['phone'] as String,
+      address: json['address'] as String,
+      isActive: json['isActive'] as bool,
+      role: json['role'] as String,
+      createdAt: json['createdAt'] as String,
+      updatedAt: json['updatedAt'] as String,
     );
   }
+  final int? userId;
+  final String? username;
+  final String? email;
+  final String? firstName;
+  final String? lastName;
+  final String? phone;
+  final String? address;
+  final bool? isActive;
+  final String? role;
+  final String? createdAt;
+  final String? updatedAt;
 
   Map<String, dynamic> toJson() {
     return {
@@ -66,7 +65,6 @@ class User {
 
   String get displayPhone {
     if (phone == null) return '';
-    // Masquer une partie du numéro pour la sécurité
     if (phone!.length > 6) {
       return '${phone!.substring(0, 6)}XXX XX';
     }
@@ -75,13 +73,12 @@ class User {
 }
 
 class AuthRequest {
-  final String username;
-  final String password;
-
   AuthRequest({
     required this.username,
     required this.password,
   });
+  final String username;
+  final String password;
 
   Map<String, dynamic> toJson() {
     return {
@@ -92,12 +89,6 @@ class AuthRequest {
 }
 
 class AuthResponse {
-  final String? token;
-  final String? refreshToken;
-  final User? user;
-  final String? message;
-  final bool? success;
-
   AuthResponse({
     this.token,
     this.refreshToken,
@@ -108,11 +99,18 @@ class AuthResponse {
 
   factory AuthResponse.fromJson(Map<String, dynamic> json) {
     return AuthResponse(
-      token: json['token'],
-      refreshToken: json['refreshToken'],
-      user: json['user'] != null ? User.fromJson(json['user']) : null,
-      message: json['message'],
-      success: json['success'],
+      token: json['token'] as String,
+      refreshToken: json['refreshToken'] as String,
+      user: json['user'] != null
+          ? User.fromJson(json['user'] as Map<String, dynamic>)
+          : null,
+      message: json['message'] as String,
+      success: json['success'] as bool,
     );
   }
+  final String? token;
+  final String? refreshToken;
+  final User? user;
+  final String? message;
+  final bool? success;
 }

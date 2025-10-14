@@ -1,7 +1,6 @@
 package com.siewe_rostand.tvcam.auth.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.siewe_rostand.tvcam.auth.dto.AuthenticationRequest;
 import com.siewe_rostand.tvcam.auth.dto.AuthenticationResponse;
 import com.siewe_rostand.tvcam.auth.dto.ForgetPasswordForm;
@@ -38,29 +37,24 @@ public class AuthenticationController {
     private static final Logger log = LoggerFactory.getLogger(AuthenticationController.class);
     private final AuthenticationService service;
 
+    private final com.fasterxml.jackson.databind.ObjectMapper objectMapper;
 
     @PostMapping("/register")
     public ResponseEntity<HttpResponse<Object>> register(
-            @RequestBody RegisterRequest request
-    ) {
-        ObjectMapper objectMapper = new ObjectMapper();
+            @RequestBody RegisterRequest request) {
         var response = service.register(request);
-        Map<String, Object> data = objectMapper
-                .convertValue(response, new TypeReference<>() {
-                });
+        Map<String, Object> data = objectMapper.convertValue(response, new TypeReference<>() {
+        });
         return ResponseEntity.ok().body(
                 HttpResponse.builder().timestamp(LocalDateTime.now()).success(true)
                         .status(CREATED.getReasonPhrase()).statusCode(CREATED.value())
                         .message("User successfully created").data(data)
-                        .build()
-        );
+                        .build());
     }
 
     @PostMapping("/register1")
-    @ResponseBody
     public ResponseEntity<AuthenticationResponse> register1(
-            @RequestBody RegisterRequest request
-    ) {
+            @RequestBody RegisterRequest request) {
         return ResponseEntity.ok(service.register(request));
     }
 
@@ -69,8 +63,7 @@ public class AuthenticationController {
     @ApiResponse(responseCode = "400", description = "password and/or telephone number is/are incorrect")
     @PostMapping("/login")
     public ResponseEntity<HttpResponse<Object>> login(
-            @RequestBody AuthenticationRequest request
-    ) {
+            @RequestBody AuthenticationRequest request) {
         return ResponseEntity.ok(service.authenticate(request));
     }
 
@@ -87,3 +80,4 @@ public class AuthenticationController {
     }
 
 }
+

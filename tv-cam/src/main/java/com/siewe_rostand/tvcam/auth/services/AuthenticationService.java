@@ -23,3 +23,4 @@ public interface AuthenticationService {
 
     HttpResponse<Object> getUserInfo(HttpServletRequest request) throws UnAuthorizeException;
 }
+

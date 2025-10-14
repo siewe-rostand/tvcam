@@ -16,7 +16,7 @@ class OfflineBanner extends ConsumerWidget {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: const BoxDecoration(
-        gradient: AppColors.warningGradient,
+        // gradient: AppColors.warningGradient,
         boxShadow: [
           BoxShadow(
             color: AppColors.shadow,

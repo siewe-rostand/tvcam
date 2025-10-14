@@ -30,14 +30,20 @@ export class AuthGuardService implements CanActivate {
       map(authState => {
         if (authState.isAuthenticated) {
           return true;
-        } else {
-          console.log(`Access denied - redirecting to login${authState.isInitialized}`);
-          this.storageService.clean();
-          this.router.navigate(['/login'], {
-            queryParams: { returnUrl: state.url }
-          }).then(() => true);
-          return false;
         }
+
+        // Not authenticated: cleanup and redirect via UrlTree so the router performs a
+        // deterministic redirect instead of relying on an async router.navigate call
+        // which can be ignored if the original navigation was cancelled.
+        console.log(`Access denied - redirecting to login ${authState.isInitialized}`);
+        this.storageService.clean();
+        const tree = this.router.createUrlTree(['/login'], { queryParams: { returnUrl: state.url } });
+        try {
+          console.log('AuthGuard returning UrlTree:', this.router.serializeUrl(tree));
+        } catch (e) {
+          console.log('AuthGuard UrlTree (serialization failed)', tree);
+        }
+        return tree;
       })
     );
   }

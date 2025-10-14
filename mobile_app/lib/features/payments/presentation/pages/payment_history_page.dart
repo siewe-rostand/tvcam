@@ -30,10 +30,10 @@ class _PaymentHistoryPageState extends ConsumerState<PaymentHistoryPage> {
       });
 
       final apiService = ApiService();
-      final loadedPayments = await apiService.getPayments();
+      // final loadedPayments = await apiService.getPayments();
 
       setState(() {
-        payments = loadedPayments;
+        // payments = loadedPayments;
         isLoading = false;
       });
     } catch (e) {

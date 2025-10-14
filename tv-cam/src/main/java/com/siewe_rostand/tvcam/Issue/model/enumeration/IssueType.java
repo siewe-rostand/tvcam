@@ -1,5 +1,6 @@
 package com.siewe_rostand.tvcam.Issue.model.enumeration;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 
 /**
@@ -28,6 +29,24 @@ public enum IssueType {
 
     IssueType(String description) {
         this.description = description;
+    }
+
+    @JsonValue
+    public String getDescription() {
+        return description;
+    }
+
+    public static IssueType fromDescription(String description) {
+        if (description == null) {
+            return null;
+        }
+        for (IssueType type : IssueType.values()) {
+            if (type.description.equalsIgnoreCase(description)) {
+                return type;
+            }
+        }
+        // Handle case where description is not found (e.g., return OTHER or throw exception)
+        throw new IllegalArgumentException("Unknown IssueType description: " + description);
     }
 
 }

@@ -1,4 +1,3 @@
-
 spring:
   profiles:
     active: ${ACTIVE_PROFILE:dev}
@@ -21,7 +20,7 @@ spring:
       hibernate:
         globally_quoted_indentifiers: true
         dialect: ${DB_PLATFORM}
-#        format_sql: true
+        #        format_sql: true
         jdbc:
           batch_size: 25
           order_inserts: true
@@ -65,7 +64,7 @@ security:
   jwt:
     security-key: ${JWT_SECRET_KEY}
     expiration: ${JWT_EXPIRATION_TIME} #1 day
-
+    refresh-token-expiration: 604800000 # 7 days in milliseconds
 
 server:
   port: ${CONTAINER_PORT:8080}
@@ -82,14 +81,4 @@ server:
 logging:
   level:
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
-    org:
-      springframework:
-        security:
-          config:
-            annotation:
-              authentication:
-                configuration:
-                  InitializeUserDetailsBeanManagerConfigurer=ERROR:
-
-
-
+    org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer: ERROR

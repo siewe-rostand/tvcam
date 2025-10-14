@@ -2,11 +2,6 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 
 class FeatureCard extends StatefulWidget {
-  final IconData icon;
-  final String title;
-  final String description;
-  final Color color;
-  final VoidCallback onTap;
 
   const FeatureCard({
     super.key,
@@ -16,6 +11,11 @@ class FeatureCard extends StatefulWidget {
     required this.color,
     required this.onTap,
   });
+  final IconData icon;
+  final String title;
+  final String description;
+  final Color color;
+  final VoidCallback onTap;
 
   @override
   State<FeatureCard> createState() => _FeatureCardState();
@@ -86,7 +86,7 @@ class _FeatureCardState extends State<FeatureCard>
                 boxShadow: [
                   BoxShadow(
                     color: AppColors.shadow.withOpacity(0.1),
-                    offset: const Offset(0, _elevationAnimation.value),
+                    offset: Offset(0, _elevationAnimation.value),
                     blurRadius: 8,
                   ),
                 ],

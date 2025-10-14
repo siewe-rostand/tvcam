@@ -1,17 +1,17 @@
-import { Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
-import { Router, RouterOutlet } from '@angular/router';
-import { ToastModule } from "primeng/toast";
-import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { AuthState, AuthStateService } from './auth/services/auth-state.service';
-import { LoadingScreenComponent } from './_shared/components/loading-screen/loading-screen.component';
-import { Observable } from 'rxjs';
+import {Component, Inject, OnInit, PLATFORM_ID} from '@angular/core';
+import {Router, RouterOutlet} from '@angular/router';
+import {ToastModule} from "primeng/toast";
+import {CommonModule, isPlatformBrowser} from '@angular/common';
+import {AuthState, AuthStateService} from './auth/services/auth-state.service';
+import {LoadingScreenComponent} from './_shared/components/loading-screen/loading-screen.component';
+import {Observable} from 'rxjs';
 
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [RouterOutlet, ToastModule, CommonModule, LoadingScreenComponent],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css',
+  styleUrls: ['./app.component.css'],
 })
 export class AppComponent implements OnInit {
   title = 'TV CAM';
@@ -19,9 +19,9 @@ export class AppComponent implements OnInit {
   isInitializing = true;
 
   constructor(
-    private router: Router,
-    private authStateService: AuthStateService,
-    @Inject(PLATFORM_ID) private platformId: Object
+    private readonly router: Router,
+    private readonly authStateService: AuthStateService,
+    @Inject(PLATFORM_ID) private readonly platformId: Object
   ) {
     isPlatformBrowser(this.platformId);
     this.authState$ = this.authStateService.authState$;

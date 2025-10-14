@@ -2,10 +2,6 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 
 class QuickActionButton extends StatefulWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  final Color? color;
 
   const QuickActionButton({
     super.key,
@@ -14,6 +10,10 @@ class QuickActionButton extends StatefulWidget {
     required this.onTap,
     this.color,
   });
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final Color? color;
 
   @override
   State<QuickActionButton> createState() => _QuickActionButtonState();
@@ -77,13 +77,13 @@ class _QuickActionButtonState extends State<QuickActionButton>
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.shadow.withOpacity(0.1),
-                    offset: const Offset(0, _elevationAnimation.value),
+                    color: AppColors.shadow.withValues(alpha: 0.1),
+                    offset: Offset(0, _elevationAnimation.value),
                     blurRadius: 8,
                   ),
                 ],
                 border: Border.all(
-                  color: buttonColor.withOpacity(0.2),
+                  color: buttonColor.withValues(alpha:0.2),
                   width: 1,
                 ),
               ),
@@ -100,7 +100,7 @@ class _QuickActionButtonState extends State<QuickActionButton>
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: buttonColor.withOpacity(0.1),
+                            color: buttonColor.withValues(alpha:0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Icon(

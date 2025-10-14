@@ -1,25 +1,9 @@
-import 'customer.dart';
+import 'package:tvcam_mobile/core/models/customer.dart'; // Assumed to be present
+
+// --- BILL CLASS ---
 
 class Bill {
-  final int? billId;
-  final int? month;
-  final int? year;
-  final String? depositDate;
-  final String? deadline;
-  final double? debt;
-  final int? penalties;
-  final double? paidAmount;
-  final double? netToPay;
-  final double? monthlyPayment;
-  final String? observation;
-  final PaymentStatus? paymentStatus;
-  final bool? currentPeriodBill;
-  final Customer? customers;
-  final List<Payment>? payments;
-  final String? createdAt;
-  final String? updatedAt;
-
-  Bill({
+  const Bill({
     this.billId,
     this.month,
     this.year,
@@ -32,8 +16,8 @@ class Bill {
     this.monthlyPayment,
     this.observation,
     this.paymentStatus,
-    this.currentPeriodBill,
-    this.customers,
+    this.currentPeriodBill = false,
+    this.customer,
     this.payments,
     this.createdAt,
     this.updatedAt,
@@ -41,31 +25,99 @@ class Bill {
 
   factory Bill.fromJson(Map<String, dynamic> json) {
     return Bill(
-      billId: json['billId'],
-      month: json['month'],
-      year: json['year'],
-      depositDate: json['depositDate'],
-      deadline: json['deadline'],
-      debt: json['debt']?.toDouble(),
-      penalties: json['penalties'],
-      paidAmount: json['paidAmount']?.toDouble(),
-      netToPay: json['netToPay']?.toDouble(),
-      monthlyPayment: json['monthlyPayment']?.toDouble(),
-      observation: json['observation'],
-      paymentStatus: json['paymentStatus'] != null
-          ? PaymentStatus.fromString(json['paymentStatus'])
+      billId: (json['billId'] as num?)?.toInt(),
+      month: (json['month'] as num?)?.toInt(),
+      year: (json['year'] as num?)?.toInt(),
+      depositDate: json['depositDate'] != null
+          ? DateTime.tryParse(json['depositDate'] as String)
           : null,
-      currentPeriodBill: json['currentPeriodBill'],
-      customers: json['customers'] != null
-          ? Customer.fromJson(json['customers'])
+      deadline: json['deadline'] != null
+          ? DateTime.tryParse(json['deadline'] as String)
+          : null,
+      debt: (json['debt'] as num?)?.toDouble(),
+      penalties: (json['penalties'] as num?)?.toInt(),
+      paidAmount: (json['paidAmount'] as num?)?.toDouble(),
+      netToPay: (json['netToPay'] as num?)?.toDouble(),
+      monthlyPayment: (json['monthlyPayment'] as num?)?.toDouble(),
+      observation: json['observation'] as String?,
+      paymentStatus: json['paymentStatus'] != null
+          ? PaymentStatus.fromString(json['paymentStatus'] as String)
+          : null,
+      // Use as bool? ?? false for safety and default
+      currentPeriodBill: json['currentPeriodBill'] as bool? ?? false,
+      customer: json['customers'] != null
+          ? Customer.fromJson(json['customers'] as Map<String, dynamic>)
           : null,
       payments: json['payments'] != null
           ? (json['payments'] as List)
-              .map((payment) => Payment.fromJson(payment))
+              .map((payment) =>
+                  Payment.fromJson(payment as Map<String, dynamic>))
               .toList()
           : null,
-      createdAt: json['createdAt'],
-      updatedAt: json['updatedAt'],
+      createdAt: json['createdAt'] != null
+          ? DateTime.tryParse(json['createdAt'] as String)
+          : null,
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.tryParse(json['updatedAt'] as String)
+          : null,
+    );
+  }
+
+  final int? billId;
+  final int? month;
+  final int? year;
+  final DateTime? depositDate; // Changed to DateTime?
+  final DateTime? deadline; // Changed to DateTime?
+  final double? debt;
+  final int? penalties;
+  final double? paidAmount;
+  final double? netToPay;
+  final double? monthlyPayment;
+  final String? observation;
+  final PaymentStatus? paymentStatus;
+  final bool currentPeriodBill; // Changed to non-nullable with a default
+  final Customer? customer;
+  final List<Payment>? payments;
+  final DateTime? createdAt; // Changed to DateTime?
+  final DateTime? updatedAt; // Changed to DateTime?
+
+  Bill copyWith({
+    int? billId,
+    int? month,
+    int? year,
+    DateTime? depositDate,
+    DateTime? deadline,
+    double? debt,
+    int? penalties,
+    double? paidAmount,
+    double? netToPay,
+    double? monthlyPayment,
+    String? observation,
+    PaymentStatus? paymentStatus,
+    bool? currentPeriodBill,
+    Customer? customer,
+    List<Payment>? payments,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return Bill(
+      billId: billId ?? this.billId,
+      month: month ?? this.month,
+      year: year ?? this.year,
+      depositDate: depositDate ?? this.depositDate,
+      deadline: deadline ?? this.deadline,
+      debt: debt ?? this.debt,
+      penalties: penalties ?? this.penalties,
+      paidAmount: paidAmount ?? this.paidAmount,
+      netToPay: netToPay ?? this.netToPay,
+      monthlyPayment: monthlyPayment ?? this.monthlyPayment,
+      observation: observation ?? this.observation,
+      paymentStatus: paymentStatus ?? this.paymentStatus,
+      currentPeriodBill: currentPeriodBill ?? this.currentPeriodBill,
+      customer: customer ?? this.customer,
+      payments: payments ?? this.payments,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 
@@ -74,25 +126,30 @@ class Bill {
       'billId': billId,
       'month': month,
       'year': year,
-      'depositDate': depositDate,
-      'deadline': deadline,
+      'depositDate': depositDate?.toIso8601String(),
+      // Use ISO string for JSON
+      'deadline': deadline?.toIso8601String(),
+      // Use ISO string for JSON
       'debt': debt,
       'penalties': penalties,
       'paidAmount': paidAmount,
       'netToPay': netToPay,
       'monthlyPayment': monthlyPayment,
       'observation': observation,
-      'paymentStatus': paymentStatus?.name,
+      'paymentStatus': paymentStatus?.value,
+      // Use .value for consistency with fromString
       'currentPeriodBill': currentPeriodBill,
-      'customers': customers?.toJson(),
+      'customers': customer?.toJson(),
       'payments': payments?.map((payment) => payment.toJson()).toList(),
-      'createdAt': createdAt,
-      'updatedAt': updatedAt,
+      'createdAt': createdAt?.toIso8601String(),
+      'updatedAt': updatedAt?.toIso8601String(),
     };
   }
 
+  // --- Getters ---
+
   String get monthName {
-    if (month == null) return '';
+    if (month == null || month! < 1 || month! > 12) return '';
     const months = [
       '',
       'Janvier',
@@ -111,37 +168,33 @@ class Bill {
     return months[month!];
   }
 
-  String get periodDisplay {
-    return '${monthName} ${year ?? ''}';
-  }
+  String get periodDisplay => '$monthName ${year ?? ''}';
 
-  bool get isPaid {
-    return paymentStatus == PaymentStatus.paid;
-  }
+  bool get isPaid => paymentStatus == PaymentStatus.paid;
 
   bool get isOverdue {
     if (deadline == null) return false;
-    final deadlineDate = DateTime.tryParse(deadline!);
-    if (deadlineDate == null) return false;
-    return DateTime.now().isAfter(deadlineDate) && !isPaid;
+    // Check against the start of the current day to be more practical
+    final today = DateTime.now().copyWith(
+        hour: 0, minute: 0, second: 0, millisecond: 0, microsecond: 0);
+    final deadlineDay = deadline!.copyWith(
+        hour: 23, minute: 59, second: 59, millisecond: 999, microsecond: 999);
+
+    // Bill is overdue if the deadline has passed (is before today) AND it is not paid.
+    return deadlineDay.isBefore(today) && !isPaid;
+  }
+
+  // --- Standard Methods ---
+  @override
+  String toString() {
+    return 'Bill(ID: $billId, Period: $periodDisplay, Status: ${paymentStatus?.displayName ?? 'N/A'})';
   }
 }
 
-class Payment {
-  final int? paymentId;
-  final double? amount;
-  final String? paymentRef;
-  final String? observation;
-  final PaymentMethod? paymentMethod;
-  final String? paymentDate;
-  final String? updatedAt;
-  final String? createdAt;
-  final int? createdBy;
-  final int? modifiedBy;
-  final Bill? bills;
-  final int? userId;
+// --- PAYMENT CLASS ---
 
-  Payment({
+class Payment {
+  const Payment({
     this.paymentId,
     this.amount,
     this.paymentRef,
@@ -152,26 +205,78 @@ class Payment {
     this.createdAt,
     this.createdBy,
     this.modifiedBy,
-    this.bills,
+    this.billId, // Keep billId to avoid recursion
     this.userId,
   });
 
   factory Payment.fromJson(Map<String, dynamic> json) {
     return Payment(
-      paymentId: json['paymentId'],
-      amount: json['amount']?.toDouble(),
-      paymentRef: json['paymentRef'],
-      observation: json['observation'],
+      paymentId: (json['paymentId'] as num?)?.toInt(),
+      amount: (json['amount'] as num?)?.toDouble(),
+      paymentRef: json['paymentRef'] as String?,
+      observation: json['observation'] as String?,
       paymentMethod: json['paymentMethod'] != null
-          ? PaymentMethod.fromString(json['paymentMethod'])
+          ? PaymentMethod.fromString(json['paymentMethod'] as String)
           : null,
-      paymentDate: json['paymentDate'],
-      updatedAt: json['updatedAt'],
-      createdAt: json['createdAt'],
-      createdBy: json['createdBy'],
-      modifiedBy: json['modifiedBy'],
-      bills: json['bills'] != null ? Bill.fromJson(json['bills']) : null,
-      userId: json['userId'],
+      paymentDate: json['paymentDate'] != null
+          ? DateTime.tryParse(json['paymentDate'] as String)
+          : null,
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.tryParse(json['updatedAt'] as String)
+          : null,
+      createdAt: json['createdAt'] != null
+          ? DateTime.tryParse(json['createdAt'] as String)
+          : null,
+      createdBy: (json['createdBy'] as num?)?.toInt(),
+      modifiedBy: (json['modifiedBy'] as num?)?.toInt(),
+      billId: (json['billId'] as num?)?.toInt(),
+      userId: (json['userId'] as num?)?.toInt(),
+    );
+  }
+
+  final int? paymentId;
+  final double? amount;
+  final String? paymentRef;
+  final String? observation;
+  final PaymentMethod? paymentMethod;
+  final DateTime? paymentDate; // Changed to DateTime?
+  final DateTime? updatedAt; // Changed to DateTime?
+  final DateTime? createdAt; // Changed to DateTime?
+  final int? createdBy;
+  final int? modifiedBy;
+  final int? billId; // Simplified to ID to break circular dependency
+  final int? userId;
+
+  // --- Utility Methods ---
+
+  /// Allows creating a new Payment instance with modified properties.
+  Payment copyWith({
+    int? paymentId,
+    double? amount,
+    String? paymentRef,
+    String? observation,
+    PaymentMethod? paymentMethod,
+    DateTime? paymentDate,
+    DateTime? updatedAt,
+    DateTime? createdAt,
+    int? createdBy,
+    int? modifiedBy,
+    int? billId,
+    int? userId,
+  }) {
+    return Payment(
+      paymentId: paymentId ?? this.paymentId,
+      amount: amount ?? this.amount,
+      paymentRef: paymentRef ?? this.paymentRef,
+      observation: observation ?? this.observation,
+      paymentMethod: paymentMethod ?? this.paymentMethod,
+      paymentDate: paymentDate ?? this.paymentDate,
+      updatedAt: updatedAt ?? this.updatedAt,
+      createdAt: createdAt ?? this.createdAt,
+      createdBy: createdBy ?? this.createdBy,
+      modifiedBy: modifiedBy ?? this.modifiedBy,
+      billId: billId ?? this.billId,
+      userId: userId ?? this.userId,
     );
   }
 
@@ -181,25 +286,24 @@ class Payment {
       'amount': amount,
       'paymentRef': paymentRef,
       'observation': observation,
-      'paymentMethod': paymentMethod?.name,
-      'paymentDate': paymentDate,
-      'updatedAt': updatedAt,
-      'createdAt': createdAt,
+      'paymentMethod': paymentMethod?.value, // Use .value
+      'paymentDate': paymentDate?.toIso8601String(),
+      'updatedAt': updatedAt?.toIso8601String(),
+      'createdAt': createdAt?.toIso8601String(),
       'createdBy': createdBy,
       'modifiedBy': modifiedBy,
-      'bills': bills?.toJson(),
+      'billId': billId, // Corrected to ID
       'userId': userId,
     };
   }
 
+  // --- Getters ---
+
   String get formattedDate {
     if (paymentDate == null) return '';
-    try {
-      final date = DateTime.parse(paymentDate!);
-      return '${date.day} ${_getMonthName(date.month)} ${date.year}';
-    } catch (e) {
-      return paymentDate!;
-    }
+
+    // Example format: 14 oct. 2025
+    return '${paymentDate!.day} ${_getMonthName(paymentDate!.month)} ${paymentDate!.year}';
   }
 
   String _getMonthName(int month) {
@@ -220,7 +324,15 @@ class Payment {
     ];
     return months[month];
   }
+
+  // --- Standard Methods ---
+  @override
+  String toString() {
+    return 'Payment(ID: $paymentId, Amount: $amount, Date: $formattedDate)';
+  }
 }
+
+// --- ENUMS (Corrected to use .value consistently) ---
 
 enum PaymentStatus {
   pending('PENDING'),
@@ -229,21 +341,14 @@ enum PaymentStatus {
   cancelled('CANCELLED');
 
   const PaymentStatus(this.value);
-  final String value;
+
+  final String value; // The raw JSON string value
 
   static PaymentStatus fromString(String value) {
-    switch (value.toUpperCase()) {
-      case 'PENDING':
-        return PaymentStatus.pending;
-      case 'PAID':
-        return PaymentStatus.paid;
-      case 'OVERDUE':
-        return PaymentStatus.overdue;
-      case 'CANCELLED':
-        return PaymentStatus.cancelled;
-      default:
-        return PaymentStatus.pending;
-    }
+    return PaymentStatus.values.firstWhere(
+      (status) => status.value == value.toUpperCase(),
+      orElse: () => PaymentStatus.pending,
+    );
   }
 
   String get displayName {
@@ -271,20 +376,10 @@ enum PaymentMethod {
   final String value;
 
   static PaymentMethod fromString(String value) {
-    switch (value.toUpperCase()) {
-      case 'CASH':
-        return PaymentMethod.cash;
-      case 'MOBILE_MONEY':
-        return PaymentMethod.mobileMoney;
-      case 'ORANGE_MONEY':
-        return PaymentMethod.orangeMoney;
-      case 'BANK_TRANSFER':
-        return PaymentMethod.bankTransfer;
-      case 'OTHER':
-        return PaymentMethod.other;
-      default:
-        return PaymentMethod.cash;
-    }
+    return PaymentMethod.values.firstWhere(
+      (method) => method.value == value.toUpperCase(),
+      orElse: () => PaymentMethod.cash,
+    );
   }
 
   String get displayName {

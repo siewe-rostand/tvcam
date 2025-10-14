@@ -10,7 +10,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 @Slf4j
 public class TvCamApplication {
 
-
     public static void main(String[] args) {
         SpringApplication.run(TvCamApplication.class, args);
     }

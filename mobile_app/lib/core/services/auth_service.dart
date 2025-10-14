@@ -43,7 +43,6 @@ class AuthService extends _$AuthService {
       if (response.success == true &&
           response.token != null &&
           response.user != null) {
-        // Sauvegarder les données d'authentification
         await _saveAuthData(response.token!, response.user!);
 
         // Mettre à jour l'état

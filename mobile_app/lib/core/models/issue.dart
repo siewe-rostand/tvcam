@@ -1,15 +1,4 @@
 class Issue {
-  final int? issueId;
-  final String? subject;
-  final String? message;
-  final String? status;
-  final String? priority;
-  final int? customerId;
-  final int? userId;
-  final String? createdAt;
-  final String? updatedAt;
-  final String? resolvedAt;
-
   Issue({
     this.issueId,
     this.subject,
@@ -25,18 +14,28 @@ class Issue {
 
   factory Issue.fromJson(Map<String, dynamic> json) {
     return Issue(
-      issueId: json['issueId'],
-      subject: json['subject'],
-      message: json['message'],
-      status: json['status'],
-      priority: json['priority'],
-      customerId: json['customerId'],
-      userId: json['userId'],
-      createdAt: json['createdAt'],
-      updatedAt: json['updatedAt'],
-      resolvedAt: json['resolvedAt'],
+      issueId: (json['issueId'] as num?)?.toInt(),
+      subject: json['subject'] as String,
+      message: json['message'] as String,
+      status: json['status'] as String,
+      priority: json['priority'] as String,
+      customerId: (json['customerId'] as num?)?.toInt(),
+      userId: (json['userId'] as num?)?.toInt(),
+      createdAt: json['createdAt'] as String,
+      updatedAt: json['updatedAt'] as String,
+      resolvedAt: json['resolvedAt'] as String,
     );
   }
+  final int? issueId;
+  final String? subject;
+  final String? message;
+  final String? status;
+  final String? priority;
+  final int? customerId;
+  final int? userId;
+  final String? createdAt;
+  final String? updatedAt;
+  final String? resolvedAt;
 
   Map<String, dynamic> toJson() {
     return {
@@ -121,15 +120,14 @@ enum IssuePriority {
 }
 
 class IssueRequest {
-  final String subject;
-  final String message;
-  final int? customerId;
-
   IssueRequest({
     required this.subject,
     required this.message,
     this.customerId,
   });
+  final String subject;
+  final String message;
+  final int? customerId;
 
   Map<String, dynamic> toJson() {
     return {
