@@ -34,6 +34,10 @@ public class Payments {
     private Long paymentId;
 
     private BigDecimal amount;
+//    /*
+//    Any fees deducted by the payment gateway for this transaction
+//     */
+//    private BigDecimal processorFees;
 
     private String paymentRef;
 

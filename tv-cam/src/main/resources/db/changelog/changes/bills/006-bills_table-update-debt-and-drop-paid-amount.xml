@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.29.xsd">
+
+    <changeSet id="1740502972821-8-backfill-debt-unpaid" author="siewe-rostand">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="bills"/>
+                <columnExists tableName="bills" columnName="debt"/>
+                <columnExists tableName="bills" columnName="payment_status"/>
+            </and>
+        </preConditions>
+
+        <update tableName="bills">
+            <column name="debt" valueComputed="net_to_pay"/>
+            <where>payment_status = 'UNPAID'</where>
+        </update>
+
+        <rollback>
+            <update tableName="bills">
+                <column name="debt" value="0.00"/>
+                <where>payment_status = 'UNPAID'</where>
+            </update>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="1740502972821-9-set-default-explicit" author="siewe-rostand">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="bills"/>
+                <columnExists tableName="bills" columnName="debt"/>
+            </and>
+        </preConditions>
+        <addDefaultValue tableName="bills" columnName="debt" defaultValueNumeric="0.00"/>
+
+        <rollback>
+            <dropDefaultValue tableName="bills" columnName="debt"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="1740502972821-10-set-debt-non-null" author="siewe-rostand">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="bills"/>
+                <columnExists tableName="bills" columnName="debt"/>
+            </and>
+        </preConditions>
+
+        <addNotNullConstraint
+                tableName="bills"
+                columnName="debt"
+                columnDataType="DECIMAL(19, 2)"/>
+
+        <rollback>
+            <dropNotNullConstraint
+                    tableName="bills"
+                    columnName="debt"
+                    columnDataType="DECIMAL(19, 2)"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="1740502972821-7-drop-paid-amount" author="siewe-rostand">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="bills"/>
+                <columnExists tableName="bills" columnName="paid_amount"/>
+            </and>
+        </preConditions>
+
+        <dropColumn tableName="bills" columnName="paid_amount"/>
+
+        <rollback>
+            <addColumn tableName="bills">
+                <column name="paid_amount" type="DECIMAL(19, 2)">
+                    <constraints nullable="true"/>
+                </column>
+            </addColumn>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

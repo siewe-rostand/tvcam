@@ -35,11 +35,11 @@ import static org.springframework.http.HttpStatus.OK;
 public class IssueController {
 
     private final IssueService issueService;
+    private final com.fasterxml.jackson.databind.ObjectMapper objectMapper;
 
     @Operation(summary = "Créer une nouvelle réclamation")
     @PostMapping
     public ResponseEntity<HttpResponse<Object>> createIssue(@RequestBody IssueRequest request) {
-        ObjectMapper objectMapper = new ObjectMapper();
         IssueResponse response = issueService.createIssue(request);
         Map<String, Object> data = objectMapper.convertValue(response, new TypeReference<>() {
         });
@@ -74,7 +74,6 @@ public class IssueController {
     @Operation(summary = "Récupérer une réclamation par ID")
     @GetMapping("/{issueId}")
     public ResponseEntity<HttpResponse<Object>> getIssueById(@PathVariable Long issueId) {
-        ObjectMapper objectMapper = new ObjectMapper();
         IssueResponse response = issueService.getIssueById(issueId);
         Map<String, Object> data = objectMapper.convertValue(response, new TypeReference<>() {
         });
@@ -91,7 +90,6 @@ public class IssueController {
     @Operation(summary = "Récupérer les réclamations d'un client")
     @GetMapping("/customer/{customerId}")
     public ResponseEntity<HttpResponse<Object>> getIssuesByCustomer(@PathVariable Long customerId) {
-        ObjectMapper objectMapper = new ObjectMapper();
         List<IssueResponse> issues = issueService.getIssuesByCustomer(customerId);
         Map<String, Object> data = objectMapper.convertValue(issues, new TypeReference<>() {
         });
@@ -109,7 +107,6 @@ public class IssueController {
     @GetMapping("/assigned/{userId}")
     @PreAuthorize("hasRole('TECHNICIEN') or hasRole('CHEF_CABLEUR') or hasRole('ADMIN')")
     public ResponseEntity<HttpResponse<Object>> getIssuesByAssignee(@PathVariable Long userId) {
-        ObjectMapper objectMapper = new ObjectMapper();
         List<IssueResponse> issues = issueService.getIssuesByAssignee(userId);
         Map<String, Object> data = objectMapper.convertValue(issues, new TypeReference<>() {
         });
@@ -127,7 +124,6 @@ public class IssueController {
     @PutMapping("/{issueId}")
     @PreAuthorize("hasRole('TECHNICIEN') or hasRole('CHEF_CABLEUR') or hasRole('ADMIN')")
     public ResponseEntity<HttpResponse<Object>> updateIssue(@PathVariable Long issueId, @RequestBody IssueRequest request) {
-        ObjectMapper objectMapper = new ObjectMapper();
         IssueResponse response = issueService.updateIssue(issueId, request);
         Map<String, Object> data = objectMapper.convertValue(response, new TypeReference<>() {
         });

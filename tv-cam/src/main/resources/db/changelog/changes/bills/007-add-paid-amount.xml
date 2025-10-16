@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="1760638611218-0-drop-paid-amount-if-exists" author="siewe-rostand">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="bills" columnName="paid_amount"/>
+        </preConditions>
+        <dropColumn tableName="bills" columnName="paid_amount"/>
+
+        <rollback/>
+    </changeSet>
+
+    <changeSet id="1760638611218-1-add-paid-amount-final" author="siewe-rostand">
+        <addColumn tableName="bills">
+            <column name="paid_amount" type="DECIMAL(19, 2)" defaultValueNumeric="0.00">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+
+        <rollback>
+            <dropColumn tableName="bills" columnName="paid_amount"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

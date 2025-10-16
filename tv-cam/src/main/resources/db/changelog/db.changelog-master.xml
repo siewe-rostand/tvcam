@@ -14,4 +14,6 @@
     <include file="db/changelog/changes/bills/003-change-year-type-to-integer.xml"/>
     <include file="db/changelog/changes/bills/004-update-certain-field-type.xml"/>
     <include file="db/changelog/changes/bills/005-create-bills-sequence.xml"/>
+    <include file="/db/changelog/changes/bills/006-bills_table-update-debt-and-drop-paid-amount.xml"/>
+    <include file="db/changelog/changes/bills/007-add-paid-amount.xml"/>
 </databaseChangeLog>

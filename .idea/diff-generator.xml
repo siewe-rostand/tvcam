@@ -2,5 +2,6 @@
 <project version="4">
   <component name="DiffGenerationConfig">
     <option name="snapshotDbValue" value="43886874-7f85-4cbb-b0bb-38a9a8651fae" />
+    <option name="updateDbConnectionName" value="fe4bdf4d-f4b2-4683-b7d6-cba8bec171e0" />
   </component>
 </project>

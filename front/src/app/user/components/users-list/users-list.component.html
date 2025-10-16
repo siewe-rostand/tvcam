@@ -1,8 +1,8 @@
 <app-navbar></app-navbar>
-<p-toast />
+<p-toast/>
 
 <div class="card">
-  <p-toast />
+  <p-toast/>
   <p-toolbar styleClass="mb-4 gap-2">
     <ng-template pTemplate="left">
       <p-button
@@ -22,7 +22,7 @@
     </ng-template>
 
     <ng-template pTemplate="right">
-      <p-button severity="help" label="Export" icon="pi pi-upload" />
+      <p-button severity="help" label="Export" icon="pi pi-upload"/>
     </ng-template>
   </p-toolbar>
 
@@ -53,19 +53,23 @@
     <ng-template pTemplate="header">
       <tr>
         <th style="width: 4rem">
-          <p-tableHeaderCheckbox />
+          <p-tableHeaderCheckbox/>
         </th>
         <th pSortableColumn="firstname" style="min-width: 15rem">
-          Nom <p-sortIcon field="firstname" />
+          Nom
+          <p-sortIcon field="firstname"/>
         </th>
         <th pSortableColumn="lastname" style="min-width: 15rem">
-          Prénom <p-sortIcon field="lastname" />
+          Prénom
+          <p-sortIcon field="lastname"/>
         </th>
         <th pSortableColumn="telephone">
-          Telephone <p-sortIcon field="telephone" />
+          Telephone
+          <p-sortIcon field="telephone"/>
         </th>
         <th pSortableColumn="active" style="min-width: 10rem">
-          Active <p-sortIcon field="active" />
+          Active
+          <p-sortIcon field="active"/>
         </th>
         <th></th>
       </tr>
@@ -74,7 +78,7 @@
     <ng-template pTemplate="body" let-user>
       <tr>
         <td>
-          <p-tableCheckbox [value]="user" />
+          <p-tableCheckbox [value]="user"/>
         </td>
         <td>
           {{ user.firstname }}
@@ -101,8 +105,7 @@
             [rounded]="true"
             [outlined]="true"
             severity="success"
-            (onClick)="openEdit(user)"
-          />
+            (onClick)="openEdit(user)"/>
           <p-button
             icon="pi pi-trash"
             severity="danger"
@@ -123,7 +126,7 @@
   <!-- update user dialog  -->
   <p-dialog
     [(visible)]="userUpdateDialog"
-    [style]="{ width: '450px' }"
+    [style]="{ width: '650px' }"
     header="Detail de L'utilisateur"
     [modal]="true"
     styleClass="p-fluid">
@@ -300,5 +303,5 @@
     </ng-template>
   </p-dialog>
 
-  <p-confirmDialog [style]="{ width: '450px' }" />
+  <p-confirmDialog [style]="{ width: '450px' }"/>
 </div>

@@ -151,8 +151,8 @@ public class IssueServiceImpl implements IssueService {
 
     @Override
     @Transactional(readOnly = true)
-    public PaginatedResponse getAllIssues(Integer page, Integer size, String sortBy, String direction,
-                                          String searchTerm, String status, String issueType, String priority) {
+    public PaginatedResponse<IssueResponse> getAllIssues(Integer page, Integer size, String sortBy, String direction,
+                                                         String searchTerm, String status, String issueType, String priority) {
 
         Pageable pageable = PageRequest.of(page, size, Sort.Direction.fromString(direction), sortBy);
 
@@ -175,7 +175,7 @@ public class IssueServiceImpl implements IssueService {
                 .map(issueMapper::toResponse)
                 .collect(Collectors.toList());
 
-        return PaginatedResponse.builder()
+        return PaginatedResponse.<IssueResponse>builder()
                 .data(issueResponses)
                 .page(page)
                 .totalElements((int) issuesPage.getTotalElements())

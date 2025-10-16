@@ -37,6 +37,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+    private final ObjectMapper objectMapper;
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
@@ -95,7 +96,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                         .status(FORBIDDEN.getReasonPhrase())
                         .statusCode(FORBIDDEN.value())
                         .build();
-        String jsonResponse = new ObjectMapper().writeValueAsString(errorResponse);
+        String jsonResponse = objectMapper.writeValueAsString(errorResponse);
 
         response.getWriter().write(jsonResponse);
     }

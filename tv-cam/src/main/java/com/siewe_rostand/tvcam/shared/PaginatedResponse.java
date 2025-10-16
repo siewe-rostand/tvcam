@@ -17,13 +17,13 @@ import java.util.List;
 @Data
 @SuperBuilder
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
-public class PaginatedResponse {
+public class PaginatedResponse<T> {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm:ss")
     private LocalDateTime timestamp;
     protected int statusCode;
     protected HttpStatus status;
     protected String message;
-    protected List<?> data;
+    protected List<T> data;
     protected Boolean lastPage;
     protected Boolean firstPage;
     protected Boolean empty;

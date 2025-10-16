@@ -35,12 +35,12 @@ import static org.springframework.http.HttpStatus.OK;
 public class ZoneController {
 
     private final ZoneService zoneService;
+    private final ObjectMapper objectMapper;
 
     @Operation(summary = "Créer une nouvelle zone")
     @PostMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public ResponseEntity<HttpResponse<Object>> createZone(@RequestBody ZoneRequest request) {
-        ObjectMapper objectMapper = new ObjectMapper();
         ZoneResponse response = zoneService.createZone(request);
         Map<String, Object> data = objectMapper.convertValue(response, new TypeReference<>() {
         });
@@ -71,7 +71,6 @@ public class ZoneController {
     @Operation(summary = "Récupérer les zones actives")
     @GetMapping("/active")
     public ResponseEntity<HttpResponse<Object>> getActiveZones() {
-        ObjectMapper objectMapper = new ObjectMapper();
         List<ZoneResponse> zones = zoneService.getActiveZones();
         Map<String, Object> data = objectMapper.convertValue(zones, new TypeReference<>() {
         });
@@ -88,7 +87,6 @@ public class ZoneController {
     @Operation(summary = "Récupérer une zone par ID")
     @GetMapping("/{zoneId}")
     public ResponseEntity<HttpResponse<Object>> getZoneById(@PathVariable Long zoneId) {
-        ObjectMapper objectMapper = new ObjectMapper();
         ZoneResponse response = zoneService.getZoneById(zoneId);
         Map<String, Object> data = objectMapper.convertValue(response, new TypeReference<>() {
         });
@@ -106,7 +104,6 @@ public class ZoneController {
     @PutMapping("/{zoneId}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public ResponseEntity<HttpResponse<Object>> updateZone(@PathVariable Long zoneId, @RequestBody ZoneRequest request) {
-        ObjectMapper objectMapper = new ObjectMapper();
         ZoneResponse response = zoneService.updateZone(zoneId, request);
         Map<String, Object> data = objectMapper.convertValue(response, new TypeReference<>() {
         });
@@ -155,7 +152,6 @@ public class ZoneController {
     @Operation(summary = "Récupérer les zones d'un utilisateur")
     @GetMapping("/user/{userId}")
     public ResponseEntity<HttpResponse<Object>> getUserZones(@PathVariable Long userId) {
-        ObjectMapper objectMapper = new ObjectMapper();
         List<ZoneResponse> zones = zoneService.getZonesByUserId(userId);
         Map<String, Object> data = objectMapper.convertValue(zones, new TypeReference<>() {
         });

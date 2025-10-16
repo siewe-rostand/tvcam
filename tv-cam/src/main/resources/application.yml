@@ -46,6 +46,10 @@ spring:
   jackson:
     time-zone: Africa/Lagos
     date-format: dd-MM-yyyy HH:mm:ss
+    serialization:
+      write-dates-as-timestamps: false
+      write-durations-as-timestamps: false
+      write-date-keys-as-timestamps: false
 
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.xml

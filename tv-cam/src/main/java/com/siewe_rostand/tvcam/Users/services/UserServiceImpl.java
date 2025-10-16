@@ -1,8 +1,5 @@
 package com.siewe_rostand.tvcam.Users.services;
 
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentContextPath;
-
 import com.siewe_rostand.tvcam.Roles.Roles;
 import com.siewe_rostand.tvcam.Roles.RolesRepository;
 import com.siewe_rostand.tvcam.Users.dto.UserMapper;
@@ -11,20 +8,11 @@ import com.siewe_rostand.tvcam.Users.dto.UserResponse;
 import com.siewe_rostand.tvcam.Users.dto.UsersDto;
 import com.siewe_rostand.tvcam.Users.models.Users;
 import com.siewe_rostand.tvcam.Users.repository.UsersRepository;
+import com.siewe_rostand.tvcam.common.constraints.validator.ObjectsValidator;
 import com.siewe_rostand.tvcam.common.exceptions.ApiException;
 import com.siewe_rostand.tvcam.shared.Exceptions.EntityAlreadyExistException;
 import com.siewe_rostand.tvcam.shared.Exceptions.EntityNotFoundException;
 import com.siewe_rostand.tvcam.shared.PaginatedResponse;
-import com.siewe_rostand.tvcam.common.constraints.validator.ObjectsValidator;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -35,6 +23,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentContextPath;
 
 @Service
 @Slf4j
@@ -79,7 +80,7 @@ public class UserServiceImpl implements UserService {
             throw new EntityNotFoundException(Users.class, "id", usersDto.getId().toString());
         } else {
             Users existingUser = usersRepository.findByUserId(usersDto.getId());
-            existingUser.setActive(usersDto.getActivated() == null ? existingUser.getActive(): usersDto.getActivated());
+            existingUser.setActive(usersDto.getActivated() == null ? existingUser.getActive() : usersDto.getActivated());
             existingUser.setLastname(usersDto.getLastname());
             existingUser.setFirstname(usersDto.getFirstname());
             existingUser.setAddress(usersDto.getAddress());
@@ -96,7 +97,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public PaginatedResponse findAll(Integer page, Integer size, String sortBy, String direction, String name) {
+    public PaginatedResponse<UserResponse> findAll(Integer page, Integer size, String sortBy, String direction, String name) {
         Pageable pageable = createPageable(page, size, sortBy, direction);
         Page<Users> users;
         if (!name.isEmpty()) {
@@ -104,16 +105,16 @@ public class UserServiceImpl implements UserService {
         } else {
             users = usersRepository.findAll(pageable);
         }
-        return buildResponse(users,pageable);
+        return buildResponse(users, pageable);
     }
 
     private Pageable createPageable(Integer page, Integer size, String sortBy, String direction) {
         return PageRequest.of(page, size, Sort.Direction.fromString(direction), sortBy);
     }
 
-    private PaginatedResponse buildResponse(Page<Users> users, Pageable pageable) {
+    private PaginatedResponse<UserResponse> buildResponse(Page<Users> users, Pageable pageable) {
         Page<UserResponse> responses = users.map(mapper::toResponse);
-        return PaginatedResponse.builder()
+        return PaginatedResponse.<UserResponse>builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.OK).statusCode(HttpStatus.OK.value())
                 .message("Users gotten successfully")

@@ -33,10 +33,10 @@ public class UsersController {
     private final Logger logger = LoggerFactory.getLogger(UsersController.class);
 
     private final UserService userService;
+    private final com.fasterxml.jackson.databind.ObjectMapper objectMapper;
 
     @PostMapping
     public ResponseEntity<HttpResponse<Object>> saveUser(@RequestBody UserRequest usersDto) {
-        ObjectMapper objectMapper = new ObjectMapper();
         UserResponse dto = userService.create(usersDto);
         Map<String, Object> data = objectMapper
                 .convertValue(dto, new TypeReference<>() {
@@ -54,7 +54,6 @@ public class UsersController {
 
     @PutMapping("/edit")
     public ResponseEntity<HttpResponse<Object>> updateUser(@RequestBody UsersDto usersDto) {
-        ObjectMapper objectMapper = new ObjectMapper();
         UsersDto dto = new UsersDto().CreateDTO(userService.updateUser(usersDto));
         Map<String, Object> data = objectMapper.convertValue(dto, new TypeReference<>() {
         });
@@ -107,7 +106,6 @@ public class UsersController {
 
     @GetMapping("/{id}")
     public ResponseEntity<HttpResponse<Object>> findByUserId(@PathVariable Long id, HttpServletRequest request) {
-        ObjectMapper objectMapper = new ObjectMapper();
         UserResponse response = userService.findById(id);
         Map<String, Object> data = objectMapper.convertValue(response, new TypeReference<>() {
         });

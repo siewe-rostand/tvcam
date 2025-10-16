@@ -6,14 +6,12 @@ import com.siewe_rostand.tvcam.Customers.model.Customers;
 import com.siewe_rostand.tvcam.Discount.model.Discount;
 import com.siewe_rostand.tvcam.Discount.repository.DiscountRepository;
 import com.siewe_rostand.tvcam.Payment.model.enumeration.PaymentFrequency;
-import com.siewe_rostand.tvcam.Payment.model.enumeration.PaymentStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,7 +19,7 @@ import static com.siewe_rostand.tvcam.shared.utils.CommonUtils.DEFAULT_MONTHLY_A
 
 /**
  * Service pour calculer les montants de facturation avec rabais
- * 
+ *
  * @author rostand
  * @project tv-cam
  */
@@ -154,17 +152,25 @@ public class BillCalculationService {
         };
     }
 
+
     @Transactional(readOnly = true)
     public BigDecimal getUnpaidAmount(Customers customer) {
-        List<Bills> unpaidBills = billRepository.findAllByCustomersAndPaymentStatus(customer, PaymentStatus.UNPAID);
+        List<Bills> unpaidBills = billRepository.findAllByCustomersAndDebtGreaterThan(customer, BigDecimal.ZERO);
         return unpaidBills.stream()
                 .map(Bills::getPaidAmount)
+                .filter(java.util.Objects::nonNull)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
+
+    @Transactional
+    public BigDecimal getDebtAmount(Customers customer) {
+        List<Bills> unpaidBills = billRepository.findAllByCustomersAndDebtGreaterThan(customer, BigDecimal.ZERO);
+        return unpaidBills.stream().map(Bills::getDebt).reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
     @Transactional(readOnly = true)
     public BigDecimal calculateBillAmount(Customers customer) {
-        // Utiliser BillCalculationService pour les calculs avec rabais
-        BigDecimal debt = getUnpaidAmount(customer);
+        BigDecimal debt = getDebtAmount(customer);
         return calculateBillAmount(customer, debt);
     }
 

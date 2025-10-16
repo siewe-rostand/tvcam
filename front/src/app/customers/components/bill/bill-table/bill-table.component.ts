@@ -1,24 +1,27 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Button } from "primeng/button";
-import { InputTextModule } from "primeng/inputtext";
-import { ConfirmationService, MessageService } from "primeng/api";
-import { TableModule } from "primeng/table";
-import { TagModule } from "primeng/tag";
-import { BillModel } from "../../../model/bill.model";
-import { PaymentStatusComponent } from "../../_shared/payment-table/payment-status/payment-status.component";
-import { DialogModule } from "primeng/dialog";
-import { DividerModule } from "primeng/divider";
-import { DropdownModule } from "primeng/dropdown";
-import { FormsModule } from "@angular/forms";
-import { NgIf } from "@angular/common";
-import { PaymentModel } from "../../../model/payment.model";
-import { PaymentService } from "../../../service/payment.service";
-import { ToastModule } from "primeng/toast";
-import { ConfirmDialogModule } from "primeng/confirmdialog";
-import { BillService } from "../../../service/bill.service";
-import { BillPrintService } from "../../../service/bill-print.service";
-import { Router } from "@angular/router";
+import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {Button} from "primeng/button";
+import {InputTextModule} from "primeng/inputtext";
+import {ConfirmationService, MessageService} from "primeng/api";
+import {TableModule} from "primeng/table";
+import {TagModule} from "primeng/tag";
+import {BillModel} from "../../../model/bill.model";
+import {PaymentStatusComponent} from "../../_shared/payment-table/payment-status/payment-status.component";
+import {DialogModule} from "primeng/dialog";
+import {DividerModule} from "primeng/divider";
+import {DropdownModule} from "primeng/dropdown";
+import {FormsModule} from "@angular/forms";
+import {PAYMENT_METHODS, PaymentModel} from "../../../model/payment.model";
+import {PaymentService} from "../../../service/payment.service";
+import {ToastModule} from "primeng/toast";
+import {ConfirmDialogModule} from "primeng/confirmdialog";
+import {BillService} from "../../../service/bill.service";
+import {BillPrintService} from "../../../service/bill-print.service";
+import {Router} from "@angular/router";
+import {InputNumberModule} from "primeng/inputnumber";
+import {DropdownOptionModel} from "../../../../_shared/model/api-response";
+import {BillUtils} from "../../../../_shared/utils/bill.utils";
+import {InputTextareaModule} from "primeng/inputtextarea";
 
 @Component({
   selector: 'app-bill-table',
@@ -29,13 +32,15 @@ import { Router } from "@angular/router";
     InputTextModule,
     TableModule,
     TagModule,
+    InputNumberModule,
     PaymentStatusComponent,
     DialogModule,
     DividerModule,
     DropdownModule,
     FormsModule,
     ToastModule,
-    ConfirmDialogModule
+    ConfirmDialogModule,
+    InputTextareaModule
   ],
   templateUrl: './bill-table.component.html',
   styleUrl: './bill-table.component.css',
@@ -51,23 +56,22 @@ export class BillTableComponent {
   amount: number = 0;
   submitted: boolean = false;
   commentaire: string = '';
-  paymentMethod: any[] = [{ name: 'CASH', value: 'CASH' },
-  { name: 'MTN MONEY', value: 'MTN_MONEY' },
-  { name: 'ORANGE MONEY', value: 'ORANGE_MONEY' }];
-  selectedPaymentMethod: any | undefined;
+  paymentMethod: DropdownOptionModel[] = PAYMENT_METHODS;
+  selectedPaymentMethod: DropdownOptionModel = PAYMENT_METHODS[0];
   payment: PaymentModel = {};
 
 
   constructor(private paymentService: PaymentService, private billService: BillService,
-    private messageService: MessageService, private confirmationService: ConfirmationService,
-    private billPrintService: BillPrintService, private router: Router) {
+              private messageService: MessageService, private confirmationService: ConfirmationService,
+              private billPrintService: BillPrintService, private router: Router) {
   }
+
   onSelectionChange(event: BillModel) {
     this.selectedBillsChange.emit(this.selectedBills);
   }
 
   openEdit(bill: BillModel) {
-    this.bill = { ...bill };
+    this.bill = {...bill};
     this.makePaymentDialog = true;
     console.log(bill);
   }
@@ -106,8 +110,41 @@ export class BillTableComponent {
       },
     });
   }
+
   hideUpdateBill() {
     this.makePaymentDialog = false;
+  }
+
+  getMonthLabel(monthValue?: string): string {
+    return BillUtils.getMonthLabelFr(monthValue);
+  }
+
+  getDateFromMonth(month: number, year: number): Date {
+    return new Date(year, month - 1, 1);
+  }
+
+  getMonthColor(monthValue?: string): string {
+    const readableColors = [
+      '#2563eb',
+      '#dc2626',
+      '#059669',
+      '#7c3aed',
+      '#ea580c',
+      '#0891b2',
+      '#be123c',
+      '#4338ca',
+      '#0d9488',
+      '#9333ea',
+      '#f59e0b',
+      '#ef4444'
+    ];
+
+    if (!monthValue) {
+      return readableColors[0];
+    }
+
+    const monthNum = parseInt(monthValue) || 1;
+    return readableColors[(monthNum - 1) % readableColors.length];
   }
 
 
@@ -144,7 +181,7 @@ export class BillTableComponent {
       customerId: this.bill.customerId,
       billId: this.bill.id,
       observation: this.commentaire,
-      paymentMethod: this.selectedPaymentMethod == undefined ? "CASH" : this.selectedPaymentMethod['value'],
+      paymentMethod: this.selectedPaymentMethod.label,
     };
 
     this.paymentService.makePayment(this.payment).subscribe({
@@ -178,12 +215,11 @@ export class BillTableComponent {
   private resetForm() {
     this.amount = 0;
     this.commentaire = '';
-    this.selectedPaymentMethod = undefined;
+    this.selectedPaymentMethod = PAYMENT_METHODS[0];
   }
 
   private refreshBills() {
-    // Émettre un événement pour indiquer qu'il faut rafraîchir les données
-    window.location.reload(); // Solution temporaire, peut être améliorée avec des services
+    window.location.reload();
   }
 
   /**
@@ -204,7 +240,7 @@ export class BillTableComponent {
     this.billPrintService.setSelectedBills(this.selectedBills);
 
     // Naviguer vers la page d'aperçu d'impression
-    this.router.navigate(['/receipts/print-preview']);
+    this.router.navigate(['/receipts/print-preview']).then(r => true);
 
     this.messageService.add({
       severity: 'info',

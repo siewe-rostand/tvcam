@@ -89,9 +89,9 @@ public class CustomerServiceImpl implements CustomerService {
         return buildResponse(customers, pageable);
     }
 
-    private PaginatedResponse buildResponse(Page<Customers> customers, Pageable pageable) {
+    private PaginatedResponse<CustomerResponse> buildResponse(Page<Customers> customers, Pageable pageable) {
         Page<CustomerResponse> customersDTOPage = customers.map(mapper::toResponse);
-        return PaginatedResponse.builder()
+        return PaginatedResponse.<CustomerResponse>builder()
                 .timestamp(now())
                 .status(OK).statusCode(OK.value())
                 .data(customersDTOPage.getContent())
@@ -152,6 +152,17 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public Customers getById(Long id) {
         return customersRepository.findByCustomerId(id).orElseThrow(() -> new EntityNotFoundException(Customers.class, "id", id.toString()));
+    }
+
+    @Override
+    public List<Customers> getAllCustomersByIds(List<Long> ids) {
+        if (ids.isEmpty())
+            throw new OperationNotPermittedException("The list of customer ids is empty");
+        if (ids.size() == 1) {
+            Customers customer = getById(ids.get(0));
+            return List.of(customer);
+        }
+        return customersRepository.findAllById(ids);
     }
 
     @Override

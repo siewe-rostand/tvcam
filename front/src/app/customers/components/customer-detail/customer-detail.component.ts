@@ -86,7 +86,7 @@ export class CustomerDetailComponent implements OnInit {
   getCustomerPayment(id: number) {
     this.paymentService.getPaymentsForCustomer(id).subscribe({
       next: response => {
-        this.payments = response.content;
+        this.payments = response.data;
       },
       error:err => {
         console.log(err);

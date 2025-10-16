@@ -1,9 +1,5 @@
 package com.siewe_rostand.tvcam.Bills.controller;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.siewe_rostand.tvcam.Bills.dto.BillGenerationResult;
-import com.siewe_rostand.tvcam.Bills.dto.BillRequest;
 import com.siewe_rostand.tvcam.Bills.dto.BillResponse;
 import com.siewe_rostand.tvcam.Bills.services.BillServices;
 import com.siewe_rostand.tvcam.common.exceptions.ApiException;
@@ -14,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +24,7 @@ import static org.springframework.http.HttpStatus.OK;
  */
 
 @RestController
-@RequestMapping("bills")
+@RequestMapping("/bills")
 public class BillController {
     private final Logger logger = LoggerFactory.getLogger(BillController.class);
 
@@ -48,7 +43,7 @@ public class BillController {
                 customerIds, shouldGenerate);
 
         if (shouldGenerate == null) {
-            shouldGenerate = false; // Valeur par défaut
+            shouldGenerate = false;
         }
 
         List<BillResponse> generatedBills = billServices.generateBillsForSelectedCustomers(customerIds,
@@ -88,30 +83,45 @@ public class BillController {
                         .build());
     }
 
+    @PostMapping("/generate/single")
+    public ResponseEntity<HttpResponse<BillResponse>> generateCustomerBill(
+            @RequestParam("customerId") Long customerId,
+            @RequestParam("shouldGenerate") Boolean shouldGenerate) {
+        logger.debug("BillController:::generateCustomerBill - Customer ID: {}, Should Generate: {}",
+                customerId, shouldGenerate);
+
+        if (shouldGenerate == null) {
+            shouldGenerate = false;
+        }
+
+        HttpResponse<BillResponse> response = billServices.generateCustomerBill(customerId, shouldGenerate);
+        return ResponseEntity.status(CREATED).body(response);
+    }
+
     @GetMapping()
-    public ResponseEntity<PaginatedResponse> getAllBills(
+    public ResponseEntity<PaginatedResponse<BillResponse>> getAllBills(
             @RequestParam(name = "page", defaultValue = "0") Integer page,
             @RequestParam(name = "size", defaultValue = "10") Integer size,
             @RequestParam(name = "sortBy", defaultValue = "createdAt") String sortBy,
             @RequestParam(name = "direction", defaultValue = "desc") String direction,
             @RequestParam(name = "name", defaultValue = "") String name) {
-        PaginatedResponse response = billServices.findAll(page, size, sortBy, direction, name);
+        PaginatedResponse<BillResponse> response = billServices.findAll(page, size, sortBy, direction, name);
         return ResponseEntity.status(OK).body(response);
     }
 
     @GetMapping("/customer/{id}")
-    public ResponseEntity<HttpResponse<Object>> getBillsByCustomerId(
+    public ResponseEntity<HttpResponse<List<BillResponse>>> getBillsByCustomerId(
             @PathVariable(name = "id") Long customerId) {
         logger.debug("BillController::getBillsByCustomerId {}", customerId);
-        HttpResponse<Object> response = billServices.findCustomerBills(customerId);
+        HttpResponse<List<BillResponse>> response = billServices.findCustomerBills(customerId);
 
         return ResponseEntity.status(OK).body(response);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<HttpResponse<Object>> deleteBill(@PathVariable(name = "id") Long id) {
+    public ResponseEntity<HttpResponse<BillResponse>> deleteBill(@PathVariable(name = "id") Long id) {
         logger.debug("BillController:::deleteBill {}", id);
-        HttpResponse<Object> response = billServices.delete(id);
+        HttpResponse<BillResponse> response = billServices.delete(id);
         return ResponseEntity.ok().body(response);
     }
 

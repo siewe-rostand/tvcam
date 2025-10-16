@@ -15,7 +15,7 @@ export interface BillModel {
   status?: string;
   remainingBalance?: number;
   paidAmount?: number;
-  
+
   // Informations supplémentaires pour la facture
   zoneName?: string;
   zoneAddress?: string;

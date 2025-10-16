@@ -16,11 +16,13 @@ public interface BillServices {
 
     Bills update(BillRequest billSDto);
 
-    PaginatedResponse findAll(Integer page, Integer size, String sortBy, String direction, String name);
+    PaginatedResponse<BillResponse> findAll(Integer page, Integer size, String sortBy, String direction, String name);
 
-    HttpResponse<Object> findCustomerBills(Long customerId);
+    HttpResponse<List<BillResponse>> findCustomerBills(Long customerId);
 
-    HttpResponse<Object> delete(Long id);
+    HttpResponse<BillResponse> delete(Long id);
+
+    HttpResponse<BillResponse> generateCustomerBill(Long customerId, Boolean shouldGenerate);
 
     List<BillResponse> generateBillsForSelectedCustomers(List<Long> customerIds, Boolean shouldGenerate);
 

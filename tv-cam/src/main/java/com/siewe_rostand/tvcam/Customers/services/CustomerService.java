@@ -7,6 +7,8 @@ import com.siewe_rostand.tvcam.shared.HttpResponse;
 import com.siewe_rostand.tvcam.shared.PaginatedResponse;
 import org.springframework.data.domain.Page;
 
+import java.util.List;
+
 public interface CustomerService {
 
     HttpResponse<Object> save(CustomerRequest customersDto);
@@ -28,4 +30,6 @@ public interface CustomerService {
     Page<CustomerResponse> findAllActive(Integer page, Integer size, String sortBy, String direction, Boolean isActive);
 
     Customers getById(Long id);
+
+    List<Customers> getAllCustomersByIds(List<Long> ids);
 }

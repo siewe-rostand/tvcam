@@ -92,42 +92,42 @@ export class PaymentManagementService {
   /**
    * Charge les paiements pour un client
    */
-  loadPaymentsForCustomer(customerId: number): Observable<PaymentModel[]> {
-    this.loadingSubject.next(true);
-
-    return this.paymentService.getPaymentsForCustomer(customerId).pipe(
-      map(response => {
-        const payments = response.data || [];
-        this.paymentsSubject.next(payments);
-        this.loadingSubject.next(false);
-        return payments;
-      }),
-      catchError(error => {
-        this.loadingSubject.next(false);
-        return throwError(() => error);
-      })
-    );
-  }
+  // loadPaymentsForCustomer(customerId: number): Observable<ApiResponse<PaymentModel[]>> {
+  //   this.loadingSubject.next(true);
+  //
+  //   return this.paymentService.getPaymentsForCustomer(customerId).pipe(
+  //     map(response => {
+  //       const payments = response.data || [];
+  //       this.paymentsSubject.next(payments);
+  //       this.loadingSubject.next(false);
+  //       return payments;
+  //     }),
+  //     catchError(error => {
+  //       this.loadingSubject.next(false);
+  //       return throwError(() => error);
+  //     })
+  //   );
+  // }
 
   /**
    * Charge les paiements pour un mois donné
    */
-  loadMonthlyPayments(month: string): Observable<PaymentModel[]> {
-    this.loadingSubject.next(true);
-
-    return this.paymentService.getMonthlyPayment(month).pipe(
-      map(response => {
-        const payments = response.data || [];
-        this.paymentsSubject.next(payments);
-        this.loadingSubject.next(false);
-        return payments;
-      }),
-      catchError(error => {
-        this.loadingSubject.next(false);
-        return throwError(() => error);
-      })
-    );
-  }
+  // loadMonthlyPayments(month: string): Observable<PaymentModel[]> {
+  //   this.loadingSubject.next(true);
+  //
+  //   return this.paymentService.getMonthlyPayment(month).pipe(
+  //     map(response => {
+  //       const payments = response.data || [];
+  //       this.paymentsSubject.next(payments);
+  //       this.loadingSubject.next(false);
+  //       return payments;
+  //     }),
+  //     catchError(error => {
+  //       this.loadingSubject.next(false);
+  //       return throwError(() => error);
+  //     })
+  //   );
+  // }
 
   /**
    * Ajoute un paiement au cache local

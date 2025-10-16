@@ -140,8 +140,8 @@ public class ZoneServiceImpl implements ZoneService {
 
     @Override
     @Transactional(readOnly = true)
-    public PaginatedResponse getAllZones(Integer page, Integer size, String sortBy, String direction,
-                                         String searchTerm) {
+    public PaginatedResponse<ZoneResponse> getAllZones(Integer page, Integer size, String sortBy, String direction,
+                                                       String searchTerm) {
         Pageable pageable = PageRequest.of(page, size, Sort.Direction.fromString(direction), sortBy);
 
         Page<Zone> zonesPage;
@@ -164,7 +164,7 @@ public class ZoneServiceImpl implements ZoneService {
                 .map(zoneMapper::toResponse)
                 .collect(Collectors.toList());
 
-        return PaginatedResponse.builder()
+        return PaginatedResponse.<ZoneResponse>builder()
                 .data(zoneResponses)
                 .page(page)
                 .totalElements((int) zonesPage.getTotalElements())

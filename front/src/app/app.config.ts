@@ -1,4 +1,4 @@
-import {ApplicationConfig, provideZoneChangeDetection} from '@angular/core';
+import {ApplicationConfig, LOCALE_ID, provideZoneChangeDetection} from '@angular/core';
 import {provideRouter} from '@angular/router';
 
 import {routes} from './app.routes';
@@ -19,6 +19,7 @@ export const appConfig: ApplicationConfig = {
     provideClientHydration(),
     provideAnimations(),
     provideHttpClient(withFetch(), withInterceptorsFromDi()),
+    { provide: LOCALE_ID, useValue: 'fr' },
     baseUrlInterceptorProvider,
     {provide: 'BASE_API_URL', useValue: environment.BASE_URL},
     httpInterceptorProviders,

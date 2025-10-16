@@ -29,10 +29,10 @@ import static org.springframework.http.HttpStatus.OK;
 @RequiredArgsConstructor
 public class PaymentController {
     private final PaymentService paymentService;
+    private final ObjectMapper objectMapper;
 
     @PostMapping()
     public ResponseEntity<HttpResponse<Object>> makePayment(@RequestBody PaymentRequest request) {
-        ObjectMapper objectMapper = new ObjectMapper();
         PaymentResponse response = paymentService.save(request);
         Map<String, Object> data = objectMapper
                 .convertValue(response, new TypeReference<>() {

@@ -8,7 +8,6 @@ import {CommonModule} from "@angular/common";
 import {PaymentService} from "../../service/payment.service";
 import {TagModule} from "primeng/tag";
 import {ToolbarModule} from "primeng/toolbar";
-import {PaymentStatusComponent} from "../_shared/payment-table/payment-status/payment-status.component";
 import {PaymentTableComponent} from "../_shared/payment-table/payment-table.component";
 
 @Component({
@@ -22,7 +21,6 @@ import {PaymentTableComponent} from "../_shared/payment-table/payment-table.comp
     CommonModule,
     TagModule,
     ToolbarModule,
-    PaymentStatusComponent,
     PaymentTableComponent
   ],
   templateUrl: './payment.component.html',
@@ -52,8 +50,8 @@ export class PaymentComponent implements OnInit {
   getAllPayments() {
     this.paymentService.getMonthlyPayment('AUGUST').subscribe({
       next: (response) => {
-        console.log(response.content)
-        this.payments = response.content;
+        console.log(response.data)
+        this.payments = response.data;
       },
       error: (error) => {
         console.log(error)

@@ -179,10 +179,10 @@ public class PaymentServiceImpl implements PaymentService {
         return PageRequest.of(page, size, Sort.Direction.fromString(direction), sortBy);
     }
 
-    private PaginatedResponse buildResponse(Page<Payments> payments, Pageable pageable) {
+    private PaginatedResponse<PaymentResponse> buildResponse(Page<Payments> payments, Pageable pageable) {
         Page<PaymentResponse> responses = payments
                 .map((Function<? super Payments, ? extends PaymentResponse>) paymentMapper::toResponse);
-        return PaginatedResponse.builder()
+        return PaginatedResponse.<PaymentResponse>builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.OK).statusCode(HttpStatus.OK.value())
                 .message("Paiements récupérés avec succès")
