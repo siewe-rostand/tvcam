@@ -1,0 +1,51 @@
+/* Styles spécifiques pour la liste des clients v2 */
+.form-field {
+  margin-bottom: 1.5rem;
+}
+
+.form-field label {
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.form-field input {
+  border-radius: 10px;
+  border: 2px solid #e9ecef;
+  padding: 0.75rem 1rem;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+}
+
+.form-field input:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+  outline: none;
+}
+
+/* Dialog modernisé */
+:host ::ng-deep .modern-dialog .p-dialog {
+  border-radius: 20px;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.15);
+  border: none;
+}
+
+:host ::ng-deep .modern-dialog .p-dialog-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 20px 20px 0 0;
+  padding: 1.5rem 2rem;
+  border: none;
+}
+
+:host ::ng-deep .modern-dialog .p-dialog-content {
+  padding: 2rem;
+  background: #f8f9fa;
+}
+
+:host ::ng-deep .modern-dialog .p-dialog-footer {
+  padding: 1.5rem 2rem;
+  border-top: 1px solid #e9ecef;
+  border-radius: 0 0 20px 20px;
+}

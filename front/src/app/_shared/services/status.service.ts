@@ -1,11 +1,12 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 
 @Injectable({
   providedIn: 'root'
 })
 export class StatusService {
 
-  constructor() { }
+  constructor() {
+  }
 
   getStatusSeverity(status: string) {
     switch (status) {
@@ -14,7 +15,7 @@ export class StatusService {
       case 'PAID':
         return 'success';
       case 'PARTIALLY_PAID':
-        return 'warning';
+        return 'warn';
       default:
         return 'danger';
     }

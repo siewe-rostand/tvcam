@@ -83,7 +83,7 @@ export class BillUtils {
   static generateBillReference(billId?: number, month?: string, year?: string): string {
     if (!billId || !month || !year) return '';
 
-    const monthNum = this.getMonthNumber(month);
+    const monthNum = parseInt(month);
     return `FAC-${year}${monthNum.toString().padStart(2, '0')}-${billId.toString().padStart(4, '0')}`;
   }
 

@@ -1,21 +1,24 @@
-import { Component, OnInit } from '@angular/core';
-import { CustomerService } from '../../service/customer.service';
-import { ToastModule } from 'primeng/toast';
-import { ConfirmationService, MessageService } from 'primeng/api';
-import { NavbarComponent } from '../../../_shared/components/navbar/navbar.component';
-import { FormsModule } from '@angular/forms';
-import { RippleModule } from 'primeng/ripple';
-import { TableModule } from 'primeng/table';
-import { DialogModule } from 'primeng/dialog';
-import { ButtonModule } from 'primeng/button';
-import { ToolbarModule } from 'primeng/toolbar';
-import { InputTextModule } from 'primeng/inputtext';
-import { InputNumberModule } from 'primeng/inputnumber';
-import { CommonModule } from '@angular/common';
-import { CustomerModel } from '../../model/customer.model';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { BillService } from "../../service/bill.service";
-import { Router } from "@angular/router";
+import {Component, OnInit, ViewChild} from '@angular/core';
+import {CustomerService} from '../../service/customer.service';
+import {ToastModule} from 'primeng/toast';
+import {ConfirmationService, MessageService} from 'primeng/api';
+import {NavbarComponent} from '../../../_shared/components/navbar/navbar.component';
+import {FormsModule} from '@angular/forms';
+import {RippleModule} from 'primeng/ripple';
+import {Table, TableModule} from 'primeng/table';
+import {DialogModule} from 'primeng/dialog';
+import {ButtonModule} from 'primeng/button';
+import {ToolbarModule} from 'primeng/toolbar';
+import {InputTextModule} from 'primeng/inputtext';
+import {InputNumberModule} from 'primeng/inputnumber';
+import {CommonModule} from '@angular/common';
+import {CustomerModel} from '../../model/customer.model';
+import {ConfirmDialogModule} from 'primeng/confirmdialog';
+import {BillService} from "../../service/bill.service";
+import {Router} from "@angular/router";
+import {InputIconModule} from "primeng/inputicon";
+import {IconFieldModule} from "primeng/iconfield";
+import {TooltipModule} from "primeng/tooltip";
 
 @Component({
   selector: 'app-customer-list',
@@ -34,15 +37,20 @@ import { Router } from "@angular/router";
     InputTextModule,
     InputNumberModule,
     ConfirmDialogModule,
+    InputIconModule,
+    IconFieldModule,
+    TooltipModule
   ],
   templateUrl: './customer-list.component.html',
   styleUrl: './customer-list.component.css',
   providers: [MessageService, ConfirmationService],
 })
 export class CustomerListComponent implements OnInit {
+  @ViewChild('dt') dt!: Table;
   saveCustomerDialog: boolean = false;
   updateCustomerDialog: boolean = false;
   submitted: boolean = false;
+  isGenerateBillDialogOpen: boolean = false; // Flag pour prévenir les dialogues multiples
 
   customer!: CustomerModel;
 
@@ -62,21 +70,24 @@ export class CustomerListComponent implements OnInit {
     this.getCustomers();
   }
 
+  onGlobalFilter(event: Event) {
+    const inputElement = event.target as HTMLInputElement;
+    this.dt.filterGlobal(inputElement.value, 'contains');
+  }
+
   onSelectionChange(event: any) {
     this.selectedCustomers = event;
   }
 
-  showConfirmGenerateBill() {
-    this.confirmationService.confirm({
-      header: 'Confirmation',
-      message: 'La/les Facture(s) de certains client ont déjà été générées.\n Voulez-vous toujours générer les factures des clients sélectionnés ?',
-      accept: () => {
-        this.generateBills();
-      },
-    });
-  }
 
   showGenerateBill(event: Event) {
+    // Prévenir l'affichage multiple du dialogue
+    if (this.isGenerateBillDialogOpen) {
+      return;
+    }
+
+    this.isGenerateBillDialogOpen = true;
+
     this.confirmationService.confirm({
       target: event.target as EventTarget,
       header: 'Confirmation',
@@ -88,15 +99,12 @@ export class CustomerListComponent implements OnInit {
       acceptLabel: 'OUI',
       rejectLabel: 'NON',
       accept: () => {
-        // const shouldGenerate = this.selectedCustomers.some(item => item.lastBillGenerationDate != null);
-        // console.log(shouldGenerate)
-        // if (shouldGenerate) {
-        //   this.showConfirmGenerateBill();
-        // } else {
-
-        // }
         this.generateBills();
+        this.isGenerateBillDialogOpen = false; // Reset du flag
       },
+      reject: () => {
+        this.isGenerateBillDialogOpen = false; // Reset du flag
+      }
     });
   }
 
@@ -104,20 +112,20 @@ export class CustomerListComponent implements OnInit {
     const customerIds = this.selectedCustomers.map(customer => customer.id);
     if (customerIds.length > 0) {
       this.billService.generateBills(customerIds, true).subscribe({
-        next: (bills) => {
-          this.generatedBills = bills;
-          this.messageService.add({ severity: 'success', summary: 'Success', detail: 'factures générées avec succès' });
-        },
-        error: (error) => {
-          console.log(error)
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'une erreur interne s\'est produite. Si le problème persiste, veuillez contacter l\'administrateur',
-            life: 5000
-          });
+          next: (bills) => {
+            this.generatedBills = bills;
+            this.messageService.add({severity: 'success', summary: 'Success', detail: 'factures générées avec succès'});
+          },
+          error: (error) => {
+            console.log(error)
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'une erreur interne s\'est produite. Si le problème persiste, veuillez contacter l\'administrateur',
+              life: 5000
+            });
+          }
         }
-      }
       );
     }
   }
@@ -179,7 +187,7 @@ export class CustomerListComponent implements OnInit {
   }
 
   openEdit(customer: CustomerModel) {
-    this.customer = { ...customer };
+    this.customer = {...customer};
     this.updateCustomerDialog = true;
     console.log(customer);
   }
