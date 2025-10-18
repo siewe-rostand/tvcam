@@ -1,0 +1,511 @@
+<app-navbar></app-navbar>
+
+<!-- Background avec design professionnel et subtil -->
+<div class="min-h-screen" style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);">
+  <div class="container mx-auto p-6">
+
+    <!-- Header avec design élégant -->
+    <div class="mb-8 text-center">
+      <h1 class="text-4xl font-bold text-gray-800 mb-2 animate-fade-in">
+        <i class="pi pi-chart-line mr-3 text-blue-600"></i>
+        Tableau de Bord Exécutif
+      </h1>
+      <p class="text-gray-600 text-lg animate-slide-up">
+        Pilotage intelligent de votre activité • {{ getCurrentDate() }}
+      </p>
+    </div>
+
+    <!-- Statistiques principales avec design moderne sur une ligne -->
+    <div class="flex flex-wrap gap-6 mb-8 justify-content-center">
+      <!-- Card Total Factures -->
+      <div class="flex-1 min-w-64">
+        <div class="stats-card bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-3 border border-blue-200 relative overflow-hidden" pRipple>
+          <!-- Effet de brillance en arrière-plan -->
+          <div class="absolute top-0 right-0 w-20 h-20 bg-blue-100 rounded-full opacity-30 -translate-y-10 translate-x-10"></div>
+          <div class="absolute bottom-0 left-0 w-16 h-16 bg-blue-200 rounded-full opacity-20 translate-y-8 -translate-x-8"></div>
+
+          <div class="flex align-items-center justify-content-between mb-5 relative z-10">
+            <div class="stats-icon bg-blue-500 text-white p-4 rounded-xl shadow-lg">
+              <i class="pi pi-file text-2xl"></i>
+            </div>
+            <div class="stats-trend bg-green-100 text-green-700 px-3 py-1 rounded-full">
+              <i class="pi pi-arrow-up mr-1"></i>
+              <span class="text-sm font-bold">+{{ getBillsGrowth() }}%</span>
+            </div>
+          </div>
+
+          <div class="relative z-10">
+            <h3 class="text-4xl font-black text-blue-900 mb-2">{{ stats.totalBills }}</h3>
+            <p class="text-blue-700 font-semibold text-lg mb-4">Total Factures</p>
+
+            <div class="progress-section">
+              <div class="progress-wrapper bg-blue-100 rounded-full h-3 overflow-hidden shadow-inner">
+                <div class="progress-bar bg-gradient-to-r from-blue-500 to-blue-600 h-full rounded-full transition-all duration-1500 shadow-sm"
+                     [style.width.%]="stats.totalBills > 0 ? (stats.paidBills / stats.totalBills) * 100 : 0">
+                </div>
+              </div>
+              <div class="flex justify-content-between mt-3">
+                <small class="text-blue-600 font-medium">{{ stats.paidBills }} payées</small>
+                <small class="text-blue-700 font-bold">{{ stats.totalBills > 0 ? ((stats.paidBills / stats.totalBills) * 100 | number:'1.0-0') : 0 }}%</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card Revenus Total -->
+      <div class="flex-1 min-w-64">
+        <div class="stats-card bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-3 border border-green-200 relative overflow-hidden" pRipple>
+          <!-- Effet de brillance en arrière-plan -->
+          <div class="absolute top-0 right-0 w-20 h-20 bg-green-100 rounded-full opacity-30 -translate-y-10 translate-x-10"></div>
+          <div class="absolute bottom-0 left-0 w-16 h-16 bg-emerald-200 rounded-full opacity-20 translate-y-8 -translate-x-8"></div>
+
+          <div class="flex align-items-center justify-content-between mb-5 relative z-10">
+            <div class="stats-icon bg-green-500 text-white p-4 rounded-xl shadow-lg">
+              <i class="pi pi-dollar text-2xl"></i>
+            </div>
+            <div class="stats-trend bg-green-100 text-green-700 px-3 py-1 rounded-full">
+              <i class="pi pi-arrow-up mr-1"></i>
+              <span class="text-sm font-bold">+{{ revenueGrowth }}%</span>
+            </div>
+          </div>
+
+          <div class="relative z-10">
+            <h3 class="text-3xl font-black text-green-900 mb-2 leading-tight">
+              {{ formatCurrency(stats.totalRevenue) }}
+            </h3>
+            <p class="text-green-700 font-semibold text-lg mb-4">Revenus Total</p>
+
+            <div class="monthly-revenue bg-green-50 rounded-lg p-3 border border-green-100">
+              <div class="flex align-items-center">
+                <i class="pi pi-calendar text-green-600 mr-3 text-lg"></i>
+                <div>
+                  <small class="text-green-600 font-medium block">Ce mois</small>
+                  <span class="text-green-800 font-bold text-lg">
+                    {{ formatCurrency(stats.monthlyRevenue) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card Factures Impayées -->
+      <div class="flex-1 min-w-64">
+        <div class="stats-card bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-3 border border-orange-200 relative overflow-hidden" pRipple>
+          <!-- Effet de brillance en arrière-plan -->
+          <div class="absolute top-0 right-0 w-20 h-20 bg-orange-100 rounded-full opacity-30 -translate-y-10 translate-x-10"></div>
+          <div class="absolute bottom-0 left-0 w-16 h-16 bg-red-200 rounded-full opacity-20 translate-y-8 -translate-x-8"></div>
+
+          <div class="flex align-items-center justify-content-between mb-5 relative z-10">
+            <div class="stats-icon bg-orange-500 text-white p-4 rounded-xl shadow-lg">
+              <i class="pi pi-exclamation-triangle text-2xl"></i>
+            </div>
+            <div class="stats-trend bg-red-100 text-red-700 px-3 py-1 rounded-full" *ngIf="stats.unpaidBills > 0">
+              <i class="pi pi-arrow-up mr-1"></i>
+              <span class="text-sm font-bold">{{ getUnpaidTrend() }}</span>
+            </div>
+          </div>
+
+          <div class="relative z-10">
+            <h3 class="text-4xl font-black text-orange-900 mb-2">{{ stats.unpaidBills }}</h3>
+            <p class="text-orange-700 font-semibold text-lg mb-4">Factures Impayées</p>
+
+            <div class="overdue-amount bg-orange-50 rounded-lg p-3 border border-orange-100">
+              <div class="flex align-items-center">
+                <i class="pi pi-clock text-orange-600 mr-3 text-lg"></i>
+                <div>
+                  <small class="text-orange-600 font-medium block">En retard</small>
+                  <span class="text-orange-800 font-bold text-lg">
+                    {{ formatCurrency(stats.overdueAmount) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card Taux de Paiement -->
+      <div class="flex-1 min-w-64">
+        <div class="stats-card bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-3 border border-purple-200 relative overflow-hidden" pRipple>
+          <!-- Effet de brillance en arrière-plan -->
+          <div class="absolute top-0 right-0 w-20 h-20 bg-purple-100 rounded-full opacity-30 -translate-y-10 translate-x-10"></div>
+          <div class="absolute bottom-0 left-0 w-16 h-16 bg-indigo-200 rounded-full opacity-20 translate-y-8 -translate-x-8"></div>
+
+          <div class="flex align-items-center justify-content-between mb-5 relative z-10">
+            <div class="stats-icon bg-purple-500 text-white p-4 rounded-xl shadow-lg">
+              <i class="pi pi-chart-line text-2xl"></i>
+            </div>
+            <div class="stats-trend px-3 py-1 rounded-full"
+                 [class]="stats.paymentRate >= 80 ? 'bg-green-100 text-green-700' : stats.paymentRate >= 60 ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'">
+              <i class="pi mr-1" [class]="stats.paymentRate >= 80 ? 'pi-arrow-up' : 'pi-arrow-down'"></i>
+              <span class="text-sm font-bold">{{ getPaymentRateLabel() }}</span>
+            </div>
+          </div>
+
+          <div class="relative z-10">
+            <h3 class="text-4xl font-black text-purple-900 mb-2">{{ stats.paymentRate }}%</h3>
+            <p class="text-purple-700 font-semibold text-lg mb-4">Taux de Paiement</p>
+
+            <div class="circular-progress-section flex justify-content-center">
+              <div class="circular-progress-wrapper relative w-20 h-20">
+                <!-- Background circle -->
+                <svg class="circular-progress transform -rotate-90 w-20 h-20" viewBox="0 0 42 42" >
+                  <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#e2e8f0" stroke-width="3"></circle>
+                  <circle cx="21" cy="21" r="15.915" fill="transparent"
+                          stroke="#7c3aed" stroke-width="3"
+                          stroke-linecap="round"
+                          [attr.stroke-dasharray]="stats.paymentRate + ' 100'"
+                          class="transition-all duration-1000 ease-out">
+                  </circle>
+                </svg>
+                <!-- Percentage text in center -->
+                <div class="absolute inset-0 flex items-center justify-center">
+                  <span class="text-lg font-bold text-purple-900">{{ stats.paymentRate }}%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Graphiques avec design amélioré sur une ligne -->
+    <div class="flex flex-wrap gap-6 mb-8">
+      <div class="flex-1 min-w-96">
+        <div class="chart-card bg-white rounded-xl p-6 shadow-xl">
+          <div class="flex align-items-center justify-content-between mb-6">
+            <div>
+              <h3 class="text-xl font-bold text-gray-800 mb-1">
+                <i class="pi pi-chart-line text-blue-500 mr-2"></i>
+                Évolution des Revenus
+              </h3>
+              <p class="text-gray-500">Analyse des performances mensuelles</p>
+            </div>
+            <div class="chart-controls flex gap-2">
+              <p-button icon="pi pi-download" [text]="true" [rounded]="true"
+                       severity="secondary" size="small"
+                       pTooltip="Exporter les données" pRipple></p-button>
+              <p-button icon="pi pi-refresh" [text]="true" [rounded]="true"
+                       severity="secondary" size="small"
+                       pTooltip="Actualiser" (onClick)="refreshData()" pRipple></p-button>
+            </div>
+          </div>
+          <p-chart type="line" [data]="revenueChart" [options]="chartOptions" height="350px"></p-chart>
+        </div>
+      </div>
+
+      <div class="flex-1 min-w-80">
+        <div class="chart-card bg-white rounded-xl p-6 shadow-xl h-full">
+          <div class="mb-6">
+            <h3 class="text-xl font-bold text-gray-800 mb-1">
+              <i class="pi pi-chart-pie text-green-500 mr-2"></i>
+              État des Paiements
+            </h3>
+            <p class="text-gray-500">Répartition actuelle</p>
+          </div>
+          <p-chart type="doughnut" [data]="paymentStatusChart" [options]="doughnutOptions" height="300px"></p-chart>
+
+          <!-- Légende personnalisée -->
+          <div class="legend-custom mt-4">
+            <div class="flex align-items-center justify-content-between mb-2">
+              <div class="flex align-items-center">
+                <div class="legend-dot bg-green-500 w-3 h-3 rounded-full mr-2"></div>
+                <span class="text-sm text-gray-600">Payées</span>
+              </div>
+              <span class="text-sm font-semibold text-gray-800">{{ stats.paidBills }}</span>
+            </div>
+            <div class="flex align-items-center justify-content-between mb-2">
+              <div class="flex align-items-center">
+                <div class="legend-dot bg-red-500 w-3 h-3 rounded-full mr-2"></div>
+                <span class="text-sm text-gray-600">Impayées</span>
+              </div>
+              <span class="text-sm font-semibold text-gray-800">{{ stats.unpaidBills }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions rapides avec données en dur -->
+    <div class="grid mb-6">
+      <div class="col-12">
+        <p-card header="Actions Rapides">
+          <div class="flex flex-wrap gap-3">
+            <p-button
+              label="Générer Factures"
+              icon="pi pi-file-plus"
+              (onClick)="navigateToGeneration()"
+              severity="success">
+            </p-button>
+            <p-button
+              label="Nouveau Paiement"
+              icon="pi pi-dollar"
+              (onClick)="navigateToPayments()"
+              severity="info">
+            </p-button>
+            <p-button
+              label="Voir Factures"
+              icon="pi pi-list"
+              (onClick)="navigateToBills()"
+              severity="secondary">
+            </p-button>
+            <p-button
+              label="Gérer Clients"
+              icon="pi pi-users"
+              (onClick)="navigateToCustomers()"
+              severity="help">
+            </p-button>
+          </div>
+        </p-card>
+      </div>
+    </div>
+
+    <!-- Tables avec design amélioré sur une ligne -->
+    <div class="flex flex-wrap gap-6 mb-8">
+      <div class="flex-1 min-w-96">
+        <div class="table-card bg-white rounded-xl shadow-xl overflow-hidden">
+          <div class="table-header bg-gradient-to-r from-gray-50 to-gray-100 p-6 border-b">
+            <div class="flex align-items-center justify-content-between">
+              <div>
+                <h3 class="text-lg font-bold text-gray-800 mb-1">
+                  <i class="pi pi-file-edit text-blue-500 mr-2"></i>
+                  Factures Récentes
+                </h3>
+                <p class="text-gray-500 text-sm">Dernières activités</p>
+              </div>
+              <p-badge [value]="recentBills.length" severity="info"></p-badge>
+            </div>
+          </div>
+
+          <div class="p-4">
+            <p-table [value]="recentBills" [rows]="5" styleClass="modern-table"
+                     [showCurrentPageReport]="false" [paginator]="false">
+              <ng-template pTemplate="header">
+                <tr>
+                  <th class="font-semibold text-gray-700">Client</th>
+                  <th class="font-semibold text-gray-700">Montant</th>
+                  <th class="font-semibold text-gray-700">Statut</th>
+                  <th class="font-semibold text-gray-700">Date</th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-bill>
+                <tr class="hover:bg-gray-50 transition-colors">
+                  <td>
+                    <div class="flex align-items-center">
+                      <div class="customer-avatar bg-blue-100 text-blue-600 w-8 h-8 rounded-full
+                                 flex align-items-center justify-content-center mr-3 text-sm font-bold">
+                        {{ getInitials(bill.customerName) }}
+                      </div>
+                      <span class="font-medium">{{ bill.customerName }}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="font-semibold text-gray-800">
+                      {{ formatCurrency(bill.netToPay) }}
+                    </span>
+                  </td>
+                  <td>
+                    <p-tag [value]="getStatusLabel(bill.status)"
+                           [severity]="getBillStatusSeverity(bill.status)"
+                           [rounded]="true">
+                    </p-tag>
+                  </td>
+                  <td class="text-gray-600">{{ bill.depositDate | date:'dd/MM/yyyy' }}</td>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="emptymessage">
+                <tr>
+                  <td colspan="4" class="text-center py-6">
+                    <i class="pi pi-info-circle text-gray-400 text-2xl mb-2"></i>
+                    <p class="text-gray-500">Aucune facture récente</p>
+                  </td>
+                </tr>
+              </ng-template>
+            </p-table>
+
+            <div class="text-center mt-4">
+              <p-button label="Voir Toutes les Factures" icon="pi pi-arrow-right"
+                       [text]="true" [rounded]="true"
+                       (onClick)="navigateToBills()"
+                       class="text-blue-600" pRipple>
+              </p-button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex-1 min-w-96">
+        <div class="table-card bg-white rounded-xl shadow-xl overflow-hidden">
+          <div class="table-header bg-gradient-to-r from-gray-50 to-gray-100 p-6 border-b">
+            <div class="flex align-items-center justify-content-between">
+              <div>
+                <h3 class="text-lg font-bold text-gray-800 mb-1">
+                  <i class="pi pi-credit-card text-green-500 mr-2"></i>
+                  Paiements Récents
+                </h3>
+                <p class="text-gray-500 text-sm">Transactions récentes</p>
+              </div>
+              <p-badge [value]="recentPayments.length" severity="success"></p-badge>
+            </div>
+          </div>
+
+          <div class="p-4">
+            <p-table [value]="recentPayments" [rows]="5" styleClass="modern-table"
+                     [showCurrentPageReport]="false" [paginator]="false">
+              <ng-template pTemplate="header">
+                <tr>
+                  <th class="font-semibold text-gray-700">Client</th>
+                  <th class="font-semibold text-gray-700">Montant</th>
+                  <th class="font-semibold text-gray-700">Méthode</th>
+                  <th class="font-semibold text-gray-700">Date</th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-payment>
+                <tr class="hover:bg-gray-50 transition-colors">
+                  <td>
+                    <div class="flex align-items-center">
+                      <div class="customer-avatar bg-green-100 text-green-600 w-8 h-8 rounded-full
+                                 flex align-items-center justify-content-center mr-3 text-sm font-bold">
+                        {{ getInitials(payment.customerName) }}
+                      </div>
+                      <span class="font-medium">{{ payment.customerName }}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="font-semibold text-green-600">
+                      +{{ formatCurrency(payment.amount) }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="flex align-items-center">
+                      <i class="pi {{ getPaymentMethodIcon(payment.paymentMethod) }} mr-2 text-blue-500"></i>
+                      <p-tag [value]="formatPaymentMethod(payment.paymentMethod)"
+                             severity="info" [rounded]="true">
+                      </p-tag>
+                    </div>
+                  </td>
+                  <td class="text-gray-600">{{ payment.paymentDate | date:'dd/MM/yyyy' }}</td>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="emptymessage">
+                <tr>
+                  <td colspan="4" class="text-center py-6">
+                    <i class="pi pi-info-circle text-gray-400 text-2xl mb-2"></i>
+                    <p class="text-gray-500">Aucun paiement récent</p>
+                  </td>
+                </tr>
+              </ng-template>
+            </p-table>
+
+            <div class="text-center mt-4">
+              <p-button label="Voir Tous les Paiements" icon="pi pi-arrow-right"
+                       [text]="true" [rounded]="true"
+                       (onClick)="navigateToPayments()"
+                       class="text-green-600" pRipple>
+              </p-button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alertes avec design amélioré -->
+    <div *ngIf="overdueBills.length > 0" class="mb-8">
+      <div class="alert-card bg-white rounded-xl shadow-xl overflow-hidden border-l-4 border-red-500">
+        <div class="alert-header bg-gradient-to-r from-red-50 to-orange-50 p-6 border-b">
+          <div class="flex align-items-center">
+            <div class="alert-icon bg-red-100 text-red-600 p-3 rounded-full mr-4">
+              <i class="pi pi-exclamation-triangle text-xl"></i>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-lg font-bold text-red-800 mb-1">
+                Attention Requise
+              </h3>
+              <p class="text-red-600">
+                {{ overdueBills.length }} facture(s) en retard nécessitent une intervention immédiate
+              </p>
+            </div>
+            <div class="priority-badge bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
+              URGENT
+            </div>
+          </div>
+        </div>
+
+        <div class="p-6">
+          <p-table [value]="overdueBills" [rows]="3" styleClass="urgent-table">
+            <ng-template pTemplate="header">
+              <tr>
+                <th class="font-semibold text-gray-700">Client</th>
+                <th class="font-semibold text-gray-700">Montant Dû</th>
+                <th class="font-semibold text-gray-700">Échéance</th>
+                <th class="font-semibold text-gray-700">Retard</th>
+                <th class="font-semibold text-gray-700">Action</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-bill>
+              <tr class="hover:bg-red-50 transition-colors">
+                <td>
+                  <div class="flex align-items-center">
+                    <div class="customer-avatar bg-red-100 text-red-600 w-8 h-8 rounded-full
+                               flex align-items-center justify-content-center mr-3 text-sm font-bold">
+                      {{ getInitials(bill.customerName) }}
+                    </div>
+                    <span class="font-medium">{{ bill.customerName }}</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="font-bold text-red-600">
+                    {{ formatCurrency(bill.remainingBalance) }}
+                  </span>
+                </td>
+                <td class="text-gray-600">{{ bill.deadLine | date:'dd/MM/yyyy' }}</td>
+                <td>
+                  <p-tag [value]="getDaysOverdue(bill.deadLine) + ' jours'"
+                         severity="danger" [rounded]="true">
+                  </p-tag>
+                </td>
+                <td>
+                  <p-button label="Relancer" icon="pi pi-send"
+                           size="small" severity="danger" [rounded]="true"
+                           (onClick)="sendReminder(bill)"
+                           pTooltip="Envoyer un rappel" pRipple>
+                  </p-button>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+
+          <div class="flex justify-content-between align-items-center mt-6 pt-4 border-t">
+            <div class="text-red-600">
+              <i class="pi pi-info-circle mr-2"></i>
+              <strong>Total en retard: {{ formatCurrency(stats.overdueAmount) }}</strong>
+            </div>
+            <p-button label="Traiter Toutes" icon="pi pi-check-circle"
+                     severity="danger" [outlined]="true" [rounded]="true"
+                     (onClick)="handleAllOverdue()" pRipple>
+            </p-button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Message de bienvenue si pas de données -->
+    <div *ngIf="stats.totalBills === 0" class="text-center py-12">
+      <div class="welcome-card bg-white rounded-xl p-8 shadow-xl max-w-md mx-auto">
+        <div class="welcome-icon bg-blue-100 text-blue-600 w-16 h-16 rounded-full
+                   flex align-items-center justify-content-center mx-auto mb-4">
+          <i class="pi pi-chart-line text-2xl"></i>
+        </div>
+        <h3 class="text-xl font-bold text-gray-800 mb-2">Bienvenue sur votre Dashboard</h3>
+        <p class="text-gray-600 mb-6">Commencez par créer vos premières factures pour voir vos statistiques</p>
+        <p-button label="Créer une Facture" icon="pi pi-plus"
+                 severity="success" [rounded]="true"
+                 (onClick)="navigateToGeneration()" pRipple>
+        </p-button>
+      </div>
+    </div>
+  </div>
+</div>

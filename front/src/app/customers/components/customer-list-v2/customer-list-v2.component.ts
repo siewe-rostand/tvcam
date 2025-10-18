@@ -208,7 +208,33 @@ import {DataTableComponent, TableColumn, TableAction, ToolbarAction} from '../..
       </p-dialog>
 
       <!-- Dialog de confirmation -->
-      <p-confirmDialog></p-confirmDialog>
+      <p-confirmDialog #cd>
+        <ng-template pTemplate="headless" let-message>
+          <div class="custom-confirm-dialog flex flex-column align-items-center p-5">
+            <div class="confirm-icon">
+              <i class="pi pi-question text-4xl text-white"></i>
+            </div>
+            <span class="font-bold text-2xl block mb-2 mt-3 text-900">
+            {{ message.header }}
+          </span>
+            <p class="mb-0 text-700 text-center px-3">{{ message.message }}</p>
+            <div class="flex align-items-center confirm-buttons">
+              <button
+                pButton
+                label="NON"
+                (click)="cd.reject()"
+                class="confirm-button p-button-outlined">
+              </button>
+              <button
+                pButton
+                label="OUI"
+                (click)="cd.accept()"
+                class="confirm-button">
+              </button>
+            </div>
+          </div>
+        </ng-template>
+      </p-confirmDialog>
     </app-data-table>
 
     <p-toast key="br"/>

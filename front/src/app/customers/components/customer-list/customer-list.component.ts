@@ -19,6 +19,8 @@ import {Router} from "@angular/router";
 import {InputIconModule} from "primeng/inputicon";
 import {IconFieldModule} from "primeng/iconfield";
 import {TooltipModule} from "primeng/tooltip";
+import {ConfirmDialogComponent} from '../../../_shared/components/confirm-dialog/confirm-dialog.component';
+import {ConfirmDialogService} from '../../../_shared/services/confirm-dialog.service';
 
 @Component({
   selector: 'app-customer-list',
@@ -39,11 +41,12 @@ import {TooltipModule} from "primeng/tooltip";
     ConfirmDialogModule,
     InputIconModule,
     IconFieldModule,
-    TooltipModule
+    TooltipModule,
+    ConfirmDialogComponent
   ],
   templateUrl: './customer-list.component.html',
   styleUrl: './customer-list.component.css',
-  providers: [MessageService, ConfirmationService],
+  providers: [MessageService, ConfirmationService, ConfirmDialogService],
 })
 export class CustomerListComponent implements OnInit {
   @ViewChild('dt') dt!: Table;

@@ -1,0 +1,29 @@
+<!-- Dialog de confirmation modernisé réutilisable -->
+<p-confirmDialog #cd>
+  <ng-template pTemplate="headless" let-message>
+    <div class="custom-confirm-dialog flex flex-column align-items-center p-5">
+      <div class="confirm-icon">
+        <i class="pi text-4xl text-white" [ngClass]="message.icon || 'pi-question'"></i>
+      </div>
+      <span class="font-bold text-2xl block mb-2 mt-3 text-900">
+        {{ message.header }}
+      </span>
+      <p class="mb-0 text-700 text-center px-3">{{ message.message }}</p>
+      <div class="flex align-items-center confirm-buttons">
+        <button
+          pButton
+          [label]="message.rejectLabel"
+          (click)="cd.reject()"
+          [class]="message.rejectButtonStyleClass">
+        </button>
+        <button
+          pButton
+          [label]="message.acceptLabel"
+          (click)="cd.accept()"
+          [class]="message.acceptButtonStyleClass">
+        </button>
+      </div>
+    </div>
+  </ng-template>
+</p-confirmDialog>
+

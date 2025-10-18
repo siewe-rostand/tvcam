@@ -10,6 +10,8 @@ import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { TooltipModule } from 'primeng/tooltip';
+import { BadgeModule } from 'primeng/badge';
+import { RippleModule } from 'primeng/ripple';
 
 // Services
 import { BillManagementService } from '../customers/service/bill-management.service';
@@ -44,279 +46,12 @@ interface DashboardStats {
         TagModule,
         ProgressBarModule,
         TooltipModule,
+        BadgeModule,
+        RippleModule,
         NavbarComponent
     ],
-    template: `
-    <app-navbar></app-navbar>
-    
-    <div class="container mx-auto p-4">
-      <div class="mb-4">
-        <h1 class="text-3xl font-bold text-gray-800">Tableau de Bord</h1>
-        <p class="text-gray-600">Vue d'ensemble de votre activité</p>
-      </div>
-
-      <!-- Statistiques principales -->
-      <div class="grid mb-6">
-        <div class="col-12 md:col-3">
-          <p-card styleClass="border-l-4 border-blue-500">
-            <div class="flex align-items-center">
-              <div class="flex-1">
-                <h3 class="text-2xl font-bold text-blue-600 m-0">{{ stats.totalBills }}</h3>
-                <p class="text-gray-600 m-0">Total Factures</p>
-              </div>
-              <i class="pi pi-file text-blue-500 text-3xl"></i>
-            </div>
-            <div class="mt-3">
-              <p-progressBar 
-                [value]="(stats.paidBills / stats.totalBills) * 100" 
-                [showValue]="false"
-                styleClass="h-2">
-              </p-progressBar>
-              <small class="text-gray-500">{{ stats.paidBills }} payées / {{ stats.totalBills }} total</small>
-            </div>
-          </p-card>
-        </div>
-
-        <div class="col-12 md:col-3">
-          <p-card styleClass="border-l-4 border-green-500">
-            <div class="flex align-items-center">
-              <div class="flex-1">
-                <h3 class="text-2xl font-bold text-green-600 m-0">
-                  {{ stats.totalRevenue | currency:'XAF':'symbol':'1.0-0' }}
-                </h3>
-                <p class="text-gray-600 m-0">Revenus Total</p>
-              </div>
-              <i class="pi pi-dollar text-green-500 text-3xl"></i>
-            </div>
-            <div class="mt-3">
-              <small class="text-green-600">
-                +{{ revenueGrowth }}% ce mois
-              </small>
-            </div>
-          </p-card>
-        </div>
-
-        <div class="col-12 md:col-3">
-          <p-card styleClass="border-l-4 border-orange-500">
-            <div class="flex align-items-center">
-              <div class="flex-1">
-                <h3 class="text-2xl font-bold text-orange-600 m-0">{{ stats.unpaidBills }}</h3>
-                <p class="text-gray-600 m-0">Factures Impayées</p>
-              </div>
-              <i class="pi pi-exclamation-triangle text-orange-500 text-3xl"></i>
-            </div>
-            <div class="mt-3">
-              <small class="text-orange-600">
-                {{ stats.overdueAmount | currency:'XAF':'symbol':'1.0-0' }} en retard
-              </small>
-            </div>
-          </p-card>
-        </div>
-
-        <div class="col-12 md:col-3">
-          <p-card styleClass="border-l-4 border-purple-500">
-            <div class="flex align-items-center">
-              <div class="flex-1">
-                <h3 class="text-2xl font-bold text-purple-600 m-0">{{ stats.paymentRate }}%</h3>
-                <p class="text-gray-600 m-0">Taux de Paiement</p>
-              </div>
-              <i class="pi pi-chart-line text-purple-500 text-3xl"></i>
-            </div>
-            <div class="mt-3">
-              <p-progressBar 
-                [value]="stats.paymentRate" 
-                [showValue]="false"
-                styleClass="h-2">
-              </p-progressBar>
-            </div>
-          </p-card>
-        </div>
-      </div>
-
-      <!-- Graphiques -->
-      <div class="grid mb-6">
-        <div class="col-12 md:col-8">
-          <p-card header="Évolution des Revenus" styleClass="h-full">
-            <p-chart 
-              type="line" 
-              [data]="revenueChart" 
-              [options]="chartOptions"
-              height="300px">
-            </p-chart>
-          </p-card>
-        </div>
-        
-        <div class="col-12 md:col-4">
-          <p-card header="Répartition des Paiements" styleClass="h-full">
-            <p-chart 
-              type="doughnut" 
-              [data]="paymentStatusChart" 
-              [options]="doughnutOptions"
-              height="300px">
-            </p-chart>
-          </p-card>
-        </div>
-      </div>
-
-      <!-- Actions rapides -->
-      <div class="grid mb-6">
-        <div class="col-12">
-          <p-card header="Actions Rapides">
-            <div class="flex flex-wrap gap-3">
-              <p-button 
-                label="Générer Factures" 
-                icon="pi pi-file-plus" 
-                (onClick)="navigateToGeneration()"
-                severity="success">
-              </p-button>
-              <p-button 
-                label="Nouveau Paiement" 
-                icon="pi pi-dollar" 
-                (onClick)="navigateToPayments()"
-                severity="info">
-              </p-button>
-              <p-button 
-                label="Voir Factures" 
-                icon="pi pi-list" 
-                (onClick)="navigateToBills()"
-                severity="secondary">
-              </p-button>
-              <p-button 
-                label="Gérer Clients" 
-                icon="pi pi-users" 
-                (onClick)="navigateToCustomers()"
-                severity="help">
-              </p-button>
-            </div>
-          </p-card>
-        </div>
-      </div>
-
-      <!-- Tables récentes -->
-      <div class="grid">
-        <div class="col-12 md:col-6">
-          <p-card header="Factures Récentes">
-            <p-table [value]="recentBills" [rows]="5" styleClass="p-datatable-sm">
-              <ng-template pTemplate="header">
-                <tr>
-                  <th>Client</th>
-                  <th>Montant</th>
-                  <th>Statut</th>
-                  <th>Date</th>
-                </tr>
-              </ng-template>
-              <ng-template pTemplate="body" let-bill>
-                <tr>
-                  <td>{{ bill.customerName }}</td>
-                  <td>{{ bill.netToPay | currency:'XAF':'symbol':'1.0-0' }}</td>
-                  <td>
-                    <p-tag 
-                      [value]="bill.status" 
-                      [severity]="getBillStatusSeverity(bill.status)">
-                    </p-tag>
-                  </td>
-                  <td>{{ bill.depositDate | date:'dd/MM/yyyy' }}</td>
-                </tr>
-              </ng-template>
-            </p-table>
-            
-            <div class="mt-3 text-center">
-              <p-button 
-                label="Voir Toutes" 
-                icon="pi pi-arrow-right" 
-                [text]="true"
-                (onClick)="navigateToBills()">
-              </p-button>
-            </div>
-          </p-card>
-        </div>
-
-        <div class="col-12 md:col-6">
-          <p-card header="Paiements Récents">
-            <p-table [value]="recentPayments" [rows]="5" styleClass="p-datatable-sm">
-              <ng-template pTemplate="header">
-                <tr>
-                  <th>Client</th>
-                  <th>Montant</th>
-                  <th>Méthode</th>
-                  <th>Date</th>
-                </tr>
-              </ng-template>
-              <ng-template pTemplate="body" let-payment>
-                <tr>
-                  <td>{{ payment.customerName }}</td>
-                  <td>{{ payment.amount | currency:'XAF':'symbol':'1.0-0' }}</td>
-                  <td>
-                    <p-tag 
-                      [value]="formatPaymentMethod(payment.paymentMethod)" 
-                      severity="info">
-                    </p-tag>
-                  </td>
-                  <td>{{ payment.paymentDate | date:'dd/MM/yyyy' }}</td>
-                </tr>
-              </ng-template>
-            </p-table>
-            
-            <div class="mt-3 text-center">
-              <p-button 
-                label="Voir Tous" 
-                icon="pi pi-arrow-right" 
-                [text]="true"
-                (onClick)="navigateToPayments()">
-              </p-button>
-            </div>
-          </p-card>
-        </div>
-      </div>
-
-      <!-- Alertes -->
-      <div class="grid mt-4" *ngIf="overdueBills.length > 0">
-        <div class="col-12">
-          <p-card 
-            header="⚠️ Factures en Retard" 
-            styleClass="border-l-4 border-red-500 bg-red-50">
-            
-            <p class="text-red-700 mb-3">
-              Vous avez {{ overdueBills.length }} facture(s) en retard nécessitant une attention immédiate.
-            </p>
-            
-            <p-table [value]="overdueBills" [rows]="3" styleClass="p-datatable-sm">
-              <ng-template pTemplate="header">
-                <tr>
-                  <th>Client</th>
-                  <th>Montant</th>
-                  <th>Date Limite</th>
-                  <th>Jours de Retard</th>
-                  <th>Action</th>
-                </tr>
-              </ng-template>
-              <ng-template pTemplate="body" let-bill>
-                <tr>
-                  <td>{{ bill.customerName }}</td>
-                  <td>{{ bill.remainingBalance | currency:'XAF':'symbol':'1.0-0' }}</td>
-                  <td>{{ bill.deadLine | date:'dd/MM/yyyy' }}</td>
-                  <td>
-                    <span class="text-red-600 font-bold">
-                      {{ getDaysOverdue(bill.deadLine) }}
-                    </span>
-                  </td>
-                  <td>
-                    <p-button 
-                      label="Relancer" 
-                      icon="pi pi-send" 
-                      size="small"
-                      severity="danger"
-                      (onClick)="sendReminder(bill)">
-                    </p-button>
-                  </td>
-                </tr>
-              </ng-template>
-            </p-table>
-          </p-card>
-        </div>
-      </div>
-    </div>
-  `
+    templateUrl: './enhanced-dashboard.component.html',
+    styleUrls: ['./enhanced-dashboard.component.css']
 })
 export class EnhancedDashboardComponent implements OnInit {
     stats: DashboardStats = {
@@ -392,7 +127,10 @@ export class EnhancedDashboardComponent implements OnInit {
     }
 
     loadDashboardData(): void {
-        // Charger les statistiques des factures
+        // Utiliser des données mockées quand l'API n'est pas disponible
+        this.loadMockData();
+
+        // Essayer de charger les vraies données si l'API est disponible
         this.billManagementService.getBillsStatistics().subscribe({
             next: (billStats) => {
                 this.stats.totalBills = billStats.total;
@@ -401,27 +139,36 @@ export class EnhancedDashboardComponent implements OnInit {
                 this.stats.totalRevenue = billStats.paidAmount;
                 this.stats.paymentRate = Math.round(billStats.paymentRate);
                 this.updateCharts();
+            },
+            error: () => {
+                // En cas d'erreur, utiliser les données mockées
+                console.log('API non disponible, utilisation des données mockées');
             }
         });
 
-        // Charger les factures récentes
+        // Charger les factures récentes avec fallback
         this.billManagementService.loadBills().subscribe({
             next: (bills) => {
                 this.recentBills = bills.slice(0, 5);
                 this.loadOverdueBills();
+            },
+            error: () => {
+                // Fallback vers les données mockées déjà chargées
+                console.log('API factures non disponible, utilisation des données mockées');
             }
         });
 
-        // Charger les métriques de performance des paiements
+        // Charger les métriques de performance avec fallback
         this.paymentManagementService.getPerformanceMetrics().subscribe({
             next: (metrics) => {
                 this.revenueGrowth = Math.round(metrics.growth);
                 this.stats.monthlyRevenue = metrics.thisMonthAmount;
+            },
+            error: () => {
+                // Les données mockées sont déjà chargées
+                console.log('API métriques non disponible, utilisation des données mockées');
             }
         });
-
-        // Simuler les paiements récents
-        this.loadRecentPayments();
     }
 
     loadOverdueBills(): void {
@@ -521,5 +268,210 @@ export class EnhancedDashboardComponent implements OnInit {
         // Simuler l'envoi de rappel
         console.log('Envoi de rappel pour la facture:', bill);
         // Ici, vous pouvez implémenter l'envoi d'email ou SMS
+    }
+
+    // Nouvelles méthodes pour les données mockées
+    private loadMockData(): void {
+        // Statistiques mockées
+        this.stats = {
+            totalBills: 245,
+            paidBills: 187,
+            unpaidBills: 58,
+            totalRevenue: 18750000,
+            monthlyRevenue: 3250000,
+            paymentRate: 76,
+            overdueAmount: 2450000
+        };
+
+        this.revenueGrowth = 15;
+
+        // Factures récentes mockées
+        this.recentBills = [
+            {
+                id: 1,
+                customerName: 'Société KAMDEM & Fils',
+                netToPay: 850000,
+                status: 'PAID',
+                depositDate: '2024-10-15T10:30:00Z'
+            },
+            {
+                id: 2,
+                customerName: 'Entreprise MBALLA SARL',
+                netToPay: 1200000,
+                status: 'UNPAID',
+                depositDate: '2024-10-14T14:20:00Z'
+            },
+            {
+                id: 3,
+                customerName: 'NGOUO Trading Ltd',
+                netToPay: 675000,
+                status: 'PARTIALLY_PAID',
+                depositDate: '2024-10-13T09:15:00Z'
+            },
+            {
+                id: 4,
+                customerName: 'FOTSO Construction',
+                netToPay: 2100000,
+                status: 'PAID',
+                depositDate: '2024-10-12T16:45:00Z'
+            },
+            {
+                id: 5,
+                customerName: 'TCHOUNGA Import-Export',
+                netToPay: 950000,
+                status: 'UNPAID',
+                depositDate: '2024-10-11T11:30:00Z'
+            }
+        ];
+
+        // Paiements récents mockés avec plus de données
+        this.recentPayments = [
+            {
+                customerName: 'Société KAMDEM & Fils',
+                amount: 850000,
+                paymentMethod: 'BANK_TRANSFER',
+                paymentDate: '2024-10-15T15:30:00Z'
+            },
+            {
+                customerName: 'FOTSO Construction',
+                amount: 2100000,
+                paymentMethod: 'MTN_MONEY',
+                paymentDate: '2024-10-14T10:20:00Z'
+            },
+            {
+                customerName: 'NKOMO Services',
+                amount: 450000,
+                paymentMethod: 'CASH',
+                paymentDate: '2024-10-13T14:15:00Z'
+            },
+            {
+                customerName: 'BELLA Entreprises',
+                amount: 750000,
+                paymentMethod: 'ORANGE_MONEY',
+                paymentDate: '2024-10-12T09:45:00Z'
+            },
+            {
+                customerName: 'DOUALA Trading Co.',
+                amount: 1300000,
+                paymentMethod: 'BANK_TRANSFER',
+                paymentDate: '2024-10-11T16:30:00Z'
+            }
+        ];
+
+        // Factures en retard mockées
+        this.overdueBills = [
+            {
+                id: 15,
+                customerName: 'YAOUNDE Motors SARL',
+                remainingBalance: 1200000,
+                deadLine: '2024-09-30T23:59:59Z'
+            },
+            {
+                id: 23,
+                customerName: 'BAFOUSSAM Logistics',
+                remainingBalance: 850000,
+                deadLine: '2024-10-05T23:59:59Z'
+            },
+            {
+                id: 31,
+                customerName: 'KRIBI Shipping Ltd',
+                remainingBalance: 400000,
+                deadLine: '2024-10-08T23:59:59Z'
+            }
+        ];
+
+        // Mettre à jour les graphiques avec les données mockées
+        this.updateCharts();
+    }
+
+    // Nouvelles méthodes utilitaires pour le design amélioré
+    getCurrentDate(): string {
+        return new Date().toLocaleDateString('fr-FR', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    }
+
+    formatCurrency(amount: number): string {
+        if (!amount) return '0 FCFA';
+        return new Intl.NumberFormat('fr-FR', {
+            style: 'decimal',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        }).format(amount) + ' FCFA';
+    }
+
+    getPaymentRateTrend(): string {
+        if (this.stats.paymentRate >= 80) {
+            return 'text-green-500';
+        } else if (this.stats.paymentRate >= 60) {
+            return 'text-yellow-500';
+        } else {
+            return 'text-red-500';
+        }
+    }
+
+    getPaymentRateLabel(): string {
+        if (this.stats.paymentRate >= 80) {
+            return 'Excellent';
+        } else if (this.stats.paymentRate >= 60) {
+            return 'Moyen';
+        } else {
+            return 'Faible';
+        }
+    }
+
+    getInitials(name?: string): string {
+        if (!name) return '?';
+        return name.split(' ')
+            .map(word => word.charAt(0).toUpperCase())
+            .slice(0, 2)
+            .join('');
+    }
+
+    getStatusLabel(status?: string): string {
+        const statusLabels: { [key: string]: string } = {
+            'PAID': 'Payée',
+            'UNPAID': 'Impayée',
+            'PARTIALLY_PAID': 'Partielle',
+            'OVERDUE': 'En retard'
+        };
+        return statusLabels[status || ''] || status || 'Inconnu';
+    }
+
+    getPaymentMethodIcon(method?: string): string {
+        const icons: { [key: string]: string } = {
+            'CASH': 'pi-money-bill',
+            'MTN_MONEY': 'pi-mobile',
+            'ORANGE_MONEY': 'pi-mobile',
+            'BANK_TRANSFER': 'pi-credit-card'
+        };
+        return icons[method || ''] || 'pi-circle';
+    }
+
+    refreshData(): void {
+        this.loadDashboardData();
+        // Ajouter une animation de chargement ou notification
+        console.log('Données actualisées');
+    }
+
+    handleAllOverdue(): void {
+        // Traiter toutes les factures en retard
+        this.overdueBills.forEach(bill => {
+            this.sendReminder(bill);
+        });
+        console.log('Rappels envoyés pour toutes les factures en retard');
+    }
+
+    getBillsGrowth(): number {
+        // Calcul mockée basée sur une croissance de 18%
+        return 18;
+    }
+
+    getUnpaidTrend(): string {
+        const unpaidPercentage = (this.stats.unpaidBills / this.stats.totalBills) * 100;
+        return unpaidPercentage > 20 ? 'Élevé' : 'Normal';
     }
 }

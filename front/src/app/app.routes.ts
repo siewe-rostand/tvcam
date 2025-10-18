@@ -14,6 +14,7 @@ import { AuthGuardService } from "./auth/services/auth-guard.service";
 import { EnhancedDashboardComponent } from "./dashboard/enhanced-dashboard.component";
 import { EnhancedBillGenerationComponent } from "./customers/components/bill/enhanced-bill-generation.component";
 import { EnhancedPaymentComponent } from "./customers/components/payment/enhanced-payment.component";
+import {CustomerListV2Component} from "./customers/components/customer-list-v2/customer-list-v2.component";
 
 export const routes: Routes = [
   // Public routes (no authentication required)
@@ -37,6 +38,12 @@ export const routes: Routes = [
   {
     path: 'customers',
     component: CustomerListComponent,
+    canActivate: [AuthGuardService],
+  },
+
+  {
+    path: 'customersv2',
+    component: CustomerListV2Component,
     canActivate: [AuthGuardService],
   },
 

@@ -1,0 +1,476 @@
+/* Enhanced Dashboard Styles - Design Professionnel */
+
+/* Variables CSS pour les couleurs neutres et élégantes */
+:root {
+  --primary-color: #3b82f6;
+  --secondary-color: #1e40af;
+  --success-color: #10b981;
+  --warning-color: #f59e0b;
+  --danger-color: #ef4444;
+  --info-color: #0ea5e9;
+  --gray-50: #f8fafc;
+  --gray-100: #f1f5f9;
+  --gray-200: #e2e8f0;
+  --gray-300: #cbd5e1;
+  --gray-400: #94a3b8;
+  --gray-500: #64748b;
+  --gray-600: #475569;
+  --gray-700: #334155;
+  --gray-800: #1e293b;
+  --gray-900: #0f172a;
+}
+
+/* Animations subtiles et professionnelles */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes gentlePulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.02);
+  }
+}
+
+@keyframes progressFill {
+  from {
+    width: 0%;
+    opacity: 0.5;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.8s ease-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 1s ease-out 0.3s both;
+}
+
+/* Conteneur principal avec design subtil */
+.min-h-screen {
+  position: relative;
+  min-height: 100vh;
+}
+
+.min-h-screen::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 40% 60%, rgba(16, 185, 129, 0.02) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.container {
+  position: relative;
+  z-index: 1;
+}
+
+/* Header amélioré */
+.animate-fade-in {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Cards avec design épuré et élégant */
+.stats-card {
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 280px;
+}
+
+.stats-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.8s ease-in-out;
+}
+
+.stats-card:hover::before {
+  left: 100%;
+}
+
+.stats-card:hover {
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.1),
+    0 8px 16px rgba(0, 0, 0, 0.05),
+    0 0 0 1px rgba(255, 255, 255, 0.5);
+  transform: translateY(-12px) scale(1.02);
+}
+
+.stats-icon {
+  transition: all 0.4s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.stats-card:hover .stats-icon {
+  transform: scale(1.1) rotate(5deg);
+}
+
+/* Trends badges améliorés */
+.stats-trend {
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.stats-card:hover .stats-trend {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Progress bars avec design moderne */
+.progress-section {
+  transition: all 0.3s ease;
+}
+
+.stats-card:hover .progress-section {
+  transform: translateY(-2px);
+}
+
+.progress-wrapper {
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-bar {
+  animation: progressFill 2s ease-out;
+  position: relative;
+}
+
+.progress-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.4) 50%, transparent 70%);
+  animation: shimmer 2.5s infinite;
+}
+
+/* Sections spéciales pour revenus et impayés */
+.monthly-revenue,
+.overdue-amount {
+  transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.stats-card:hover .monthly-revenue,
+.stats-card:hover .overdue-amount {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Circular progress amélioré */
+.circular-progress-section {
+  transition: all 0.3s ease;
+}
+
+.stats-card:hover .circular-progress-section {
+  transform: scale(1.05);
+}
+
+.circular-progress {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.circular-progress circle:last-child {
+  filter: drop-shadow(0 1px 3px rgba(124, 58, 237, 0.3));
+  transition: all 1s ease-out;
+}
+
+/* Effets de brillance en arrière-plan */
+.stats-card .absolute {
+  transition: all 0.5s ease;
+}
+
+.stats-card:hover .absolute:first-of-type {
+  transform: translate(5px, -5px) scale(1.1);
+}
+
+.stats-card:hover .absolute:last-of-type {
+  transform: translate(-5px, 5px) scale(1.1);
+}
+
+/* Responsive design pour les cartes */
+@media (max-width: 1200px) {
+  .stats-card {
+    min-height: 260px;
+  }
+}
+
+@media (max-width: 768px) {
+  .flex-wrap {
+    flex-direction: column;
+  }
+
+  .flex-1 {
+    flex: none;
+    width: 100%;
+  }
+
+  .stats-card {
+    min-height: 200px;
+  }
+
+  .stats-card:hover {
+    transform: translateY(-4px) scale(1.01);
+  }
+}
+
+@media (max-width: 640px) {
+  .min-w-64 {
+    min-width: auto;
+  }
+}
+
+/* Animation d'entrée pour les cartes */
+@keyframes cardEntrance {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.stats-card {
+  animation: cardEntrance 0.6s ease-out;
+}
+
+.stats-card:nth-child(1) { animation-delay: 0.1s; }
+.stats-card:nth-child(2) { animation-delay: 0.2s; }
+.stats-card:nth-child(3) { animation-delay: 0.3s; }
+.stats-card:nth-child(4) { animation-delay: 0.4s; }
+
+/* Amélioration des titres dans les cardes */
+.stats-card h3 {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.stats-card:hover h3 {
+  transform: translateY(-1px);
+}
+
+/* Amélioration des textes secondaires */
+.stats-card p {
+  transition: all 0.3s ease;
+}
+
+.stats-card:hover p {
+  color: inherit;
+  opacity: 0.9;
+}
+
+/* Alert cards avec design subtil */
+.alert-card {
+  animation: slideInFromLeft 0.6s ease-out;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+@keyframes slideInFromLeft {
+  0% {
+    transform: translateX(-50px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.priority-badge {
+  animation: gentlePulse 3s infinite;
+}
+
+.urgent-table tbody tr:hover {
+  background: rgba(239, 68, 68, 0.03);
+}
+
+/* Chart containers avec design épuré */
+.chart-card {
+  position: relative;
+  backdrop-filter: blur(5px);
+  border: 1px solid var(--gray-200);
+  transition: all 0.3s ease;
+}
+
+.chart-card:hover {
+  border-color: rgba(59, 130, 246, 0.2);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* Responsive design amélioré */
+@media (max-width: 768px) {
+  .stats-card:hover {
+    transform: translateY(-2px) !important;
+  }
+
+  .action-button:hover {
+    transform: translateY(-1px) scale(1.01) !important;
+  }
+}
+
+/* États de chargement subtils */
+.loading {
+  animation: gentlePulse 2s infinite;
+}
+
+/* Scrollbar personnalisée */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--gray-100);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, var(--primary-color), var(--info-color));
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(45deg, var(--secondary-color), var(--primary-color));
+}
+
+/* Tooltips élégants */
+.p-tooltip .p-tooltip-text {
+  background: linear-gradient(135deg, var(--gray-800), var(--gray-700));
+  color: white;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  padding: 0.5rem 0.75rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Badges avec design moderne */
+.p-badge {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Boutons avec interactions subtiles */
+.p-button {
+  transition: all 0.2s ease;
+}
+
+.p-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+}
+
+.p-button:active {
+  transform: translateY(0);
+}
+
+/* Welcome card avec design accueillant */
+.welcome-card {
+  background: linear-gradient(135deg, #ffffff 0%, var(--gray-50) 100%);
+  border: 1px solid var(--gray-200);
+}
+
+.welcome-icon {
+  animation: gentlePulse 4s infinite;
+}
+
+/* Circular progress avec design élégant */
+.circular-progress-wrapper svg {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.05));
+}
+
+.circle {
+  filter: drop-shadow(0 1px 2px rgba(124, 58, 237, 0.2));
+  stroke-linecap: round;
+}
+
+/* Légendes avec style cohérent */
+.legend-custom .legend-dot {
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Micro-interactions professionnelles */
+.stats-trend {
+  transition: all 0.2s ease;
+}
+
+.stats-card:hover .stats-trend {
+  transform: scale(1.05);
+}
+
+/* États de focus pour l'accessibilité */
+.action-button:focus,
+.stats-card:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+/* Styles d'impression */
+@media print {
+  .min-h-screen {
+    background: white !important;
+  }
+
+  .stats-card,
+  .chart-card,
+  .table-card {
+    box-shadow: none !important;
+    border: 1px solid #ddd !important;
+  }
+
+  .action-button {
+    display: none !important;
+  }
+
+  .animate-fade-in,
+  .animate-slide-up {
+    animation: none !important;
+  }
+}
