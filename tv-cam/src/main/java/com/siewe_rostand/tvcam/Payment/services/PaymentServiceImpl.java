@@ -127,13 +127,29 @@ public class PaymentServiceImpl implements PaymentService {
         if (newPaidAmount.compareTo(currentBill.getNetToPay()) >= 0) {
             currentBill.setPaymentStatus(PaymentStatus.PAID);
             log.info("Facture complètement payée pour le client {}", customer.getCustomerId());
+
+            // Gérer l'excédent de paiement (avance)
+            BigDecimal excess = newPaidAmount.subtract(currentBill.getNetToPay());
+            if (excess.compareTo(BigDecimal.ZERO) > 0) {
+                log.info("Excédent de paiement détecté pour le client {}: {}",
+                        customer.getCustomerId(), excess);
+                // L'excédent sera automatiquement pris en compte lors de la prochaine génération de facture
+                // grâce à la méthode getCreditBalance() dans BillCalculationService
+            }
         } else {
             currentBill.setPaymentStatus(PaymentStatus.PARTIALLY_PAID);
             log.info("Facture partiellement payée pour le client {}: {}/{}",
                     customer.getCustomerId(), newPaidAmount, currentBill.getNetToPay());
         }
 
+        // Recalculer la dette de la facture courante
+        BigDecimal currentDebt = billCalculationService.calculateCurrentBillDebt(currentBill);
+        currentBill.setDebt(currentDebt);
+
         billRepository.save(currentBill);
+
+        // Mettre à jour toutes les dettes du client après le paiement
+        billCalculationService.updateAllBillsDebt(customer);
 
         log.info("Paiement traité avec succès. Référence: {}", payment.getPaymentRef());
         return paymentMapper.toResponse(payment);

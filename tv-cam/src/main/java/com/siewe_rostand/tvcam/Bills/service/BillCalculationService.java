@@ -6,6 +6,7 @@ import com.siewe_rostand.tvcam.Customers.model.Customers;
 import com.siewe_rostand.tvcam.Discount.model.Discount;
 import com.siewe_rostand.tvcam.Discount.repository.DiscountRepository;
 import com.siewe_rostand.tvcam.Payment.model.enumeration.PaymentFrequency;
+import com.siewe_rostand.tvcam.Payment.model.enumeration.PaymentStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -31,18 +32,150 @@ public class BillCalculationService {
     private final DiscountRepository discountRepository;
     private final BillRepository billRepository;
 
+    /**
+     * Calcule le montant net à payer pour une nouvelle facture
+     * Dette antérieure + Montant mensuel = Net à payer
+     */
+    @Transactional(readOnly = true)
+    public BigDecimal calculateBillAmount(Customers customer, Integer month, Integer year) {
+        // Calculer la dette antérieure (excluant la facture courante)
+        BigDecimal previousDebt = getDebtAmount(customer, month, year);
+
+        // Le montant net = dette antérieure + montant mensuel
+        BigDecimal monthlyAmount = DEFAULT_MONTHLY_AMOUNT;
+        BigDecimal netToPay = previousDebt.add(monthlyAmount);
+
+        log.debug("Calcul pour client {}: Dette antérieure = {}, Montant mensuel = {}, Net à payer = {}",
+                customer.getName(), previousDebt, monthlyAmount, netToPay);
+
+        return netToPay;
+    }
 
     /**
-     * Calcule le montant total à payer pour un client selon sa fréquence de
-     * paiement
+     * Calcule la dette totale d'un client (montants impayés des factures précédentes)
+     * Dette = Somme de (net_to_pay - paid_amount) pour toutes les factures non soldées
+     * Exclut la facture courante pour éviter la duplication lors de la régénération
+     */
+    @Transactional(readOnly = true)
+    public BigDecimal getDebtAmount(Customers customer, Integer currentMonth, Integer currentYear) {
+        // Récupérer toutes les factures du client
+        List<Bills> allBills = billRepository.findAllByCustomers(customer);
+
+        return allBills.stream()
+                .filter(bill -> {
+                    // Exclure la facture courante pour éviter la duplication lors de la régénération
+                    if (currentMonth != null && currentYear != null) {
+                        return !(bill.getMonth().equals(currentMonth) && bill.getYear().equals(currentYear));
+                    }
+                    return true;
+                })
+                .filter(bill -> {
+                    // Ne considérer que les factures avec un solde impayé
+                    BigDecimal netToPay = bill.getNetToPay() != null ? bill.getNetToPay() : BigDecimal.ZERO;
+                    BigDecimal paidAmount = bill.getPaidAmount() != null ? bill.getPaidAmount() : BigDecimal.ZERO;
+                    return netToPay.subtract(paidAmount).compareTo(BigDecimal.ZERO) > 0;
+                })
+                .map(bill -> {
+                    // Calculer le solde impayé de chaque facture
+                    BigDecimal netToPay = bill.getNetToPay() != null ? bill.getNetToPay() : BigDecimal.ZERO;
+                    BigDecimal paidAmount = bill.getPaidAmount() != null ? bill.getPaidAmount() : BigDecimal.ZERO;
+                    return netToPay.subtract(paidAmount);
+                })
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    /**
+     * Version surchargée pour maintenir la compatibilité
+     */
+    @Transactional(readOnly = true)
+    public BigDecimal getDebtAmount(Customers customer) {
+        return getDebtAmount(customer, null, null);
+    }
+
+    /**
+     * Calcule la dette actuelle d'une facture spécifique
+     * Dette de la facture = net_to_pay - paid_amount
+     */
+    @Transactional(readOnly = true)
+    public BigDecimal calculateCurrentBillDebt(Bills bill) {
+        BigDecimal netToPay = bill.getNetToPay() != null ? bill.getNetToPay() : BigDecimal.ZERO;
+        BigDecimal paidAmount = bill.getPaidAmount() != null ? bill.getPaidAmount() : BigDecimal.ZERO;
+        BigDecimal debt = netToPay.subtract(paidAmount);
+        return debt.compareTo(BigDecimal.ZERO) > 0 ? debt : BigDecimal.ZERO;
+    }
+
+    /**
+     * Met à jour les dettes de toutes les factures d'un client après génération/paiement
+     * Cette méthode recalcule et met à jour le champ 'debt' dans chaque facture
+     * Le champ 'debt' représente le solde restant à payer pour cette facture (net_to_pay - paid_amount)
+     */
+    @Transactional
+    public void updateAllBillsDebt(Customers customer) {
+        List<Bills> allBills = billRepository.findAllByCustomers(customer);
+
+        for (Bills bill : allBills) {
+            // Calculer le solde restant à payer pour cette facture
+            BigDecimal netToPay = bill.getNetToPay() != null ? bill.getNetToPay() : BigDecimal.ZERO;
+            BigDecimal paidAmount = bill.getPaidAmount() != null ? bill.getPaidAmount() : BigDecimal.ZERO;
+            BigDecimal remainingDebt = netToPay.subtract(paidAmount);
+
+            // La dette ne peut pas être négative
+            bill.setDebt(remainingDebt.compareTo(BigDecimal.ZERO) > 0 ? remainingDebt : BigDecimal.ZERO);
+
+            // Mettre à jour le statut de paiement
+            updatePaymentStatus(bill);
+        }
+
+        billRepository.saveAll(allBills);
+    }
+
+    /**
+     * Met à jour le statut de paiement d'une facture selon son solde
+     */
+    private void updatePaymentStatus(Bills bill) {
+        BigDecimal netToPay = bill.getNetToPay() != null ? bill.getNetToPay() : BigDecimal.ZERO;
+        BigDecimal paidAmount = bill.getPaidAmount() != null ? bill.getPaidAmount() : BigDecimal.ZERO;
+
+        if (paidAmount.compareTo(BigDecimal.ZERO) == 0) {
+            bill.setPaymentStatus(PaymentStatus.UNPAID);
+        } else if (paidAmount.compareTo(netToPay) >= 0) {
+            bill.setPaymentStatus(PaymentStatus.PAID);
+        } else {
+            bill.setPaymentStatus(PaymentStatus.PARTIALLY_PAID);
+        }
+    }
+
+    /**
+     * Vérifie si un client a des factures impayées
+     */
+    @Transactional(readOnly = true)
+    public boolean hasUnpaidBills(Customers customer) {
+        return getDebtAmount(customer).compareTo(BigDecimal.ZERO) > 0;
+    }
+
+    /**
+     * Calcule le solde créditeur d'un client (paiements en avance)
+     */
+    @Transactional(readOnly = true)
+    public BigDecimal getCreditBalance(Customers customer) {
+        List<Bills> allBills = billRepository.findAllByCustomers(customer);
+
+        return allBills.stream()
+                .map(bill -> {
+                    BigDecimal netToPay = bill.getNetToPay() != null ? bill.getNetToPay() : BigDecimal.ZERO;
+                    BigDecimal paidAmount = bill.getPaidAmount() != null ? bill.getPaidAmount() : BigDecimal.ZERO;
+                    BigDecimal excess = paidAmount.subtract(netToPay);
+                    return excess.compareTo(BigDecimal.ZERO) > 0 ? excess : BigDecimal.ZERO;
+                })
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    /**
+     * Calcule le montant total à payer pour un client selon sa fréquence de paiement
      */
     public BigDecimal calculateTotalAmount(Customers customer, int numberOfMonths) {
         PaymentFrequency frequency = customer.getPaymentFrequency();
-
-        // Calcul du montant brut (nombre de mois × montant mensuel)
         BigDecimal grossAmount = DEFAULT_MONTHLY_AMOUNT.multiply(BigDecimal.valueOf(numberOfMonths));
-
-        // Application du rabais selon la fréquence
         BigDecimal finalAmount = applyDiscount(grossAmount, frequency);
 
         log.info("Calcul pour client {}: {} mois, montant brut: {}, montant final: {}",
@@ -52,66 +185,20 @@ public class BillCalculationService {
     }
 
     /**
-     * Calcule le montant pour un paiement trimestriel (3 mois)
-     */
-    public BigDecimal calculateQuarterlyAmount() {
-        return calculateAmountWithDiscount(3, PaymentFrequency.QUARTERLY);
-    }
-
-    /**
-     * Calcule le montant pour un paiement semestriel (6 mois)
-     */
-    public BigDecimal calculateSemiAnnualAmount() {
-        return calculateAmountWithDiscount(6, PaymentFrequency.SEMI_ANNUALLY);
-    }
-
-    /**
-     * Calcule le montant pour un paiement annuel (12 mois)
-     */
-    public BigDecimal calculateAnnualAmount() {
-        return calculateAmountWithDiscount(12, PaymentFrequency.ANNUALLY);
-    }
-
-    /**
      * Applique le rabais selon la fréquence de paiement
      */
     private BigDecimal applyDiscount(BigDecimal originalAmount, PaymentFrequency frequency) {
         if (frequency == PaymentFrequency.MONTHLY) {
-            return originalAmount; // Pas de rabais pour le paiement mensuel
+            return originalAmount;
         }
 
         Optional<Discount> discountOpt = discountRepository.findByPaymentFrequencyAndIsActiveTrue(frequency);
-
         if (discountOpt.isPresent()) {
             Discount discount = discountOpt.get();
             return discount.calculateDiscountedAmount(originalAmount);
         }
 
         return originalAmount;
-    }
-
-    /**
-     * Calcule le montant avec rabais pour un nombre de mois et une fréquence donnés
-     */
-    private BigDecimal calculateAmountWithDiscount(int numberOfMonths, PaymentFrequency frequency) {
-        BigDecimal grossAmount = DEFAULT_MONTHLY_AMOUNT.multiply(BigDecimal.valueOf(numberOfMonths));
-        return applyDiscount(grossAmount, frequency);
-    }
-
-    /**
-     * Calcule le montant d'économie réalisé avec un paiement avancé
-     */
-    public BigDecimal calculateSavings(PaymentFrequency frequency, int numberOfMonths) {
-        BigDecimal grossAmount = DEFAULT_MONTHLY_AMOUNT.multiply(BigDecimal.valueOf(numberOfMonths));
-        BigDecimal discountedAmount = applyDiscount(grossAmount, frequency);
-        return grossAmount.subtract(discountedAmount);
-    }
-
-    /**
-     * Vérifie si un client est éligible pour un rabais
-     */
-    public boolean isEligibleForDiscount(Customers customer) {
-        return customer.getPaymentFrequency() != PaymentFrequency.MONTHLY;
     }
 
     /**
@@ -123,98 +210,9 @@ public class BillCalculationService {
     }
 
     /**
-     * Calcule le montant d'une facture en tenant compte des arriérés et des rabais
+     * Vérifie si un client est éligible pour un rabais selon sa fréquence de paiement
      */
-    public BigDecimal calculateBillAmount(Customers customer, BigDecimal debt) {
-        PaymentFrequency frequency = customer.getPaymentFrequency();
-
-        // Pour les paiements mensuels
-        if (frequency == PaymentFrequency.MONTHLY) {
-            return DEFAULT_MONTHLY_AMOUNT.add(debt != null ? debt : BigDecimal.ZERO);
-        }
-
-        // Pour les autres fréquences, calculer selon la période
-        int months = getMonthsForFrequency(frequency);
-        BigDecimal totalAmount = DEFAULT_MONTHLY_AMOUNT.multiply(BigDecimal.valueOf(months));
-
-        return totalAmount.add(debt != null ? debt : BigDecimal.ZERO);
-    }
-
-    /**
-     * Retourne le nombre de mois selon la fréquence
-     */
-    private int getMonthsForFrequency(PaymentFrequency frequency) {
-        return switch (frequency) {
-            case QUARTERLY -> 3;
-            case SEMI_ANNUALLY -> 6;
-            case ANNUALLY -> 12;
-            default -> 1;
-        };
-    }
-
-
-    @Transactional(readOnly = true)
-    public BigDecimal getUnpaidAmount(Customers customer) {
-        List<Bills> unpaidBills = billRepository.findAllByCustomersAndDebtGreaterThan(customer, BigDecimal.ZERO);
-        return unpaidBills.stream()
-                .map(Bills::getPaidAmount)
-                .filter(java.util.Objects::nonNull)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
-
-    @Transactional
-    public BigDecimal getDebtAmount(Customers customer) {
-        List<Bills> unpaidBills = billRepository.findAllByCustomersAndDebtGreaterThan(customer, BigDecimal.ZERO);
-        return unpaidBills.stream().map(Bills::getDebt).reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
-
-    @Transactional(readOnly = true)
-    public BigDecimal calculateBillAmount(Customers customer) {
-        BigDecimal debt = getDebtAmount(customer);
-        return calculateBillAmount(customer, debt);
-    }
-
-
-    /**
-     * Génère un résumé de facturation avec les détails du rabais
-     */
-    public BillSummary generateBillSummary(Customers customer, BigDecimal debt) {
-        PaymentFrequency frequency = customer.getPaymentFrequency();
-        int months = getMonthsForFrequency(frequency);
-        BigDecimal grossAmount = DEFAULT_MONTHLY_AMOUNT.multiply(BigDecimal.valueOf(months));
-        BigDecimal discount = calculateSavings(frequency, months);
-        BigDecimal netAmount = grossAmount.subtract(discount);
-        BigDecimal totalWithDebt = netAmount.add(debt != null ? debt : BigDecimal.ZERO);
-
-        return BillSummary.builder()
-                .customerId(customer.getCustomerId())
-                .customerName(customer.getName())
-                .paymentFrequency(frequency)
-                .numberOfMonths(months)
-                .grossAmount(grossAmount)
-                .discountAmount(discount)
-                .netAmount(netAmount)
-                .debt(debt)
-                .totalAmount(totalWithDebt)
-                .discountPercentage(getDiscountPercentage(frequency))
-                .build();
-    }
-
-    /**
-     * Classe interne pour le résumé de facturation
-     */
-    @lombok.Builder
-    @lombok.Data
-    public static class BillSummary {
-        private Long customerId;
-        private String customerName;
-        private PaymentFrequency paymentFrequency;
-        private Integer numberOfMonths;
-        private BigDecimal grossAmount;
-        private BigDecimal discountAmount;
-        private BigDecimal netAmount;
-        private BigDecimal debt;
-        private BigDecimal totalAmount;
-        private BigDecimal discountPercentage;
+    public boolean isEligibleForDiscount(Customers customer) {
+        return customer.getPaymentFrequency() != PaymentFrequency.MONTHLY;
     }
 }

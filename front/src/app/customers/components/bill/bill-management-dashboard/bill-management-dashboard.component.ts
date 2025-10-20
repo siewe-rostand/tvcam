@@ -27,8 +27,7 @@ import { NavbarComponent } from '../../../../_shared/components/navbar/navbar.co
     MonthlyGenerationConfigComponent
   ],
   template: `
-    <app-navbar></app-navbar>
-    
+
     <div class="container mx-auto p-4">
       <p-card header="Gestion des Factures TV CAM" styleClass="mb-4">
         <div class="text-center mb-4">
@@ -39,7 +38,7 @@ import { NavbarComponent } from '../../../../_shared/components/navbar/navbar.co
         </div>
 
         <p-tabView>
-          
+
           <!-- Onglet Génération Manuelle -->
           <p-tabPanel header="Génération Manuelle" leftIcon="pi pi-file-plus">
             <app-enhanced-bill-generation></app-enhanced-bill-generation>
@@ -70,7 +69,7 @@ import { NavbarComponent } from '../../../../_shared/components/navbar/navbar.co
               </p>
             </div>
           </div>
-          
+
           <div class="col-12 md:col-4">
             <div class="text-center p-3">
               <i class="pi pi-file-edit text-4xl text-green-500 mb-3"></i>
@@ -80,7 +79,7 @@ import { NavbarComponent } from '../../../../_shared/components/navbar/navbar.co
               </p>
             </div>
           </div>
-          
+
           <div class="col-12 md:col-4">
             <div class="text-center p-3">
               <i class="pi pi-bell text-4xl text-orange-500 mb-3"></i>

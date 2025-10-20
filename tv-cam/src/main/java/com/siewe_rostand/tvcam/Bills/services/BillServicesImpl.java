@@ -10,6 +10,7 @@ import com.siewe_rostand.tvcam.Customers.model.Customers;
 import com.siewe_rostand.tvcam.Customers.repository.CustomersRepository;
 import com.siewe_rostand.tvcam.Customers.services.CustomerService;
 import com.siewe_rostand.tvcam.Payment.model.enumeration.PaymentFrequency;
+import com.siewe_rostand.tvcam.Payment.model.enumeration.PaymentStatus;
 import com.siewe_rostand.tvcam.common.constraints.validator.ObjectsValidator;
 import com.siewe_rostand.tvcam.shared.Exceptions.OperationNotPermittedException;
 import com.siewe_rostand.tvcam.shared.HttpResponse;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -131,8 +133,11 @@ public class BillServicesImpl implements BillServices {
 
         for (Customers c : customers) {
             if (shouldGenerateBill(c, today) || shouldGenerate) {
-                BillRequest dynamicRequest = createBillRequestFromCustomer(c, today);
-                BillResponse response = generateBillForCustomer(c, today, dynamicRequest);
+                Bills savedBill = billRepository.findByCustomersAndMonthAndYear(c, today.getMonthValue(), today.getYear());
+                LocalDateTime billingDate = savedBill.getDepositDate() != null ?
+                        LocalDate.parse(savedBill.getDepositDate(), DATE_FORMAT).atStartOfDay() : today;
+                BillRequest dynamicRequest = createBillRequestFromCustomer(c, billingDate);
+                BillResponse response = generateBillForCustomer(c, billingDate, dynamicRequest);
                 generatedBills.add(response);
             }
         }
@@ -233,7 +238,7 @@ public class BillServicesImpl implements BillServices {
         List<Customers> customers = customerService.getAllCustomersByIds(customerIds);
 
         for (Customers customer : customers) {
-            List<Bills> existingBills = billRepository.findByCustomersAndMonthAndYear(customer, month, year);
+            List<Bills> existingBills = billRepository.findAllByCustomersAndMonthAndYear(customer, month, year);
             if (!existingBills.isEmpty()) {
                 log.info("Factures existantes trouvées pour le client {} en {} {}",
                         customer.getName(), month, year);
@@ -279,17 +284,23 @@ public class BillServicesImpl implements BillServices {
         LocalDateTime dueDate = billingDate.plusDays(10);
         String deadLine = DATE_FORMAT.format(dueDate);
 
+        // Calculer la dette antérieure (factures impayées des mois précédents)
+        int currentMonth = billingDate.getMonth().getValue();
+        int currentYear = billingDate.getYear();
+        Bills previousBill = billRepository.findBillsByCustomersAndMonthAndYear(customer, currentMonth - 1, currentYear);
+        BigDecimal previousDebt = previousBill.getNetToPay().subtract(previousBill.getPaidAmount());
+
         return BillRequest.builder()
                 .monthlyPayment(DEFAULT_MONTHLY_AMOUNT)
                 .deadline(deadLine)
-                .month(billingDate.getMonth().getValue())
-                .year(billingDate.getYear())
+                .month(currentMonth)
+                .year(currentYear)
                 .depositDate(DATE_FORMAT.format(billingDate))
                 .paidAmount(BigDecimal.ZERO)
                 .penalties(0)
                 .observation("Vous serez suspendu si vous n'avez pas payé après la date limite de paiement.")
                 .customerId(customer.getCustomerId())
-                .debt(BigDecimal.ZERO)
+                .debt(previousDebt) // Dette antérieure calculée
                 .build();
     }
 
@@ -302,21 +313,34 @@ public class BillServicesImpl implements BillServices {
      * @return the created or updated bill
      */
     private Bills createOrUpdateBill(Customers customer, BillRequest request, LocalDateTime billingDate) {
-        BigDecimal netToPay = billCalculationService.calculateBillAmount(customer);
-        BigDecimal debt = billCalculationService.getDebtAmount(customer);
-        System.out.println("debt = " + debt + ", netToPay = " + netToPay);
-
         int month = request.getMonth() != null ? request.getMonth() : billingDate.getMonth().getValue();
         int year = request.getYear() != null ? request.getYear() : billingDate.getYear();
 
         Bills existingBill = billRepository.findBillsByCustomersAndMonthAndYear(customer, month, year);
+        BigDecimal netToPay = request.getDebt().add(request.getMonthlyPayment());
 
         if (existingBill != null) {
-            billMapper.updateExistingBill(existingBill, request, netToPay, debt, billingDate);
+            billMapper.updateExistingBill(existingBill, request, netToPay, request.getDebt(), billingDate);
             return billRepository.save(existingBill);
         } else {
-            Bills newBill = billMapper.createNewBill(customer, request, netToPay, debt, billingDate, month, year);
+            Bills newBill = billMapper.createNewBill(customer, request, netToPay, request.getDebt(), billingDate, month, year);
             return billRepository.save(newBill);
+        }
+    }
+
+    /**
+     * Met à jour le statut de paiement d'une facture selon son solde
+     */
+    private void updateBillPaymentStatus(Bills bill) {
+        BigDecimal netToPay = bill.getNetToPay() != null ? bill.getNetToPay() : BigDecimal.ZERO;
+        BigDecimal paidAmount = bill.getPaidAmount() != null ? bill.getPaidAmount() : BigDecimal.ZERO;
+
+        if (paidAmount.compareTo(BigDecimal.ZERO) == 0) {
+            bill.setPaymentStatus(PaymentStatus.UNPAID);
+        } else if (paidAmount.compareTo(netToPay) >= 0) {
+            bill.setPaymentStatus(PaymentStatus.PAID);
+        } else {
+            bill.setPaymentStatus(PaymentStatus.PARTIALLY_PAID);
         }
     }
 }

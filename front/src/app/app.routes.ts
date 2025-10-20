@@ -1,26 +1,27 @@
-import { Routes } from '@angular/router';
-import { LoginComponent } from './auth/components/login/login.component';
-import { RegistrationComponent } from './auth/components/registration/registration.component';
-import { UsersListComponent } from './user/components/users-list/users-list.component';
-import { CustomerListComponent } from './customers/components/customer-list/customer-list.component';
-import { BillComponent } from "./customers/components/bill/bill.component";
-import { PaymentComponent } from "./customers/components/payment/payment.component";
-import { CustomerDetailComponent } from "./customers/components/customer-detail/customer-detail.component";
-import { ForgottenPasswordComponent } from "./auth/components/forgotten-password/forgotten-password.component";
-import { BillPrintComponent } from "./customers/components/bill/bill-print/bill-print.component";
-import { BillPrintPreviewComponent } from "./customers/components/bill/bill-print-preview/bill-print-preview.component";
-import { HomeComponent } from "./home/home.component";
-import { AuthGuardService } from "./auth/services/auth-guard.service";
-import { EnhancedDashboardComponent } from "./dashboard/enhanced-dashboard.component";
-import { EnhancedBillGenerationComponent } from "./customers/components/bill/enhanced-bill-generation.component";
-import { EnhancedPaymentComponent } from "./customers/components/payment/enhanced-payment.component";
+import {Routes} from '@angular/router';
+import {LoginComponent} from './auth/components/login/login.component';
+import {RegistrationComponent} from './auth/components/registration/registration.component';
+import {UsersListComponent} from './user/components/users-list/users-list.component';
+import {CustomerListComponent} from './customers/components/customer-list/customer-list.component';
+import {BillComponent} from "./customers/components/bill/bill.component";
+import {PaymentComponent} from "./customers/components/payment/payment.component";
+import {CustomerDetailComponent} from "./customers/components/customer-detail/customer-detail.component";
+import {ForgottenPasswordComponent} from "./auth/components/forgotten-password/forgotten-password.component";
+import {BillPrintComponent} from "./customers/components/bill/bill-print/bill-print.component";
+import {BillPrintPreviewComponent} from "./customers/components/bill/bill-print-preview/bill-print-preview.component";
+import {HomeComponent} from "./home/home.component";
+import {AuthGuardService} from "./auth/services/auth-guard.service";
+import {EnhancedDashboardComponent} from "./dashboard/enhanced-dashboard.component";
+import {EnhancedBillGenerationComponent} from "./customers/components/bill/enhanced-bill-generation.component";
+import {EnhancedPaymentComponent} from "./customers/components/payment/enhanced-payment.component";
 import {CustomerListV2Component} from "./customers/components/customer-list-v2/customer-list-v2.component";
+import {billRoutes} from "./customers/components/bill/bill-routes";
 
 export const routes: Routes = [
   // Public routes (no authentication required)
-  { path: 'login', component: LoginComponent },
-  { path: 'signup', component: RegistrationComponent },
-  { path: 'forgottenPassword', component: ForgottenPasswordComponent },
+  {path: 'login', component: LoginComponent},
+  {path: 'signup', component: RegistrationComponent},
+  {path: 'forgottenPassword', component: ForgottenPasswordComponent},
 
   // Protected routes (authentication required)
   {
@@ -60,6 +61,11 @@ export const routes: Routes = [
   },
 
   {
+    path: 'bills',
+    children: billRoutes
+  },
+
+  {
     path: 'receipts/generate',
     component: EnhancedBillGenerationComponent,
     canActivate: [AuthGuardService],
@@ -95,7 +101,7 @@ export const routes: Routes = [
     canActivate: [AuthGuardService],
   },
 
-  { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
+  {path: '', redirectTo: '/dashboard', pathMatch: 'full'},
 
-  { path: '**', redirectTo: '/login' }
+  {path: '**', redirectTo: '/login'}
 ];

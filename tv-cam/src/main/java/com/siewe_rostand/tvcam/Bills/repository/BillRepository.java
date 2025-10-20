@@ -33,7 +33,8 @@ public interface BillRepository extends JpaRepository<Bills, Long> {
     /**
      * Trouve les factures par client, mois et année
      */
-    List<Bills> findByCustomersAndMonthAndYear(Customers customers, Integer month, Integer year);
+    List<Bills> findAllByCustomersAndMonthAndYear(Customers customers, Integer month, Integer year);
+    Bills findByCustomersAndMonthAndYear(Customers customers, Integer month, Integer year);
 
     Bills findBillsByCustomersAndMonthAndYear(Customers customers, Integer month, Integer year);
 }

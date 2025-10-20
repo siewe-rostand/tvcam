@@ -103,7 +103,7 @@ export class MonthlyBillGenerationService {
     const year = today.getFullYear().toString();
 
     return this.http.get<{ hasGenerated: boolean }>(`bills/check-generation-today?month=${month}&year=${year}`).pipe(
-      map((response: { hasGenerated: boolean }) => !!response.hasGenerated as boolean),
+      map((response: { hasGenerated: boolean }) => response.hasGenerated as boolean),
       catchError(() => of(false as boolean))
     );
   }

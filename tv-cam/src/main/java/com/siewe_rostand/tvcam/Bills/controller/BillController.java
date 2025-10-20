@@ -35,12 +35,9 @@ public class BillController {
     }
 
     @PostMapping("/generate")
-    public ResponseEntity<HttpResponse<Object>> generateBillsForSelectedCustomers(
+    public ResponseEntity<HttpResponse<List<BillResponse>>> generateBillsForSelectedCustomers(
             @RequestBody List<Long> customerIds,
             @RequestParam Boolean shouldGenerate) {
-
-        logger.info("BillController:::generateBillsForSelectedCustomers - Customer IDs: {}, Should Generate: {}",
-                customerIds, shouldGenerate);
 
         if (shouldGenerate == null) {
             shouldGenerate = false;
@@ -49,35 +46,12 @@ public class BillController {
         List<BillResponse> generatedBills = billServices.generateBillsForSelectedCustomers(customerIds,
                 shouldGenerate);
 
-        // Statistiques de génération
-        int totalRequested = customerIds.size();
-        int totalGenerated = generatedBills.size();
-        int skipped = totalRequested - totalGenerated;
-
-        String message = String.format(
-                "Génération de factures terminée: %d facture(s) générée(s) sur %d client(s) demandé(s)%s",
-                totalGenerated,
-                totalRequested,
-                skipped > 0 ? String.format(" (%d client(s) ignoré(s))", skipped) : "");
-
-        logger.info("Génération réussie: {} factures générées pour {} clients", totalGenerated, totalRequested);
-
-        // Construction de la réponse enrichie
-        Map<String, Object> responseData = Map.of(
-                "bills", generatedBills,
-                "statistics", Map.of(
-                        "totalRequested", totalRequested,
-                        "totalGenerated", totalGenerated,
-                        "skipped", skipped,
-                        "generationDate", now().toString(),
-                        "shouldGenerate", shouldGenerate));
-
         return ResponseEntity.status(CREATED).body(
-                HttpResponse.builder()
+                HttpResponse.<List<BillResponse>>builder()
                         .success(true)
                         .timestamp(now())
-                        .message(message)
-                        .data(responseData)
+                        .message("Les factures des clients sélectionnés sont générées avec succès.")
+                        .data(generatedBills)
                         .status(CREATED.getReasonPhrase())
                         .statusCode(CREATED.value())
                         .build());
