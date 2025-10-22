@@ -1,6 +1,5 @@
 package com.siewe_rostand.tvcam.Payment.controller;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.siewe_rostand.tvcam.Payment.dto.PaymentRequest;
 import com.siewe_rostand.tvcam.Payment.dto.PaymentResponse;
@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Map;
 
 import static java.time.LocalDateTime.now;
 import static org.springframework.http.HttpStatus.CREATED;
@@ -32,26 +30,23 @@ public class PaymentController {
     private final ObjectMapper objectMapper;
 
     @PostMapping()
-    public ResponseEntity<HttpResponse<Object>> makePayment(@RequestBody PaymentRequest request) {
-        PaymentResponse response = paymentService.save(request);
-        Map<String, Object> data = objectMapper
-                .convertValue(response, new TypeReference<>() {
-                });
-        return ResponseEntity.created(URI.create("make_payment")).body(
-                HttpResponse.builder()
+    public ResponseEntity<HttpResponse<PaymentResponse>> processPayment(@RequestBody PaymentRequest request) {
+        PaymentResponse response = paymentService.processPayment(request);
+        return ResponseEntity.created(URI.create("process-payment")).body(
+                HttpResponse.<PaymentResponse>builder()
                         .timestamp(now()).message("payment made successfully")
-                        .status(CREATED.getReasonPhrase()).statusCode(CREATED.value()).data(data)
+                        .status(CREATED.getReasonPhrase()).statusCode(CREATED.value()).data(response)
                         .build()
         );
     }
 
     @GetMapping()
-    public ResponseEntity<PaginatedResponse> findAllPayments(@RequestParam(name = "page", defaultValue = "0") Integer page,
-                                                             @RequestParam(name = "size", defaultValue = "999999") Integer size,
-                                                             @RequestParam(name = "sortBy", defaultValue = "createdAt") String sortBy,
-                                                             @RequestParam(name = "direction", defaultValue = "desc") String direction,
-                                                             @RequestParam(name = "name", defaultValue = "") String name) {
-        PaginatedResponse response = paymentService.findAll(page, size, sortBy, direction, name);
+    public ResponseEntity<PaginatedResponse<PaymentResponse>> findAllPayments(@RequestParam(name = "page", defaultValue = "0") Integer page,
+                                                                              @RequestParam(name = "size", defaultValue = "999999") Integer size,
+                                                                              @RequestParam(name = "sortBy", defaultValue = "createdAt") String sortBy,
+                                                                              @RequestParam(name = "direction", defaultValue = "desc") String direction,
+                                                                              @RequestParam(name = "name", defaultValue = "") String name) {
+        PaginatedResponse<PaymentResponse> response = paymentService.findAll(page, size, sortBy, direction, name);
         return ResponseEntity.ok(response);
     }
 

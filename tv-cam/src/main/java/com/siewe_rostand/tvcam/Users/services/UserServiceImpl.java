@@ -188,6 +188,11 @@ public class UserServiceImpl implements UserService {
         usersRepository.deleteById(id);
     }
 
+    @Override
+    public Users findUserById(Long id) {
+        return usersRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(Users.class, "id", id.toString()));
+    }
+
     public Users findByTelephone(String telephone) {
         return usersRepository.findByTelephone(telephone);
     }

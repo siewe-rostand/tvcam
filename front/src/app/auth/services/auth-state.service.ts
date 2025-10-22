@@ -3,6 +3,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { filter, take } from 'rxjs/operators';
 import { StorageService } from '../../_shared/services/storage.service';
 import { isPlatformBrowser } from "@angular/common";
+import {UserModel} from "../../user/model/user.model";
 
 export interface AuthState {
   isAuthenticated: boolean;
@@ -57,7 +58,7 @@ export class AuthStateService {
       await this.waitForAuthInitialization();
 
       const isTokenValid = this.storageService.isTokenValid();
-      const user = isTokenValid ? this.storageService.getUser() : null;
+      const user = this.storageService.getUser();
       const hasToken = !!this.storageService.getToken;
 
       this.authStateSubject.next({
@@ -109,6 +110,11 @@ export class AuthStateService {
   isAuthenticated(): boolean {
     const state = this.authStateSubject.value;
     return state.isAuthenticated;
+  }
+
+  getConnectedUser():UserModel {
+    const state = this.authStateSubject.value;
+    return state.user;
   }
 
   waitForBrowserInitialization(): Observable<AuthState> {

@@ -4,6 +4,7 @@ export interface PaymentModel {
   id?: number;
   billId?: number;
   customerId?: number;
+  userId?: number;
   amount?: number;
   paymentMethod?: string;
   observation?: string;

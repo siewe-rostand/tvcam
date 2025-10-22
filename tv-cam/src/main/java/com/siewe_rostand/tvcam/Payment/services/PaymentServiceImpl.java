@@ -2,28 +2,22 @@ package com.siewe_rostand.tvcam.Payment.services;
 
 import com.siewe_rostand.tvcam.Bills.model.Bills;
 import com.siewe_rostand.tvcam.Bills.repository.BillRepository;
-import com.siewe_rostand.tvcam.Bills.service.BillCalculationService;
+import com.siewe_rostand.tvcam.Bills.services.BillServices;
 import com.siewe_rostand.tvcam.Customers.model.Customers;
 import com.siewe_rostand.tvcam.Customers.repository.CustomersRepository;
 import com.siewe_rostand.tvcam.Payment.dto.PaymentMapper;
 import com.siewe_rostand.tvcam.Payment.dto.PaymentRequest;
 import com.siewe_rostand.tvcam.Payment.dto.PaymentResponse;
 import com.siewe_rostand.tvcam.Payment.model.Payments;
-import com.siewe_rostand.tvcam.Payment.model.enumeration.PaymentFrequency;
 import com.siewe_rostand.tvcam.Payment.model.enumeration.PaymentMethod;
 import com.siewe_rostand.tvcam.Payment.model.enumeration.PaymentStatus;
 import com.siewe_rostand.tvcam.Payment.repository.PaymentRepository;
+import com.siewe_rostand.tvcam.Users.models.Users;
+import com.siewe_rostand.tvcam.Users.services.UserService;
+import com.siewe_rostand.tvcam.common.constraints.validator.ObjectsValidator;
 import com.siewe_rostand.tvcam.common.exceptions.ApiException;
 import com.siewe_rostand.tvcam.shared.PaginatedResponse;
-import com.siewe_rostand.tvcam.common.constraints.validator.ObjectsValidator;
 import jakarta.persistence.EntityNotFoundException;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -33,6 +27,14 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
+
+import static com.siewe_rostand.tvcam.shared.utils.CommonUtils.FORMATTER;
 
 /**
  * @author rostand
@@ -46,118 +48,120 @@ public class PaymentServiceImpl implements PaymentService {
     private final PaymentMapper paymentMapper;
     private final PaymentReferenceGenerator paymentReferenceGenerator;
     private final BillRepository billRepository;
+    private final BillServices billServices;
     private final CustomersRepository customersRepository;
     private final ObjectsValidator<PaymentRequest> validator;
-    private final BillCalculationService billCalculationService;
+    private final UserService userService;
 
     @Override
     @Transactional
-    public PaymentResponse save(PaymentRequest paymentRequest) {
+    public PaymentResponse processPayment(PaymentRequest request) {
         log.info("Traitement du paiement pour le client ID: {}, montant: {}",
-                paymentRequest.getCustomerId(), paymentRequest.getAmount());
+                request.getCustomerId(), request.getAmount());
+        validator.validate(request);
 
-        validator.validate(paymentRequest);
-
-        if (paymentRequest.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+        Users connectedUser = userService.findUserById(request.getUserId());
+        if (request.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
             throw new ApiException(
-                    "Le montant du paiement est invalide et doit être supérieur à " + paymentRequest.getAmount(),
+                    "Le montant du paiement est invalide et doit être supérieur à " + request.getAmount(),
                     "Veuillez fournir un montant de paiement valide");
         }
 
         Customers customer = customersRepository
-                .findById(paymentRequest.getCustomerId())
+                .findById(request.getCustomerId())
                 .orElseThrow(() -> new EntityNotFoundException(
-                        "Aucun client avec l'ID " + paymentRequest.getCustomerId()
+                        "Aucun client avec l'ID " + request.getCustomerId()
                                 + " trouvé! Veuillez entrer un ID client valide"));
+        List<Bills> unpaidBills = billRepository
+                .findByCustomerIdAndPaymentStatusNotOrderByYearAscMonthAsc(customer.getCustomerId());
 
-        Bills currentBill = billRepository
-                .findByCustomersAndCurrentPeriodBill(customer, true)
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Aucune facture avec l'ID " + paymentRequest.getBillId()
-                                + " trouvée! Veuillez entrer un ID de facture valide"));
 
-        if (currentBill.getPaymentStatus() == PaymentStatus.PAID) {
-            throw new ApiException("Tentative de paiement d'une facture déjà payée",
-                    "La facture actuelle a déjà été payée");
+        if (unpaidBills.isEmpty()) {
+            throw new ApiException("Aucune facture impayée trouvée pour le client ID: "
+                    + customer.getCustomerId(),
+                    "Le client n'a aucune facture en attente de paiement");
+        }
+        Bills currentBill = unpaidBills.get(unpaidBills.size() - 1);
+
+        BigDecimal soldePaiement = request.getAmount();
+//        Allocation du montant et mise à jour des factures ---
+        Bills premiereFactureModifiee = null;
+        for (Bills bill : unpaidBills) {
+            // Le paiement a été entièrement alloué
+            if (soldePaiement.compareTo(BigDecimal.ZERO) <= 0) {
+                break;
+            }
+
+            // Calcul du montant restant dû sur CETTE facture: NetToPay - PaidAmount
+            BigDecimal balanceRemaining = bill.getNetToPay().subtract(bill.getPaidAmount());
+
+            // Montant à appliquer à la facture (minimum entre le solde du paiement et ce qui reste à payer)
+            BigDecimal appliedAmount = soldePaiement.min(balanceRemaining);
+
+            if (appliedAmount.compareTo(BigDecimal.ZERO) > 0) {
+                bill.setPaidAmount(bill.getPaidAmount().add(appliedAmount));
+                // Calculer le nouvel impayé après application
+                BigDecimal nouvelImpaye = balanceRemaining.subtract(appliedAmount);
+                if (nouvelImpaye.compareTo(BigDecimal.ZERO) <= 0) {
+                    bill.setPaymentStatus(PaymentStatus.PAID);
+                } else {
+                    bill.setPaymentStatus(PaymentStatus.PARTIALLY_PAID);
+                }
+
+                // Déduire le montant appliqué du solde du paiement reçu
+                soldePaiement = soldePaiement.subtract(appliedAmount);
+                if (premiereFactureModifiee == null) {
+                    premiereFactureModifiee = bill;
+                }
+            }
         }
 
-        // Vérification des rabais disponibles avec BillCalculationService
-        if (billCalculationService.isEligibleForDiscount(customer)) {
-            BigDecimal discountPercentage = billCalculationService
-                    .getDiscountPercentage(customer.getPaymentFrequency());
-            log.info("Client {} éligible au rabais de {}% pour fréquence {}",
-                    customer.getCustomerId(), discountPercentage, customer.getPaymentFrequency());
+        for (Bills bill : unpaidBills) {
+            if (bill.getPaymentStatus() == PaymentStatus.PAID) {
+                continue;
+            }
+            if (bill.getDebt() != null) {
+                bill.setDebt(bill.getDebt().subtract(request.getAmount()).max(BigDecimal.ZERO));
+            }
+            bill.setNetToPay(bill.getNetToPay().subtract(request.getAmount()).max(BigDecimal.ZERO));
         }
 
-        BigDecimal remainingAmount = currentBill.getNetToPay().subtract(currentBill.getPaidAmount());
-        log.debug("Montant restant à payer: {}", remainingAmount);
-
-        if (paymentRequest.getAmount().compareTo(remainingAmount) > 0) {
-            throw new ApiException(
-                    "Le montant du paiement dépasse ce qui reste à payer. Montant restant: " + remainingAmount);
-        }
-
-        // Mise à jour de la fréquence de paiement du client si spécifiée
-        if (paymentRequest.getCustomerPaymentFrequency() != null) {
-            PaymentFrequency newFrequency = PaymentFrequency.valueOf(paymentRequest.getCustomerPaymentFrequency());
-            customer.setPaymentFrequency(newFrequency);
-            customersRepository.save(customer);
-            log.info("Fréquence de paiement mise à jour pour le client {}: {}", customer.getCustomerId(), newFrequency);
-        }
+        Bills billToLinkPaymentTo = unpaidBills.stream()
+                .filter(b -> b.getPaidAmount().compareTo(BigDecimal.ZERO) > 0)
+                .findFirst()
+                .orElse(unpaidBills.get(0));
 
         LocalDateTime now = LocalDateTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", Locale.FRANCE);
 
         Payments payment = new Payments();
-        payment.setBills(currentBill);
-        payment.setPaymentDate(formatter.format(now));
+        payment.setBills(billToLinkPaymentTo);
+        payment.setPaymentDate(FORMATTER.format(now));
         payment.setPaymentRef(paymentReferenceGenerator.generatePaymentReference());
-        payment.setAmount(paymentRequest.getAmount());
-        payment.setPaymentMethod(paymentRequest.getPaymentMethod() == null ? PaymentMethod.CASH
-                : PaymentMethod.valueOf(paymentRequest.getPaymentMethod()));
-        payment.setObservation(paymentRequest.getObservation());
+        payment.setAmount(request.getAmount());
+        payment.setPaymentMethod(request.getPaymentMethod() == null ? PaymentMethod.CASH
+                : PaymentMethod.valueOf(request.getPaymentMethod().toUpperCase()));
+        payment.setObservation(request.getObservation());
+        payment.setUsers(connectedUser);
 
         paymentRepository.save(payment);
 
         // Mise à jour du montant payé et du statut de la facture
-        BigDecimal newPaidAmount = currentBill.getPaidAmount().add(paymentRequest.getAmount());
+        BigDecimal newPaidAmount = currentBill.getPaidAmount().add(request.getAmount());
         currentBill.setPaidAmount(newPaidAmount);
-
-        // Correction de la logique de statut
-        if (newPaidAmount.compareTo(currentBill.getNetToPay()) >= 0) {
-            currentBill.setPaymentStatus(PaymentStatus.PAID);
-            log.info("Facture complètement payée pour le client {}", customer.getCustomerId());
-
-            // Gérer l'excédent de paiement (avance)
-            BigDecimal excess = newPaidAmount.subtract(currentBill.getNetToPay());
-            if (excess.compareTo(BigDecimal.ZERO) > 0) {
-                log.info("Excédent de paiement détecté pour le client {}: {}",
-                        customer.getCustomerId(), excess);
-                // L'excédent sera automatiquement pris en compte lors de la prochaine génération de facture
-                // grâce à la méthode getCreditBalance() dans BillCalculationService
-            }
-        } else {
-            currentBill.setPaymentStatus(PaymentStatus.PARTIALLY_PAID);
-            log.info("Facture partiellement payée pour le client {}: {}/{}",
-                    customer.getCustomerId(), newPaidAmount, currentBill.getNetToPay());
-        }
-
-        // Recalculer la dette de la facture courante
-        BigDecimal currentDebt = billCalculationService.calculateCurrentBillDebt(currentBill);
-        currentBill.setDebt(currentDebt);
-
-        billRepository.save(currentBill);
-
-        // Mettre à jour toutes les dettes du client après le paiement
-        billCalculationService.updateAllBillsDebt(customer);
 
         log.info("Paiement traité avec succès. Référence: {}", payment.getPaymentRef());
         return paymentMapper.toResponse(payment);
     }
 
+    private BigDecimal calculateRemainingAmount(Bills bill) {
+        BigDecimal netToPay = bill.getNetToPay() != null ? bill.getNetToPay() : BigDecimal.ZERO;
+        BigDecimal paidAmount = bill.getPaidAmount() != null ? bill.getPaidAmount() : BigDecimal.ZERO;
+        return netToPay.subtract(paidAmount);
+    }
+
     @Override
-    public PaginatedResponse findAll(Integer page, Integer size, String sortBy,
-            String direction, String name) {
+    public PaginatedResponse<PaymentResponse> findAll(Integer page, Integer size, String sortBy,
+                                                      String direction, String name) {
         Pageable pageable = createPageable(page, size, sortBy, direction);
         Page<Payments> payments;
         if (!name.isEmpty()) {

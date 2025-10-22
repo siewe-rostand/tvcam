@@ -10,7 +10,7 @@
   [rows]="10"
   [rowsPerPageOptions]="[10, 25, 50]"
   [paginator]="true"
-  [globalFilterFields]="['name', 'address', 'telephone']"
+  [globalFilterFields]="['client', 'annee', 'montant', 'monthly', 'unpaid', 'status', 'mois', 'netToPay', 'depositDate', 'limitDate']"
   [tableStyle]="{ 'min-width': '75rem' }"
   [(selection)]="selectedBills"
   (selectionChange)="onSelectionChange($event)"
@@ -42,43 +42,43 @@
       <th style="width: 4rem">
         <p-tableHeaderCheckbox/>
       </th>
-      <th pSortableColumn="name">
+      <th pSortableColumn="client">
         Client
-        <p-sortIcon field="Client"/>
+        <p-sortIcon field="client"/>
       </th>
-      <th pSortableColumn="telephone">
+      <th pSortableColumn="mois">
         Mois
-        <p-sortIcon field="Mois"/>
+        <p-sortIcon field="mois"/>
       </th>
-      <th pSortableColumn="address">
+      <th pSortableColumn="annee">
         Année
-        <p-sortIcon field="Annee"/>
+        <p-sortIcon field="annee"/>
       </th>
-      <th pSortableColumn="active">
+      <th pSortableColumn="netToPay">
         Total à payer
         <p-sortIcon field="netToPay"/>
       </th>
-      <th pSortableColumn="active">
-        Montant payé
-        <p-sortIcon field="Montant"/>
+      <th pSortableColumn="montant">
+        montant perçu
+        <p-sortIcon field="montant"/>
       </th>
-      <th pSortableColumn="active">
-        Reste à payer
-        <p-sortIcon field="Montant"/>
+      <th pSortableColumn="monthly">
+        Mensualité
+        <p-sortIcon field="monthly"/>
       </th>
-      <th pSortableColumn="active">
+      <th pSortableColumn="unpaid">
         Impayé
-        <p-sortIcon field="impayé"/>
+        <p-sortIcon field="unpaid"/>
       </th>
-      <th pSortableColumn="active">
+      <th pSortableColumn="depositDate">
         Date dépôt
         <p-sortIcon field="depositDate"/>
       </th>
-      <th pSortableColumn="active">
+      <th pSortableColumn="limitDate">
         Date Limite
         <p-sortIcon field="limitDate"/>
       </th>
-      <th pSortableColumn="active">
+      <th pSortableColumn="status">
         Statut
         <p-sortIcon field="status"/>
       </th>
@@ -109,7 +109,7 @@
         {{ bill.paidAmount }}
       </td>
       <td>
-        {{ bill.remainingBalance }}
+        {{ bill.monthlyPayment }}
       </td>
       <td>
         {{ bill.debt }}

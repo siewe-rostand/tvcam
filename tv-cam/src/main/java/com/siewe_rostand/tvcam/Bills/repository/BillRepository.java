@@ -9,7 +9,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,12 +27,14 @@ public interface BillRepository extends JpaRepository<Bills, Long> {
 
     List<Bills> findAllByCustomers(Customers customers);
 
-    List<Bills> findAllByCustomersAndDebtGreaterThan(Customers customers, BigDecimal remainingBalance);
+    @Query("SELECT b FROM Bills b WHERE b.customers.customerId = :customerId AND b.paymentStatus != 'PAID' ORDER BY b.year ASC, b.month ASC")
+    List<Bills> findByCustomerIdAndPaymentStatusNotOrderByYearAscMonthAsc(Long customerId);
 
     /**
      * Trouve les factures par client, mois et année
      */
     List<Bills> findAllByCustomersAndMonthAndYear(Customers customers, Integer month, Integer year);
+
     Bills findByCustomersAndMonthAndYear(Customers customers, Integer month, Integer year);
 
     Bills findBillsByCustomersAndMonthAndYear(Customers customers, Integer month, Integer year);

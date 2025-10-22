@@ -3,9 +3,11 @@ package com.siewe_rostand.tvcam.Bills.services;
 import com.siewe_rostand.tvcam.Bills.dto.BillRequest;
 import com.siewe_rostand.tvcam.Bills.dto.BillResponse;
 import com.siewe_rostand.tvcam.Bills.model.Bills;
+import com.siewe_rostand.tvcam.Customers.model.Customers;
 import com.siewe_rostand.tvcam.shared.HttpResponse;
 import com.siewe_rostand.tvcam.shared.PaginatedResponse;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -25,6 +27,8 @@ public interface BillServices {
     HttpResponse<BillResponse> generateCustomerBill(Long customerId, Boolean shouldGenerate);
 
     List<BillResponse> generateBillsForSelectedCustomers(List<Long> customerIds, Boolean shouldGenerate);
+
+    BillResponse generateCustomerBill(Customers customer, LocalDateTime billingDate, BillRequest request);
 
     /**
      * Récupère les factures pour impression

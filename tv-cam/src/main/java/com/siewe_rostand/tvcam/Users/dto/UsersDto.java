@@ -41,7 +41,7 @@ public class UsersDto {
               make sure the role table in the database contain some roles
              */
             HashSet<String> roles = new HashSet<>();
-            if (users.getRoles().size() > 0){
+            if (!users.getRoles().isEmpty()){
                 for (Roles role : users.getRoles()){
                     roles.add(role.getName());
                 }

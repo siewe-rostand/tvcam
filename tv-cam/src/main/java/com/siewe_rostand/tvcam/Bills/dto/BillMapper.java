@@ -55,6 +55,20 @@ public class BillMapper {
                 .build();
     }
 
+    public BillRequest toBillRequest(Bills bills) {
+        return BillRequest.builder()
+                .month(bills.getMonth())
+                .year(bills.getYear())
+                .paidAmount(bills.getPaidAmount())
+                .monthlyPayment(bills.getMonthlyPayment())
+                .debt(bills.getDebt())
+                .deadline(bills.getDeadline())
+                .depositDate(bills.getDepositDate())
+                .penalties(bills.getPenalties())
+                .observation(bills.getObservation())
+                .build();
+    }
+
     public void updateExistingBill(Bills bill, BillRequest request, BigDecimal netToPay, BigDecimal debt, LocalDateTime billingDate) {
         bill.setMonthlyPayment(getMonthlyPaymentOrDefault(request.getMonthlyPayment()));
         bill.setDeadline(getDeadlineOrDefault(request.getDeadline(), billingDate));

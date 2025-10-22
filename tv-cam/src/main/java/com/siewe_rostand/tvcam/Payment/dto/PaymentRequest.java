@@ -19,8 +19,8 @@ public class PaymentRequest {
   @NotNull(message = "the customer id must not be null")
   private Long customerId;
 
-  @NotNull(message = "the bill id must be provided")
-  private Long billId;
+  @NotNull(message = "The field userId must not be null")
+  private Long userId;
 
   @DecimalMin(message = "must provide the payment amount", value = "0")
   private BigDecimal amount;

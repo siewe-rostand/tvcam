@@ -1,7 +1,6 @@
 package com.siewe_rostand.tvcam.Users.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.siewe_rostand.tvcam.Users.dto.UserRequest;
 import com.siewe_rostand.tvcam.Users.dto.UserResponse;
 import com.siewe_rostand.tvcam.Users.dto.UsersDto;
@@ -12,8 +11,6 @@ import com.siewe_rostand.tvcam.shared.HttpResponse;
 import com.siewe_rostand.tvcam.shared.PaginatedResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,51 +27,44 @@ import static org.springframework.http.HttpStatus.OK;
 @RequestMapping("/users")
 @RequiredArgsConstructor
 public class UsersController {
-    private final Logger logger = LoggerFactory.getLogger(UsersController.class);
 
     private final UserService userService;
-    private final com.fasterxml.jackson.databind.ObjectMapper objectMapper;
 
     @PostMapping
-    public ResponseEntity<HttpResponse<Object>> saveUser(@RequestBody UserRequest usersDto) {
+    public ResponseEntity<HttpResponse<UserResponse>> saveUser(@RequestBody UserRequest usersDto) {
         UserResponse dto = userService.create(usersDto);
-        Map<String, Object> data = objectMapper
-                .convertValue(dto, new TypeReference<>() {
-                });
         return ResponseEntity.created(URI.create(""))
                 .body(
-                        HttpResponse.builder()
+                        HttpResponse.<UserResponse>builder()
                                 .timestamp(now()).success(true)
                                 .message("User created successfully")
-                                .data(data)
+                                .data(dto)
                                 .status(CREATED.getReasonPhrase())
                                 .statusCode(CREATED.value())
                                 .build());
     }
 
     @PutMapping("/edit")
-    public ResponseEntity<HttpResponse<Object>> updateUser(@RequestBody UsersDto usersDto) {
+    public ResponseEntity<HttpResponse<UsersDto>> updateUser(@RequestBody UsersDto usersDto) {
         UsersDto dto = new UsersDto().CreateDTO(userService.updateUser(usersDto));
-        Map<String, Object> data = objectMapper.convertValue(dto, new TypeReference<>() {
-        });
         return ResponseEntity.ok()
                 .body(
-                        HttpResponse.builder()
+                        HttpResponse.<UsersDto>builder()
                                 .timestamp(now()).success(true)
                                 .message("User data updated successfully")
-                                .data(data)
+                                .data(dto)
                                 .status(OK.getReasonPhrase())
                                 .statusCode(OK.value())
                                 .build());
     }
 
     @GetMapping
-    public ResponseEntity<PaginatedResponse> getAllUsers(@RequestParam(name = "page", defaultValue = "0") Integer page,
-                                                         @RequestParam(name = "size", defaultValue = "999999") Integer size,
-                                                         @RequestParam(name = "sortBy", defaultValue = "createdAt") String sortBy,
-                                                         @RequestParam(name = "direction", defaultValue = "desc") String direction,
-                                                         @RequestParam(name = "name", defaultValue = "") String name) {
-        PaginatedResponse response = userService.findAll(page, size, sortBy, direction, name);
+    public ResponseEntity<PaginatedResponse<UserResponse>> getAllUsers(@RequestParam(name = "page", defaultValue = "0") Integer page,
+                                                                       @RequestParam(name = "size", defaultValue = "999999") Integer size,
+                                                                       @RequestParam(name = "sortBy", defaultValue = "createdAt") String sortBy,
+                                                                       @RequestParam(name = "direction", defaultValue = "desc") String direction,
+                                                                       @RequestParam(name = "name", defaultValue = "") String name) {
+        PaginatedResponse<UserResponse> response = userService.findAll(page, size, sortBy, direction, name);
         return ResponseEntity.ok().body(response);
     }
 
@@ -105,20 +95,16 @@ public class UsersController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<HttpResponse<Object>> findByUserId(@PathVariable Long id, HttpServletRequest request) {
+    public ResponseEntity<HttpResponse<UserResponse>> findByUserId(@PathVariable Long id, HttpServletRequest request) {
         UserResponse response = userService.findById(id);
-        Map<String, Object> data = objectMapper.convertValue(response, new TypeReference<>() {
-        });
-
-        logger.debug("findByUserId data : {}", data);
         return ResponseEntity.ok()
                 .body(
-                        HttpResponse.builder().timestamp(now()).success(true)
+                        HttpResponse.<UserResponse>builder().timestamp(now()).success(true)
                                 .message("User gotten successfully")
                                 .timestamp(now())
                                 .status(OK.getReasonPhrase())
                                 .statusCode(OK.value())
-                                .data(Map.of("user", response))
+                                .data(response)
                                 .path(request.getRequestURI())
                                 .build());
     }

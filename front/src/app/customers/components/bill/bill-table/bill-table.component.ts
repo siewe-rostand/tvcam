@@ -22,6 +22,7 @@ import {InputNumberModule} from "primeng/inputnumber";
 import {DropdownOptionModel} from "../../../../_shared/model/api-response";
 import {BillUtils} from "../../../../_shared/utils/bill.utils";
 import {InputTextareaModule} from "primeng/inputtextarea";
+import {AuthStateService} from "../../../../auth/services/auth-state.service";
 
 @Component({
   selector: 'app-bill-table',
@@ -63,7 +64,7 @@ export class BillTableComponent {
 
   constructor(private paymentService: PaymentService, private billService: BillService,
               private messageService: MessageService, private confirmationService: ConfirmationService,
-              private billPrintService: BillPrintService, private router: Router) {
+              private billPrintService: BillPrintService, private router: Router, private readonly authState: AuthStateService) {
   }
 
   onSelectionChange(event: BillModel) {
@@ -175,11 +176,13 @@ export class BillTableComponent {
       });
       return;
     }
+    console.log('connected user', this.authState.getConnectedUser().id);
 
     this.payment = {
       amount: this.amount,
       customerId: this.bill.customerId,
       billId: this.bill.id,
+      userId: 1,
       observation: this.commentaire,
       paymentMethod: this.selectedPaymentMethod.label,
     };

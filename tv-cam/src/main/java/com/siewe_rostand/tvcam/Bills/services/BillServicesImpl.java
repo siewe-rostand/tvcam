@@ -137,14 +137,15 @@ public class BillServicesImpl implements BillServices {
                 LocalDateTime billingDate = savedBill.getDepositDate() != null ?
                         LocalDate.parse(savedBill.getDepositDate(), DATE_FORMAT).atStartOfDay() : today;
                 BillRequest dynamicRequest = createBillRequestFromCustomer(c, billingDate);
-                BillResponse response = generateBillForCustomer(c, billingDate, dynamicRequest);
+                BillResponse response = generateCustomerBill(c, billingDate, dynamicRequest);
                 generatedBills.add(response);
             }
         }
         return generatedBills;
     }
 
-    public BillResponse generateBillForCustomer(Customers customer, LocalDateTime billingDate, BillRequest request) {
+    @Override
+    public BillResponse generateCustomerBill(Customers customer, LocalDateTime billingDate, BillRequest request) {
         validator.validate(request);
 
         Bills savedBill = createOrUpdateBill(customer, request, billingDate);
@@ -160,7 +161,7 @@ public class BillServicesImpl implements BillServices {
 
         if (shouldGenerateBill(customer, today) || shouldGenerate) {
             BillRequest dynamicRequest = createBillRequestFromCustomer(customer, today);
-            BillResponse response = generateBillForCustomer(customer, today, dynamicRequest);
+            BillResponse response = generateCustomerBill(customer, today, dynamicRequest);
 
             return HttpResponse.<BillResponse>builder().success(true).timestamp(now())
                     .data(response).status(OK.getReasonPhrase())

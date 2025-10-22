@@ -9,7 +9,7 @@ import {isPlatformBrowser} from "@angular/common";
   providedIn: 'root',
 })
 export class StorageService {
-  private isBrowser: boolean;
+  private readonly isBrowser: boolean;
 
   constructor(
     private localStorageService: LocalStorageService,

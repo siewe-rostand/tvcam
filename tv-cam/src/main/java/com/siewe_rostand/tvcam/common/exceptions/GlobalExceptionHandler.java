@@ -261,7 +261,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<HttpResponse<Object>> processRuntimeException(RuntimeException exception) {
         logException(exception);
-        log.trace(Arrays.toString(exception.getStackTrace()));
         return new ResponseEntity<>(
                 HttpResponse.builder()
                         .timestamp(now()).success(false)
