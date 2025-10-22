@@ -26,6 +26,8 @@ import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 /**
+ * JWT Authentication Filter
+ * Validates JWT tokens for protected endpoints
  * @author rostand
  * @project tv-cam
  */
@@ -74,9 +76,17 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 }
             }
             filterChain.doFilter(request, response);
+
         } catch (JwtAuthenticationException e) {
             SecurityContextHolder.clearContext();
             handleAuthenticationException(response, e);
+        } catch (Exception e) {
+            log.error("Unexpected error in JWT filter: {}", e.getMessage(), e);
+            SecurityContextHolder.clearContext();
+            JwtAuthenticationException jwtException = new JwtAuthenticationException(
+                    "Authentication processing failed: " + e.getMessage(),
+                    "Unexpected error");
+            handleAuthenticationException(response, jwtException);
         }
     }
 
@@ -86,7 +96,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         response.setContentType(APPLICATION_JSON_VALUE);
 
         HttpResponse<Object> errorResponse =
-                HttpResponse.builder().timestamp(LocalDateTime.now()).success(false)
+                HttpResponse.builder()
+                        .timestamp(LocalDateTime.now())
+                        .success(false)
                         .message(exp.getMessage())
                         .reason(
                                 exp.reason != null
@@ -96,8 +108,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                         .status(FORBIDDEN.getReasonPhrase())
                         .statusCode(FORBIDDEN.value())
                         .build();
-        String jsonResponse = objectMapper.writeValueAsString(errorResponse);
 
+        String jsonResponse = objectMapper.writeValueAsString(errorResponse);
         response.getWriter().write(jsonResponse);
     }
 }

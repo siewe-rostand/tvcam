@@ -1,6 +1,7 @@
 package com.siewe_rostand.tvcam.security;
 
 import com.siewe_rostand.tvcam.common.exceptions.JwtAuthenticationException;
+import com.siewe_rostand.tvcam.common.utils.ApplicationConstants;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -13,6 +14,7 @@ import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 
 /**
@@ -25,11 +27,8 @@ public class JwtService {
 
     private final String secretKey;
 
-    private final long jwtExpiration;
-
-    public JwtService(@Value("${security.jwt.security-key}") String secretKey, @Value("${security.jwt.expiration}") Long jwtExpiration) {
+    public JwtService(@Value("${security.jwt.security-key}") String secretKey) {
         this.secretKey = secretKey;
-        this.jwtExpiration = jwtExpiration;
     }
 
     public String extractUsername(String token) {
@@ -97,13 +96,12 @@ public class JwtService {
             Map<String, Object> extraClaims,
             UserDetails userDetails
     ) {
-        return buildToken(extraClaims, userDetails, jwtExpiration);
+        return buildToken(extraClaims, userDetails);
     }
 
     private String buildToken(
             Map<String, Object> extraClaims,
-            UserDetails userDetails,
-            long expiration
+            UserDetails userDetails
     ) {
         var authorities = userDetails.getAuthorities()
                 .stream().
@@ -114,9 +112,25 @@ public class JwtService {
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + expiration))
+                .setExpiration(new Date(
+                        System.currentTimeMillis()
+                                + ApplicationConstants.ACCESS_TOKEN_VALIDITY_SECONDS * 1000))
                 .claim("authorities", authorities)
-                .signWith(getSignInKey())
+                .setId(UUID.randomUUID().toString())
+                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    private String doGenerateRefreshToken(String username) {
+        return Jwts.builder()
+                .setSubject("#refresh" + username)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(
+                        new Date(
+                                System.currentTimeMillis()
+                                        + ApplicationConstants.REFRESH_TOKEN_VALIDITY_SECONDS * 1000))
+                .setId(UUID.randomUUID().toString())
+                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 }

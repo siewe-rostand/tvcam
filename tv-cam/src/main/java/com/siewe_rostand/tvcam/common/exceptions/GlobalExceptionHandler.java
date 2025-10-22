@@ -8,6 +8,7 @@ import com.siewe_rostand.tvcam.shared.model.ExceptionResponse;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -22,7 +23,6 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.nio.file.AccessDeniedException;
 import java.sql.SQLIntegrityConstraintViolationException;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
@@ -59,6 +59,21 @@ public class GlobalExceptionHandler {
                                 .reason(exception.getReason())
                                 .developerMessage(exception.getViolations().toString())
                                 .errorSource(exception.getViolationSource())
+                                .build()
+                );
+    }
+
+    @ExceptionHandler(DataAccessException.class)
+    public ResponseEntity<HttpResponse<Object>> handle(DataAccessException exception) {
+        logException(exception);
+        return ResponseEntity
+                .status(INTERNAL_SERVER_ERROR)
+                .body(
+                        HttpResponse.builder()
+                                .timestamp(now()).success(false)
+                                .statusCode(INTERNAL_SERVER_ERROR.value())
+                                .status(INTERNAL_SERVER_ERROR.getReasonPhrase())
+                                .message(exception.getMessage())
                                 .build()
                 );
     }
@@ -264,7 +279,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(
                 HttpResponse.builder()
                         .timestamp(now()).success(false)
-                        .reason("An internal server error occurred.")
+                        .reason("An unexpected error occurred processing the request.")
                         .developerMessage(exception.getMessage())
                         .status(INTERNAL_SERVER_ERROR.getReasonPhrase())
                         .statusCode(INTERNAL_SERVER_ERROR.value())

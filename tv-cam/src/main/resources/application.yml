@@ -67,8 +67,8 @@ spring:
 security:
   jwt:
     security-key: ${JWT_SECRET_KEY}
-    expiration: ${JWT_EXPIRATION_TIME} #1 day
-    refresh-token-expiration: 604800000 # 7 days in milliseconds
+#    expiration: ${JWT_EXPIRATION_TIME} #1 day
+#    refresh-token-expiration: 604800000 # 7 days in milliseconds
 
 server:
   port: ${CONTAINER_PORT:8080}
@@ -86,3 +86,10 @@ logging:
   level:
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
     org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer: ERROR
+    org:
+      springframework:
+        security: DEBUG
+    com:
+      siewe_rostand:
+        tvcam:
+          security: DEBUG

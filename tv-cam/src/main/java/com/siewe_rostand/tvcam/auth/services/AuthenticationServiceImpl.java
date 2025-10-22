@@ -37,10 +37,9 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.siewe_rostand.tvcam.Roles.RoleType.ROLE_USER;
+import static com.siewe_rostand.tvcam.common.utils.ApplicationConstants.ACCESS_TOKEN_VALIDITY_SECONDS;
 import static com.siewe_rostand.tvcam.security.JwtUtils.getJwtFromRequest;
 import static java.time.LocalDateTime.now;
-import static java.util.Map.of;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
 
 /**
@@ -109,15 +108,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         var jwtToken = jwtService.generateToken(claims, savedUser);
 
         return AuthenticationResponse.builder()
-                .token(jwtToken)
-                .fullname(user.getFirstname() + " " + user.getLastname())
-                .userId(savedUser.getUserId())
-                .telephone(user.getTelephone())
+                .accessToken(jwtToken)
+                .tokenType("Bearer")
                 .build();
     }
 
     @Override
-    public HttpResponse<Object> authenticate(AuthenticationRequest request) {
+    public HttpResponse<AuthenticationResponse> login(AuthenticationRequest request) {
         if (request.getPassword() == null || request.getPassword().isEmpty()) {
             throw new EmptyPasswordException("Encoded password cannot be empty");
         }
@@ -132,18 +129,23 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         Map<String, Object> claims = buildClaims(user);
         String jwtToken = jwtService.generateToken(claims, user);
+        AuthenticationResponse response = AuthenticationResponse.builder()
+                .accessToken(jwtToken)
+                .tokenType("Bearer")
+                .expiresIn(ACCESS_TOKEN_VALIDITY_SECONDS)
+                .build();
 
-        return HttpResponse.builder()
+        return HttpResponse.<AuthenticationResponse>builder()
                 .timestamp(now()).success(true)
                 .message("login successfully")
                 .status(OK.getReasonPhrase())
                 .statusCode(OK.value())
-                .data(of("tokenType", "Bearer", "accessToken", jwtToken))
+                .data(response)
                 .build();
     }
 
     @Override
-    public HttpResponse<Object> forgottenPassword(ForgetPasswordForm forgetPasswordForm) {
+    public HttpResponse<AuthenticationResponse> forgottenPassword(ForgetPasswordForm forgetPasswordForm) {
         System.out.println(forgetPasswordForm);
         log.trace(forgetPasswordForm.toString());
         passwordFormObjectsValidator.validate(forgetPasswordForm);
@@ -152,7 +154,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             throw new EntityNotFoundException("Aucun utilisateur n'a été trouvé avec ce numéro de téléphone. Veuillez vérifier votre numéro de téléphone");
         }
         usersRepository.changePassword(passwordEncoder.encode(forgetPasswordForm.getNewPassword()));
-        return HttpResponse.builder()
+        return HttpResponse.<AuthenticationResponse>builder()
                 .timestamp(now()).success(true)
                 .message("Password changed successfully")
                 .status(OK.getReasonPhrase())
@@ -161,7 +163,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public HttpResponse<Object> getUserInfo(HttpServletRequest request) throws UnAuthorizeException {
+    public HttpResponse<UserResponse> getUserInfo(HttpServletRequest request) throws UnAuthorizeException {
         String jwt = getJwtFromRequest(request);
 
         String userEmail;
@@ -184,16 +186,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         Users user = usersRepository.findByTelephone(userEmail);
         if (user == null) {
-            return HttpResponse.builder()
-                    .timestamp(now()).success(true)
-                    .message("User not found")
-                    .statusCode(INTERNAL_SERVER_ERROR.value())
-                    .status(INTERNAL_SERVER_ERROR.getReasonPhrase())
-                    .build();
+            throw new EntityNotFoundException("No user found with the provided telephone number");
         }
 
         UserResponse userResponse = mapper.toResponse(user);
-        return HttpResponse.builder()
+        return HttpResponse.<UserResponse>builder()
                 .timestamp(now()).success(true)
                 .message("User info retrieved successfully")
                 .status(OK.getReasonPhrase())

@@ -14,9 +14,8 @@ import lombok.*;
 @Builder
 public class AuthenticationResponse {
 
-    private String token;
-    private Long userId;
-    private String fullname;
-    private String telephone;
+    private String tokenType;
+    private String accessToken;
+    private Long expiresIn;
 
 }
