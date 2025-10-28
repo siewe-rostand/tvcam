@@ -18,9 +18,9 @@ public class PaymentResponse {
     private Long id;
     private String paymentMethod;
     private String paymentDate;
-    private BigDecimal paymentAmount;
-    private String paymentStatus;
-    private String paymentReference;
+    private BigDecimal amount;
+    private String status;
+    private String reference;
     private String customerName;
     private Long customerId;
     private Integer month;

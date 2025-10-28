@@ -12,7 +12,12 @@ import {CustomerModel} from '../../model/customer.model';
 import {ConfirmDialogModule} from 'primeng/confirmdialog';
 import {BillService} from "../../service/bill.service";
 import {Router} from "@angular/router";
-import {DataTableComponent, TableColumn, TableAction, ToolbarAction} from '../../../_shared/components/data-table/data-table.component';
+import {
+  DataTableComponent,
+  TableAction,
+  TableColumn
+} from '../../../_shared/components/data-table/data-table.component';
+import {ToolbarAction} from "../../../_shared/components/page-toolbar/page-toolbar.component";
 
 @Component({
   selector: 'app-customer-list-v2',
@@ -32,15 +37,11 @@ import {DataTableComponent, TableColumn, TableAction, ToolbarAction} from '../..
     <app-navbar></app-navbar>
 
     <app-data-table
-      title="Gestion des Clients"
-      subtitle="Gérez facilement vos clients et générez leurs factures"
       [data]="customers"
       [columns]="tableColumns"
       [actions]="rowActions"
-      [toolbarActions]="toolbarActions"
       [selectedItems]="selectedCustomers"
       (selectedItemsChange)="selectedCustomers = $event"
-      (toolbarActionClick)="onToolbarAction($event)"
       (rowActionClick)="onRowAction($event)"
       searchPlaceholder="Rechercher un client..."
       [globalFilterFields]="['name', 'telephone', 'address']"
@@ -360,14 +361,15 @@ export class CustomerListV2Component implements OnInit {
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
     private router: Router
-  ) {}
+  ) {
+  }
 
   ngOnInit(): void {
     this.getCustomers();
   }
 
   // Gestion des actions de la barre d'outils
-  onToolbarAction(event: {action: string, event?: Event}) {
+  onToolbarAction(event: { action: string, event?: Event }) {
     switch (event.action) {
       case 'new':
         this.openNew();
@@ -382,7 +384,7 @@ export class CustomerListV2Component implements OnInit {
   }
 
   // Gestion des actions de ligne
-  onRowAction(event: {action: string, item: any, index: number}) {
+  onRowAction(event: { action: string, item: any, index: number }) {
     switch (event.action) {
       case 'edit':
         this.openEdit(event.item);

@@ -14,5 +14,5 @@ public interface PaymentService {
 
     List<PaymentResponse> findPaymentByCustomerId(Long customerId);
 
-    List<PaymentResponse> findByBills_Month(Integer month);
+    List<PaymentResponse> fetchBillsByMonth(Integer month);
 }

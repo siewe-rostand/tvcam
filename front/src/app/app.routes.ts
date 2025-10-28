@@ -84,13 +84,13 @@ export const routes: Routes = [
   },
 
   {
-    path: 'payment',
+    path: 'payment/legacy',
     component: EnhancedPaymentComponent,
     canActivate: [AuthGuardService],
   },
 
   {
-    path: 'payment/legacy',
+    path: 'payment',
     component: PaymentComponent,
     canActivate: [AuthGuardService],
   },

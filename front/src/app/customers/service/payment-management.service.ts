@@ -155,7 +155,7 @@ export class PaymentManagementService {
 
         // Paiements par statut
         const paymentsByStatus = payments.reduce((acc, payment) => {
-          const status = payment.paymentStatus || 'UNKNOWN';
+          const status = payment.status || 'UNKNOWN';
           acc[status] = (acc[status] || 0) + 1;
           return acc;
         }, {} as { [key: string]: number });
@@ -247,7 +247,7 @@ REÇU DE PAIEMENT
 ================
 
 Date: ${date}
-Référence: ${payment.paymentReference || 'N/A'}
+Référence: ${payment.reference || 'N/A'}
 Client: ${payment.customerName || 'N/A'}
 Montant: ${amount} FCFA
 Méthode: ${this.formatPaymentMethod(payment.paymentMethod)}

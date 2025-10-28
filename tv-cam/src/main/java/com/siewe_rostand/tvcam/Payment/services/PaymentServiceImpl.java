@@ -48,7 +48,6 @@ public class PaymentServiceImpl implements PaymentService {
     private final PaymentMapper paymentMapper;
     private final PaymentReferenceGenerator paymentReferenceGenerator;
     private final BillRepository billRepository;
-    private final BillServices billServices;
     private final CustomersRepository customersRepository;
     private final ObjectsValidator<PaymentRequest> validator;
     private final UserService userService;
@@ -186,7 +185,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public List<PaymentResponse> findByBills_Month(Integer month) {
+    public List<PaymentResponse> fetchBillsByMonth(Integer month) {
         List<Payments> payments = paymentRepository.findByBills_Month(month);
         List<PaymentResponse> paymentResponses = new ArrayList<>();
         for (Payments payment : payments) {

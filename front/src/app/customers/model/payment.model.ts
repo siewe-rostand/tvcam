@@ -10,8 +10,8 @@ export interface PaymentModel {
   observation?: string;
   customerPaymentFrequency?: string;
   paymentDate?: string;
-  paymentStatus?: string;
-  paymentReference?: string;
+  status?: string;
+  reference?: string;
   paymentAmount?: number;
   customerName?: string;
   month?: string;

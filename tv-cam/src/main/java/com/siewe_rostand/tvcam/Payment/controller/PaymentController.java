@@ -40,9 +40,9 @@ public class PaymentController {
         );
     }
 
-    @GetMapping()
+    @GetMapping("/all")
     public ResponseEntity<PaginatedResponse<PaymentResponse>> findAllPayments(@RequestParam(name = "page", defaultValue = "0") Integer page,
-                                                                              @RequestParam(name = "size", defaultValue = "999999") Integer size,
+                                                                              @RequestParam(name = "size", defaultValue = "100") Integer size,
                                                                               @RequestParam(name = "sortBy", defaultValue = "createdAt") String sortBy,
                                                                               @RequestParam(name = "direction", defaultValue = "desc") String direction,
                                                                               @RequestParam(name = "name", defaultValue = "") String name) {
@@ -59,9 +59,9 @@ public class PaymentController {
         );
     }
 
-    @GetMapping("/all")
+    @GetMapping()
     public ResponseEntity<HttpResponse<Object>> findByBillsMonth(@RequestParam("month") Integer month) {
-        List<PaymentResponse> response = paymentService.findByBills_Month(month);
+        List<PaymentResponse> response = paymentService.fetchBillsByMonth(month);
         return ResponseEntity.ok().body(
                 HttpResponse.builder().timestamp(now()).message("Payment for the month of " + month + " gotten successfully")
                         .statusCode(OK.value()).status(OK.getReasonPhrase()).data(response).success(true).build()

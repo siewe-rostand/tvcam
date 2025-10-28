@@ -48,253 +48,262 @@ import { NavbarComponent } from '../../../_shared/components/navbar/navbar.compo
     ],
     providers: [MessageService],
     template: `
-    <app-navbar></app-navbar>
+      <app-navbar></app-navbar>
 
-    <div class="container mx-auto p-4">
-      <!-- Tableau de bord des paiements -->
-      <div class="grid mb-4">
-        <div class="col-12 md:col-3">
-          <p-card>
-            <div class="text-center">
-              <h3 class="text-2xl font-bold text-blue-600">{{ summary.totalPayments }}</h3>
-              <p class="text-gray-600">Total Paiements</p>
-            </div>
-          </p-card>
+      <div class="container mx-auto p-4">
+        <!-- Tableau de bord des paiements -->
+        <div class="grid mb-4">
+          <div class="col-12 md:col-3">
+            <p-card>
+              <div class="text-center">
+                <h3 class="text-2xl font-bold text-blue-600">{{ summary.totalPayments }}</h3>
+                <p class="text-gray-600">Total Paiements</p>
+              </div>
+            </p-card>
+          </div>
+          <div class="col-12 md:col-3">
+            <p-card>
+              <div class="text-center">
+                <h3
+                  class="text-2xl font-bold text-green-600">{{ summary.totalAmount | currency:'XAF':'symbol':'1.0-0' }}</h3>
+                <p class="text-gray-600">Montant Total</p>
+              </div>
+            </p-card>
+          </div>
+          <div class="col-12 md:col-3">
+            <p-card>
+              <div class="text-center">
+                <h3 class="text-2xl font-bold text-purple-600">{{ performance.thisMonthCount }}</h3>
+                <p class="text-gray-600">Ce Mois</p>
+              </div>
+            </p-card>
+          </div>
+          <div class="col-12 md:col-3">
+            <p-card>
+              <div class="text-center">
+                <h3 class="text-2xl font-bold"
+                    [class]="performance.growth >= 0 ? 'text-green-600' : 'text-red-600'">
+                  {{ performance.growth }}%
+                </h3>
+                <p class="text-gray-600">Croissance</p>
+              </div>
+            </p-card>
+          </div>
         </div>
-        <div class="col-12 md:col-3">
-          <p-card>
-            <div class="text-center">
-              <h3 class="text-2xl font-bold text-green-600">{{ summary.totalAmount | currency:'XAF':'symbol':'1.0-0' }}</h3>
-              <p class="text-gray-600">Montant Total</p>
-            </div>
-          </p-card>
+
+        <!-- Graphiques -->
+        <div class="grid mb-4">
+          <div class="col-12 md:col-6">
+            <p-card header="Paiements par Méthode">
+              <p-chart type="doughnut" [data]="paymentMethodChart" [options]="chartOptions"></p-chart>
+            </p-card>
+          </div>
+          <div class="col-12 md:col-6">
+            <p-card header="Tendance Mensuelle">
+              <p-chart type="line" [data]="monthlyTrendChart" [options]="chartOptions"></p-chart>
+            </p-card>
+          </div>
         </div>
-        <div class="col-12 md:col-3">
-          <p-card>
-            <div class="text-center">
-              <h3 class="text-2xl font-bold text-purple-600">{{ performance.thisMonthCount }}</h3>
-              <p class="text-gray-600">Ce Mois</p>
-            </div>
-          </p-card>
-        </div>
-        <div class="col-12 md:col-3">
-          <p-card>
-            <div class="text-center">
-              <h3 class="text-2xl font-bold" [class]="performance.growth >= 0 ? 'text-green-600' : 'text-red-600'">
-                {{ performance.growth }}%
-              </h3>
-              <p class="text-gray-600">Croissance</p>
-            </div>
-          </p-card>
-        </div>
-      </div>
 
-      <!-- Graphiques -->
-      <div class="grid mb-4">
-        <div class="col-12 md:col-6">
-          <p-card header="Paiements par Méthode">
-            <p-chart type="doughnut" [data]="paymentMethodChart" [options]="chartOptions"></p-chart>
-          </p-card>
-        </div>
-        <div class="col-12 md:col-6">
-          <p-card header="Tendance Mensuelle">
-            <p-chart type="line" [data]="monthlyTrendChart" [options]="chartOptions"></p-chart>
-          </p-card>
-        </div>
-      </div>
+        <!-- Filtres et actions -->
+        <p-card header="Gestion des Paiements" styleClass="mb-4">
+          <p-toolbar styleClass="mb-4">
+            <ng-template pTemplate="left">
+              <p-dropdown
+                [options]="paymentMethods"
+                [(ngModel)]="filters.paymentMethod"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Méthode de paiement"
+                [showClear]="true"
+                (onChange)="applyFilters()"
+                styleClass="mr-2">
+              </p-dropdown>
 
-      <!-- Filtres et actions -->
-      <p-card header="Gestion des Paiements" styleClass="mb-4">
-        <p-toolbar styleClass="mb-4">
-          <ng-template pTemplate="left">
-            <p-dropdown
-              [options]="paymentMethods"
-              [(ngModel)]="filters.paymentMethod"
-              optionLabel="label"
-              optionValue="value"
-              placeholder="Méthode de paiement"
-              [showClear]="true"
-              (onChange)="applyFilters()"
-              styleClass="mr-2">
-            </p-dropdown>
+              <p-calendar
+                [(ngModel)]="filters.dateFrom"
+                placeholder="Date début"
+                [showIcon]="true"
+                dateFormat="dd/mm/yy"
+                (onSelect)="applyFilters()"
+                styleClass="mr-2">
+              </p-calendar>
 
-            <p-calendar
-              [(ngModel)]="filters.dateFrom"
-              placeholder="Date début"
-              [showIcon]="true"
-              dateFormat="dd/mm/yy"
-              (onSelect)="applyFilters()"
-              styleClass="mr-2">
-            </p-calendar>
+              <p-calendar
+                [(ngModel)]="filters.dateTo"
+                placeholder="Date fin"
+                [showIcon]="true"
+                dateFormat="dd/mm/yy"
+                (onSelect)="applyFilters()"
+                styleClass="mr-2">
+              </p-calendar>
+            </ng-template>
 
-            <p-calendar
-              [(ngModel)]="filters.dateTo"
-              placeholder="Date fin"
-              [showIcon]="true"
-              dateFormat="dd/mm/yy"
-              (onSelect)="applyFilters()"
-              styleClass="mr-2">
-            </p-calendar>
-          </ng-template>
+            <ng-template pTemplate="right">
+              <p-button
+                label="Effacer Filtres"
+                icon="pi pi-times"
+                (onClick)="clearFilters()"
+                severity="secondary"
+                styleClass="mr-2">
+              </p-button>
+              <p-button
+                label="Exporter"
+                icon="pi pi-download"
+                (onClick)="exportPayments()"
+                severity="help">
+              </p-button>
+            </ng-template>
+          </p-toolbar>
 
-          <ng-template pTemplate="right">
-            <p-button
-              label="Effacer Filtres"
-              icon="pi pi-times"
-              (onClick)="clearFilters()"
-              severity="secondary"
-              styleClass="mr-2">
-            </p-button>
-            <p-button
-              label="Exporter"
-              icon="pi pi-download"
-              (onClick)="exportPayments()"
-              severity="help">
-            </p-button>
-          </ng-template>
-        </p-toolbar>
+          <!-- Table des paiements -->
+          <p-table
+            [value]="filteredPayments"
+            [loading]="loading"
+            [rows]="10"
+            [paginator]="true"
+            [rowsPerPageOptions]="[10, 25, 50]"
+            [globalFilterFields]="['customerName', 'paymentReference']"
+            styleClass="p-datatable-payments">
 
-        <!-- Table des paiements -->
-        <p-table
-          [value]="filteredPayments"
-          [loading]="loading"
-          [rows]="10"
-          [paginator]="true"
-          [rowsPerPageOptions]="[10, 25, 50]"
-          [globalFilterFields]="['customerName', 'paymentReference']"
-          styleClass="p-datatable-payments">
-
-          <ng-template pTemplate="caption">
-            <div class="flex align-items-center justify-content-between">
-              <h5 class="m-0">Liste des Paiements</h5>
-              <span class="p-input-icon-left">
+            <ng-template pTemplate="caption">
+              <div class="flex align-items-center justify-content-between">
+                <h5 class="m-0">Liste des Paiements</h5>
+                <span class="p-input-icon-left">
                 <i class="pi pi-search"></i>
                 <input
                   pInputText
                   type="text"
                   [(ngModel)]="globalFilter"
-                  placeholder="Rechercher..." />
+                  placeholder="Rechercher..."/>
               </span>
-            </div>
-          </ng-template>
+              </div>
+            </ng-template>
 
-          <ng-template pTemplate="header">
-            <tr>
-              <th pSortableColumn="paymentDate">
-                Date <p-sortIcon field="paymentDate"></p-sortIcon>
-              </th>
-              <th pSortableColumn="paymentReference">
-                Référence <p-sortIcon field="paymentReference"></p-sortIcon>
-              </th>
-              <th pSortableColumn="customerName">
-                Client <p-sortIcon field="customerName"></p-sortIcon>
-              </th>
-              <th pSortableColumn="amount">
-                Montant <p-sortIcon field="amount"></p-sortIcon>
-              </th>
-              <th pSortableColumn="paymentMethod">
-                Méthode <p-sortIcon field="paymentMethod"></p-sortIcon>
-              </th>
-              <th pSortableColumn="paymentStatus">
-                Statut <p-sortIcon field="paymentStatus"></p-sortIcon>
-              </th>
-              <th>Actions</th>
-            </tr>
-          </ng-template>
+            <ng-template pTemplate="header">
+              <tr>
+                <th pSortableColumn="paymentDate">
+                  Date
+                  <p-sortIcon field="paymentDate"></p-sortIcon>
+                </th>
+                <th pSortableColumn="paymentReference">
+                  Référence
+                  <p-sortIcon field="paymentReference"></p-sortIcon>
+                </th>
+                <th pSortableColumn="customerName">
+                  Client
+                  <p-sortIcon field="customerName"></p-sortIcon>
+                </th>
+                <th pSortableColumn="amount">
+                  Montant
+                  <p-sortIcon field="amount"></p-sortIcon>
+                </th>
+                <th pSortableColumn="paymentMethod">
+                  Méthode
+                  <p-sortIcon field="paymentMethod"></p-sortIcon>
+                </th>
+                <th pSortableColumn="paymentStatus">
+                  Statut
+                  <p-sortIcon field="paymentStatus"></p-sortIcon>
+                </th>
+                <th>Actions</th>
+              </tr>
+            </ng-template>
 
-          <ng-template pTemplate="body" let-payment>
-            <tr>
-              <td>{{ payment.paymentDate | date:'dd/MM/yyyy HH:mm' }}</td>
-              <td>
-                <span class="font-mono text-sm">{{ payment.paymentReference }}</span>
-              </td>
-              <td>{{ payment.customerName }}</td>
-              <td>
-                <span class="font-bold">{{ payment.amount | currency:'XAF':'symbol':'1.0-0' }}</span>
-              </td>
-              <td>
+            <ng-template pTemplate="body" let-payment>
+              <tr>
+                <td>{{ payment.paymentDate | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td>
+                  <span class="font-mono text-sm">{{ payment.paymentReference }}</span>
+                </td>
+                <td>{{ payment.customerName }}</td>
+                <td>
+                  <span class="font-bold">{{ payment.amount | currency:'XAF':'symbol':'1.0-0' }}</span>
+                </td>
+                <td>
                 <span class="p-badge" [class]="getPaymentMethodBadgeClass(payment.paymentMethod)">
                   {{ formatPaymentMethod(payment.paymentMethod) }}
                 </span>
-              </td>
-              <td>
+                </td>
+                <td>
                 <span class="p-badge" [class]="getStatusBadgeClass(payment.paymentStatus)">
                   {{ payment.paymentStatus }}
                 </span>
-              </td>
-              <td>
-                <p-button
-                  icon="pi pi-eye"
-                  [rounded]="true"
-                  [outlined]="true"
-                  severity="info"
-                  (onClick)="viewPaymentDetails(payment)"
-                  styleClass="mr-1">
-                </p-button>
-                <p-button
-                  icon="pi pi-print"
-                  [rounded]="true"
-                  [outlined]="true"
-                  severity="secondary"
-                  (onClick)="printReceipt(payment)"
-                  styleClass="mr-1">
-                </p-button>
-                <p-button
-                  *ngIf="canCancelPayment(payment)"
-                  icon="pi pi-times"
-                  [rounded]="true"
-                  [outlined]="true"
-                  severity="danger"
-                  (onClick)="cancelPayment(payment)">
-                </p-button>
-              </td>
-            </tr>
-          </ng-template>
-        </p-table>
-      </p-card>
+                </td>
+                <td>
+                  <p-button
+                    icon="pi pi-eye"
+                    [rounded]="true"
+                    [outlined]="true"
+                    severity="info"
+                    (onClick)="viewPaymentDetails(payment)"
+                    styleClass="mr-1">
+                  </p-button>
+                  <p-button
+                    icon="pi pi-print"
+                    [rounded]="true"
+                    [outlined]="true"
+                    severity="secondary"
+                    (onClick)="printReceipt(payment)"
+                    styleClass="mr-1">
+                  </p-button>
+                  <p-button
+                    *ngIf="canCancelPayment(payment)"
+                    icon="pi pi-times"
+                    [rounded]="true"
+                    [outlined]="true"
+                    severity="danger"
+                    (onClick)="cancelPayment(payment)">
+                  </p-button>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </p-card>
 
-      <!-- Dialog de détails du paiement -->
-      <p-dialog
-        [(visible)]="paymentDetailsDialog"
-        [style]="{ width: '50vw' }"
-        header="Détails du Paiement"
-        [modal]="true">
+        <!-- Dialog de détails du paiement -->
+        <p-dialog
+          [(visible)]="paymentDetailsDialog"
+          [style]="{ width: '50vw' }"
+          header="Détails du Paiement"
+          [modal]="true">
 
-        <div *ngIf="selectedPayment" class="payment-details">
-          <div class="grid">
-            <div class="col-6">
-              <p><strong>Référence:</strong> {{ selectedPayment.paymentReference }}</p>
-              <p><strong>Date:</strong> {{ selectedPayment.paymentDate | date:'dd/MM/yyyy HH:mm' }}</p>
-              <p><strong>Client:</strong> {{ selectedPayment.customerName }}</p>
-              <p><strong>Montant:</strong> {{ selectedPayment.amount | currency:'XAF':'symbol':'1.0-0' }}</p>
-            </div>
-            <div class="col-6">
-              <p><strong>Méthode:</strong> {{ formatPaymentMethod(selectedPayment.paymentMethod) }}</p>
-              <p><strong>Statut:</strong> {{ selectedPayment.paymentStatus }}</p>
-              <p><strong>Utilisateur:</strong> {{ selectedPayment.user || 'N/A' }}</p>
-              <p><strong>Observation:</strong> {{ selectedPayment.observation || 'Aucune' }}</p>
+          <div *ngIf="selectedPayment" class="payment-details">
+            <div class="grid">
+              <div class="col-6">
+                <p><strong>Référence:</strong> {{ selectedPayment.reference }}</p>
+                <p><strong>Date:</strong> {{ selectedPayment.paymentDate | date:'dd/MM/yyyy HH:mm' }}</p>
+                <p><strong>Client:</strong> {{ selectedPayment.customerName }}</p>
+                <p><strong>Montant:</strong> {{ selectedPayment.amount | currency:'XAF':'symbol':'1.0-0' }}
+                </p>
+              </div>
+              <div class="col-6">
+                <p><strong>Méthode:</strong> {{ formatPaymentMethod(selectedPayment.paymentMethod) }}</p>
+                <p><strong>Statut:</strong> {{ selectedPayment.status }}</p>
+                <p><strong>Utilisateur:</strong> {{ selectedPayment.user || 'N/A' }}</p>
+                <p><strong>Observation:</strong> {{ selectedPayment.observation || 'Aucune' }}</p>
+              </div>
             </div>
           </div>
-        </div>
 
-        <ng-template pTemplate="footer">
-          <p-button
-            label="Fermer"
-            icon="pi pi-times"
-            (onClick)="paymentDetailsDialog = false">
-          </p-button>
-          <p-button
-            label="Imprimer Reçu"
-            icon="pi pi-print"
-            (onClick)="printReceipt(selectedPayment!)"
-            severity="secondary">
-          </p-button>
-        </ng-template>
-      </p-dialog>
-    </div>
+          <ng-template pTemplate="footer">
+            <p-button
+              label="Fermer"
+              icon="pi pi-times"
+              (onClick)="paymentDetailsDialog = false">
+            </p-button>
+            <p-button
+              label="Imprimer Reçu"
+              icon="pi pi-print"
+              (onClick)="printReceipt(selectedPayment!)"
+              severity="secondary">
+            </p-button>
+          </ng-template>
+        </p-dialog>
+      </div>
 
-    <p-toast></p-toast>
-  `
+      <p-toast></p-toast>
+    `
 })
 export class EnhancedPaymentComponent implements OnInit {
     payments: PaymentModel[] = [];
@@ -372,11 +381,11 @@ export class EnhancedPaymentComponent implements OnInit {
             this.payments = [
                 {
                     id: 1,
-                    paymentReference: 'PAY-001',
+                    reference: 'PAY-001',
                     customerName: 'Client 1',
                     amount: 2000,
                     paymentMethod: 'CASH',
-                    paymentStatus: 'SUCCESS',
+                    status: 'SUCCESS',
                     paymentDate: new Date().toISOString(),
                     observation: 'Paiement mensuel'
                 },
@@ -512,11 +521,11 @@ export class EnhancedPaymentComponent implements OnInit {
         const headers = ['Date', 'Référence', 'Client', 'Montant', 'Méthode', 'Statut'];
         const csvData = this.filteredPayments.map(payment => [
             payment.paymentDate,
-            payment.paymentReference,
+            payment.reference,
             payment.customerName,
             payment.amount,
             payment.paymentMethod,
-            payment.paymentStatus
+            payment.status
         ]);
 
         let csvContent = headers.join(',') + '\\n';

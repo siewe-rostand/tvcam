@@ -9,6 +9,8 @@ import {PaymentService} from "../../service/payment.service";
 import {TagModule} from "primeng/tag";
 import {ToolbarModule} from "primeng/toolbar";
 import {PaymentTableComponent} from "../_shared/payment-table/payment-table.component";
+import {BillUtils} from "../../../_shared/utils/bill.utils";
+import {DataTableComponent} from "../../../_shared/components/data-table/data-table.component";
 
 @Component({
   selector: 'app-bill-payment',
@@ -21,7 +23,8 @@ import {PaymentTableComponent} from "../_shared/payment-table/payment-table.comp
     CommonModule,
     TagModule,
     ToolbarModule,
-    PaymentTableComponent
+    PaymentTableComponent,
+    DataTableComponent
   ],
   templateUrl: './payment.component.html',
   styleUrl: './payment.component.css'
@@ -47,8 +50,24 @@ export class PaymentComponent implements OnInit {
     console.log('Selected payments updated:', this.selectedPayments);
   }
 
+  getMonthLabel(monthValue?: string): string {
+    return BillUtils.getMonthLabelFr(monthValue);
+  }
+
+  getMonthlyPayments(month: number) {
+    this.paymentService.getMonthlyPayment(month).subscribe({
+      next: (response) => {
+        console.log(response.data)
+        this.payments = response.data;
+      },
+      error: (error) => {
+        console.log(error)
+      }
+    })
+  }
+
   getAllPayments() {
-    this.paymentService.getMonthlyPayment('AUGUST').subscribe({
+    this.paymentService.getAllPayments().subscribe({
       next: (response) => {
         console.log(response.data)
         this.payments = response.data;
