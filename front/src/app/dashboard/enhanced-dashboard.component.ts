@@ -76,9 +76,9 @@ export class EnhancedDashboardComponent implements OnInit {
     doughnutOptions: any = {};
 
     constructor(
-        private billManagementService: BillManagementService,
-        private paymentManagementService: PaymentManagementService,
-        private router: Router
+        private readonly billManagementService: BillManagementService,
+        private readonly paymentManagementService: PaymentManagementService,
+        private readonly router: Router
     ) {
         this.initializeChartOptions();
     }
